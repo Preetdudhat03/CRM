@@ -1,0 +1,56 @@
+Running Gradle task 'assembleDebug'...                          
+lib/screens/leads/widgets/lead_card.dart:3:8: Error: Error when reading 'lib/screens/models/lead_model.dart': The system cannot find the path specified
+import '../../models/lead_model.dart';
+       ^
+lib/screens/leads/widgets/lead_card.dart:6:9: Error: Type 'LeadModel' not found.
+  final LeadModel lead;
+        ^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:19:25: Error: Type 'LeadStatus' not found.
+  Color _getStatusColor(LeadStatus status) {
+                        ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:6:9: Error: 'LeadModel' isn't a type.
+  final LeadModel lead;
+        ^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:19:25: Error: 'LeadStatus' isn't a type.
+  Color _getStatusColor(LeadStatus status) {
+                        ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:21:12: Error: Not a constant expression.
+      case LeadStatus.newLead:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:23:12: Error: Not a constant expression.
+      case LeadStatus.contacted:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:25:12: Error: Not a constant expression.
+      case LeadStatus.interested:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:27:12: Error: Not a constant expression.
+      case LeadStatus.qualified:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:29:12: Error: Not a constant expression.
+      case LeadStatus.converted:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:31:12: Error: Not a constant expression.
+      case LeadStatus.lost:
+           ^^^^^^^^^^
+lib/screens/leads/widgets/lead_card.dart:19:9: Error: A non-null value must be returned since the return type 'Color' doesn't allow null.
+ - 'Color' is from 'dart:ui'.
+  Color _getStatusColor(LeadStatus status) {
+        ^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Program Files\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 15s
+Running Gradle task 'assembleDebug'...                             15.9s
+Gradle task assembleDebug failed with exit code 1

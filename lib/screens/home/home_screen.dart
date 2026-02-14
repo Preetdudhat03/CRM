@@ -7,6 +7,7 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/dashboard_card.dart';
+import '../../providers/contact_provider.dart';
 import 'widgets/recent_activity_widget.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -67,17 +68,20 @@ class HomeScreen extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                const DashboardCard(
+                // Dynamic Stats Cards
+                _buildStatCard(
+                  ref,
                   title: 'Total Contacts',
-                  value: '1,245',
                   icon: Icons.people_outline,
                   color: Colors.blue,
+                  valueKey: 'total',
                 ),
-                const DashboardCard(
+                _buildStatCard(
+                  ref,
                   title: 'Total Leads',
-                  value: '48',
                   icon: Icons.leaderboard_outlined,
                   color: Colors.orange,
+                  valueKey: 'leads',
                 ),
                 const DashboardCard(
                   title: 'Active Deals',
@@ -131,6 +135,37 @@ class HomeScreen extends ConsumerWidget {
             const RecentActivityList(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    WidgetRef ref, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required String valueKey,
+  }) {
+    final statsAsync = ref.watch(contactStatsProvider);
+
+    return statsAsync.when(
+      data: (stats) => DashboardCard(
+        title: title,
+        value: stats[valueKey]?.toString() ?? '0',
+        icon: icon,
+        color: color,
+      ),
+      loading: () => DashboardCard(
+        title: title,
+        value: '...',
+        icon: icon,
+        color: color,
+      ),
+      error: (_, __) => DashboardCard(
+        title: title,
+        value: '-',
+        icon: icon,
+        color: color.withOpacity(0.5),
       ),
     );
   }

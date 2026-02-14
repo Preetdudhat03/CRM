@@ -35,6 +35,10 @@ extension RoleExtension on Role {
           Permission.createContacts,
           Permission.editContacts,
           Permission.deleteContacts,
+          Permission.viewLeads,
+          Permission.createLeads,
+          Permission.editLeads,
+          Permission.deleteLeads,
           Permission.viewDeals,
           Permission.createDeals,
           Permission.editDeals,
@@ -46,7 +50,11 @@ extension RoleExtension on Role {
         return [
           Permission.viewContacts,
           Permission.createContacts,
-          Permission.editContacts, // Can edit but not delete
+          Permission.editContacts,
+          Permission.viewLeads,
+          Permission.createLeads,
+          Permission.editLeads,
+          // Manager can edit but not delete leads (as per requirements)
           Permission.viewDeals,
           Permission.createDeals,
           Permission.editDeals,
@@ -57,6 +65,9 @@ extension RoleExtension on Role {
           Permission.viewContacts,
           Permission.createContacts,
           Permission.editContacts,
+          Permission.viewLeads,
+          Permission.createLeads,
+          Permission.editLeads,
           Permission.viewDeals,
           Permission.createDeals,
           Permission.editDeals,
@@ -64,6 +75,7 @@ extension RoleExtension on Role {
       case Role.viewer:
         return [
           Permission.viewContacts,
+          Permission.viewLeads,
           Permission.viewDeals,
         ];
     }

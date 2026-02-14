@@ -4,6 +4,10 @@ enum Permission {
   createContacts,
   editContacts,
   deleteContacts,
+  viewLeads, // Added
+  createLeads, // Added
+  editLeads, // Added
+  deleteLeads, // Added
   viewDeals,
   createDeals,
   editDeals,

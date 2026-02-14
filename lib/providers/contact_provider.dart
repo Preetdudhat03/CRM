@@ -88,3 +88,19 @@ final filteredContactsProvider = Provider<AsyncValue<List<ContactModel>>>((ref) 
     }).toList();
   });
 });
+// Dashboard Stats Provider
+final contactStatsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
+  final contactsAsync = ref.watch(contactsProvider);
+
+  return contactsAsync.whenData((contacts) {
+    int totalContacts = contacts.length;
+    int leads = contacts.where((c) => c.status == ContactStatus.lead).length;
+    int customers = contacts.where((c) => c.status == ContactStatus.customer).length;
+    
+    return {
+      'total': totalContacts,
+      'leads': leads,
+      'customers': customers,
+    };
+  });
+});
