@@ -1,20 +1,22 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import '../../models/lead_model.dart';
+import '../../providers/lead_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 
-class AddEditLeadScreen extends StatefulWidget {
+class AddEditLeadScreen extends ConsumerStatefulWidget {
   final LeadModel? lead;
 
   const AddEditLeadScreen({super.key, this.lead});
 
   @override
-  State<AddEditLeadScreen> createState() => _AddEditLeadScreenState();
+  ConsumerState<AddEditLeadScreen> createState() => _AddEditLeadScreenState();
 }
 
-class _AddEditLeadScreenState extends State<AddEditLeadScreen> {
+class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
   late String _email;
@@ -37,15 +39,51 @@ class _AddEditLeadScreenState extends State<AddEditLeadScreen> {
     _status = widget.lead?.status ?? LeadStatus.newLead;
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // Logic to save or update lead
-      Navigator.of(context).pop();
+      
+      final lead = LeadModel(
+        id: widget.lead?.id ?? '',
+        name: _name,
+        email: _email,
+        phone: _phone,
+        source: _source,
+        status: _status,
+        assignedTo: _assignedTo,
+        estimatedValue: _estimatedValue,
+        createdAt: widget.lead?.createdAt ?? DateTime.now(),
+      );
+
+      try {
+        if (widget.lead == null) {
+          await ref.read(leadsProvider.notifier).addLead(lead);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Lead added successfully')),
+            );
+          }
+        } else {
+          await ref.read(leadsProvider.notifier).updateLead(lead);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Lead updated successfully')),
+            );
+          }
+        }
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(

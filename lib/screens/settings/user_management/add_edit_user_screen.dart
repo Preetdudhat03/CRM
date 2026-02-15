@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/role_model.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_management_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
 
 class AddEditUserScreen extends ConsumerStatefulWidget {
