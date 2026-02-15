@@ -1,0 +1,2 @@
+Running Gradle task 'assembleDebug'...                          Terminate batch job (Y/N)? 
+^CThe syntax of the command is incorrect.

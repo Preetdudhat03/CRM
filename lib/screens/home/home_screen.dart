@@ -8,7 +8,11 @@ import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/dashboard_card.dart';
 import '../../providers/contact_provider.dart';
+import '../../providers/deal_provider.dart';
+import '../../providers/lead_provider.dart';
 import 'widgets/recent_activity_widget.dart';
+import '../../widgets/animations/fade_in_slide.dart';
+import '../main_layout_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -18,6 +22,10 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final permissions = ref.watch(userPermissionsProvider);
     final canViewAnalytics = permissions.contains(Permission.viewAnalytics);
+
+    final contactStats = ref.watch(contactStatsProvider);
+    final dealStats = ref.watch(dealStatsProvider);
+    final leadStats = ref.watch(leadStatsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,9 +64,11 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Dashboard Overview',
-              style: Theme.of(context).textTheme.titleLarge,
+            FadeInSlide(
+              child: Text(
+                'Dashboard Overview',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             const SizedBox(height: 16),
             GridView.count(
@@ -69,70 +79,104 @@ class HomeScreen extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 // Dynamic Stats Cards
-                _buildStatCard(
-                  ref,
-                  title: 'Total Contacts',
-                  icon: Icons.people_outline,
-                  color: Colors.blue,
-                  valueKey: 'total',
+                FadeInSlide(
+                  delay: 0.1,
+                  child: _buildStatCard(
+                    contactStats,
+                    title: 'Total Contacts',
+                    icon: Icons.people_outline,
+                    color: Colors.blue,
+                    valueKey: 'total',
+                    onTap: () {
+                      ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
+                    },
+                  ),
                 ),
-                _buildStatCard(
-                  ref,
-                  title: 'Total Leads',
-                  icon: Icons.leaderboard_outlined,
-                  color: Colors.orange,
-                  valueKey: 'leads',
+                FadeInSlide(
+                  delay: 0.2,
+                  child: _buildStatCard(
+                    leadStats, // Using correct Leads Provider
+                    title: 'Total Leads',
+                    icon: Icons.leaderboard_outlined,
+                    color: Colors.orange,
+                    valueKey: 'total', // Using 'total' key for leads
+                    onTap: () {
+                      ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
+                    },
+                  ),
                 ),
-                const DashboardCard(
-                  title: 'Active Deals',
-                  value: '12',
-                  icon: Icons.handshake_outlined,
-                  color: Colors.purple,
+                FadeInSlide(
+                  delay: 0.3,
+                  child: _buildStatCard(
+                    dealStats,
+                    title: 'Active Deals',
+                    valueKey: 'activeCount',
+                    icon: Icons.handshake_outlined,
+                    color: Colors.purple,
+                    onTap: () {
+                      ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
+                    },
+                  ),
                 ),
                 // Revenue Card - Restricted Access
                 if (canViewAnalytics)
-                  const DashboardCard(
-                    title: 'Revenue (Q1)',
-                    value: '\$42,500',
-                    icon: Icons.attach_money,
-                    color: Colors.green,
+                  FadeInSlide(
+                    delay: 0.4,
+                    child: _buildStatCard(
+                      dealStats,
+                      title: 'Revenue (Won)',
+                      valueKey: 'revenueWon',
+                      icon: Icons.attach_money,
+                      color: Colors.green,
+                      isCurrency: true,
+                      onTap: () {
+                        // Navigate to Analytics/Deals or show breakdown
+                        ref.read(bottomNavIndexProvider.notifier).state = 3;
+                      },
+                    ),
                   )
                 else
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lock_outline, color: Colors.grey),
-                          SizedBox(height: 8),
-                          Text('Access Restricted'),
-                        ],
+                  FadeInSlide(
+                    delay: 0.4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Theme.of(context).dividerColor),
+                      ),
+                      child: const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lock_outline, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Access Restricted'),
+                          ],
+                        ),
                       ),
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Recent Activity',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('View All'),
-                ),
-              ],
+            FadeInSlide(
+              delay: 0.5,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Activity',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
-            const RecentActivityList(),
+            FadeInSlide(delay: 0.6, child: const RecentActivityList()),
           ],
         ),
       ),
@@ -140,32 +184,48 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildStatCard(
-    WidgetRef ref, {
+    AsyncValue<Map<String, dynamic>> statsAsync, {
     required String title,
     required IconData icon,
     required Color color,
     required String valueKey,
+    bool isCurrency = false,
+    VoidCallback? onTap,
   }) {
-    final statsAsync = ref.watch(contactStatsProvider);
-
     return statsAsync.when(
-      data: (stats) => DashboardCard(
+      data: (stats) {
+        final value = stats[valueKey];
+        String displayValue = '0';
+        if (value != null) {
+            if (isCurrency && value is num) {
+                // Simple currency formatting for now, ideally use NumberFormat
+                displayValue = '\$${value.toStringAsFixed(0)}'; 
+            } else {
+                displayValue = value.toString();
+            }
+        }
+        
+        return DashboardCard(
         title: title,
-        value: stats[valueKey]?.toString() ?? '0',
+        value: displayValue,
         icon: icon,
         color: color,
-      ),
+        onTap: onTap,
+      );
+      },
       loading: () => DashboardCard(
         title: title,
         value: '...',
         icon: icon,
         color: color,
+        onTap: onTap,
       ),
       error: (_, __) => DashboardCard(
         title: title,
         value: '-',
         icon: icon,
         color: color.withOpacity(0.5),
+        onTap: onTap,
       ),
     );
   }

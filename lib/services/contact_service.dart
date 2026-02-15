@@ -1,52 +1,65 @@
 
 import '../models/contact_model.dart';
+import 'dart:math';
 
 class ContactService {
-  // Mock data for initial contact list
+  // Mock data for initial contact list matching user requirements
   static final List<ContactModel> _mockContacts = [
     ContactModel(
       id: 'c1',
-      name: 'John Smith',
-      email: 'john.smith@techcorp.com',
-      phone: '+1 555-0101',
-      company: 'TechCorp Solutions',
-      position: 'CTO',
+      name: 'Preet Dudhat',
+      email: 'preet@companyx.com',
+      phone: '+91 9999999999',
+      company: 'CompanyX',
+      position: 'CEO',
+      address: 'Mumbai, India',
+      notes: 'Key client, interested in expansion.',
       status: ContactStatus.customer,
+      createdAt: DateTime.now().subtract(const Duration(days: 365)),
       lastContacted: DateTime.now().subtract(const Duration(days: 2)),
-      avatarUrl: 'https://i.pravatar.cc/150?u=john',
+      avatarUrl: 'https://i.pravatar.cc/150?u=preet',
     ),
     ContactModel(
       id: 'c2',
-      name: 'Sarah Connor',
-      email: 'sarah.c@skyline.net',
+      name: 'Rahul Patel',
+      email: 'rahul@tesla.com',
       phone: '+1 555-0102',
-      company: 'Skyline Inc',
-      position: 'Operations Manager',
+      company: 'Tesla',
+      position: 'Product Manager',
+      address: 'Palo Alto, CA',
+      notes: 'Interested in demo for Q3.',
       status: ContactStatus.lead,
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
       lastContacted: DateTime.now().subtract(const Duration(hours: 5)),
-      avatarUrl: 'https://i.pravatar.cc/150?u=sarah',
+      avatarUrl: 'https://i.pravatar.cc/150?u=rahul',
     ),
     ContactModel(
       id: 'c3',
-      name: 'Michael Ross',
-      email: 'mike.ross@pearson.com',
-      phone: '+1 555-0103',
-      company: 'Pearson Hardman',
-      position: 'Senior Associate',
+      name: 'John Smith',
+      email: 'john.smith@google.com',
+      phone: '+1 650-253-0000',
+      company: 'Google',
+      position: 'Senior Developer',
+      address: 'Mountain View, CA',
+      notes: 'Met at tech conference.',
       status: ContactStatus.churned,
+      createdAt: DateTime.now().subtract(const Duration(days: 180)),
       lastContacted: DateTime.now().subtract(const Duration(days: 15)),
-      avatarUrl: 'https://i.pravatar.cc/150?u=mike',
+      avatarUrl: 'https://i.pravatar.cc/150?u=john',
     ),
     ContactModel(
       id: 'c4',
-      name: 'Jessica Pearson',
-      email: 'j.pearson@pearson.com',
-      phone: '+1 555-0104',
-      company: 'Pearson Hardman',
-      position: 'Managing Partner',
+      name: 'Amit Shah',
+      email: 'amit.shah@infosys.com',
+      phone: '+91 80 2852 0261',
+      company: 'Infosys',
+      position: 'Director',
+      address: 'Bangalore, India',
+      notes: 'Potential partnership opportunity.',
       status: ContactStatus.customer,
+      createdAt: DateTime.now().subtract(const Duration(days: 90)),
       lastContacted: DateTime.now().subtract(const Duration(days: 1)),
-      avatarUrl: 'https://i.pravatar.cc/150?u=jessica',
+      avatarUrl: 'https://i.pravatar.cc/150?u=amit',
     ),
   ];
 
@@ -57,7 +70,11 @@ class ContactService {
 
   Future<ContactModel> addContact(ContactModel contact) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    final newContact = contact.copyWith(id: 'c${_mockContacts.length + 1}');
+    final newContact = contact.copyWith(
+      id: 'c${_mockContacts.length + 1 + Random().nextInt(1000)}',
+      createdAt: DateTime.now(),
+      lastContacted: DateTime.now(),
+    );
     _mockContacts.add(newContact);
     return newContact;
   }

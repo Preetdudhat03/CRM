@@ -1,0 +1,28 @@
+Running Gradle task 'assembleDebug'...                          
+lib/screens/deals/widgets/deal_card.dart:3:8: Error: Error when reading 'lib/screens/models/deal_model.dart': The system cannot find the path specified
+import '../../models/deal_model.dart';
+       ^
+lib/screens/deals/widgets/deal_card.dart:6:9: Error: Type 'DealModel' not found.
+  final DealModel deal;
+        ^^^^^^^^^
+lib/screens/deals/widgets/deal_card.dart:6:9: Error: 'DealModel' isn't a type.
+  final DealModel deal;
+        ^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Program Files\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 17s
+Running Gradle task 'assembleDebug'...                             17.8s
+Gradle task assembleDebug failed with exit code 1

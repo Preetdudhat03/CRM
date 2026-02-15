@@ -25,7 +25,10 @@ class ContactModel {
   final String phone;
   final String company;
   final String position;
+  final String? address;
+  final String? notes;
   final ContactStatus status;
+  final DateTime createdAt;
   final DateTime lastContacted;
   final String? avatarUrl;
 
@@ -36,7 +39,10 @@ class ContactModel {
     required this.phone,
     required this.company,
     required this.position,
+    this.address,
+    this.notes,
     required this.status,
+    required this.createdAt,
     required this.lastContacted,
     this.avatarUrl,
   });
@@ -48,7 +54,10 @@ class ContactModel {
     String? phone,
     String? company,
     String? position,
+    String? address,
+    String? notes,
     ContactStatus? status,
+    DateTime? createdAt,
     DateTime? lastContacted,
     String? avatarUrl,
   }) {
@@ -59,7 +68,10 @@ class ContactModel {
       phone: phone ?? this.phone,
       company: company ?? this.company,
       position: position ?? this.position,
+      address: address ?? this.address,
+      notes: notes ?? this.notes,
       status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
       lastContacted: lastContacted ?? this.lastContacted,
       avatarUrl: avatarUrl ?? this.avatarUrl,
     );

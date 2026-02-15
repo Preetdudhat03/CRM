@@ -1,0 +1,31 @@
+Running Gradle task 'assembleDebug'...                          
+lib/screens/home/home_screen.dart:90:21: Error: No named parameter with the name 'onTap'.
+                    onTap: () {
+                    ^^^^^
+lib/screens/home/home_screen.dart:103:21: Error: No named parameter with the name 'onTap'.
+                    onTap: () {
+                    ^^^^^
+lib/screens/home/home_screen.dart:116:21: Error: No named parameter with the name 'onTap'.
+                    onTap: () {
+                    ^^^^^
+lib/screens/home/home_screen.dart:132:23: Error: No named parameter with the name 'onTap'.
+                      onTap: () {
+                      ^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Program Files\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 24s
+Running Gradle task 'assembleDebug'...                             24.6s
+Gradle task assembleDebug failed with exit code 1

@@ -4,14 +4,18 @@ enum Permission {
   createContacts,
   editContacts,
   deleteContacts,
-  viewLeads, // Added
-  createLeads, // Added
-  editLeads, // Added
-  deleteLeads, // Added
+  viewLeads,
+  createLeads,
+  editLeads,
+  deleteLeads,
   viewDeals,
   createDeals,
   editDeals,
   deleteDeals,
+  viewTasks, // Added
+  createTasks, // Added
+  editTasks, // Added
+  deleteTasks, // Added
   viewAnalytics,
   manageUsers,
 }

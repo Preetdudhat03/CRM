@@ -43,6 +43,10 @@ extension RoleExtension on Role {
           Permission.createDeals,
           Permission.editDeals,
           Permission.deleteDeals,
+          Permission.viewTasks,
+          Permission.createTasks,
+          Permission.editTasks,
+          Permission.deleteTasks,
           Permission.viewAnalytics,
           Permission.manageUsers,
         ];
@@ -54,10 +58,13 @@ extension RoleExtension on Role {
           Permission.viewLeads,
           Permission.createLeads,
           Permission.editLeads,
-          // Manager can edit but not delete leads (as per requirements)
           Permission.viewDeals,
           Permission.createDeals,
           Permission.editDeals,
+          Permission.viewTasks,
+          Permission.createTasks,
+          Permission.editTasks,
+          Permission.deleteTasks,
           Permission.viewAnalytics,
         ];
       case Role.employee:
@@ -71,12 +78,16 @@ extension RoleExtension on Role {
           Permission.viewDeals,
           Permission.createDeals,
           Permission.editDeals,
+          Permission.viewTasks, // Employee can view
+          Permission.createTasks, // Employee can create
+          Permission.editTasks, // Employee can edit
         ];
       case Role.viewer:
         return [
           Permission.viewContacts,
           Permission.viewLeads,
           Permission.viewDeals,
+          Permission.viewTasks,
         ];
     }
   }

@@ -20,6 +20,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
   late String _phone;
   late String _company;
   late String _position;
+  late String _address;
+  late String _notes;
   late ContactStatus _status;
 
   @override
@@ -30,6 +32,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
     _phone = widget.contact?.phone ?? '';
     _company = widget.contact?.company ?? '';
     _position = widget.contact?.position ?? '';
+    _address = widget.contact?.address ?? '';
+    _notes = widget.contact?.notes ?? '';
     _status = widget.contact?.status ?? ContactStatus.lead;
   }
 
@@ -37,14 +41,17 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final contact = ContactModel(
-        id: widget.contact?.id ?? '', // ID handled by service for new contacts
+        id: widget.contact?.id ?? '', // Service handles ID for new
         name: _name,
         email: _email,
         phone: _phone,
         company: _company,
         position: _position,
+        address: _address,
+        notes: _notes,
         status: _status,
-        lastContacted: DateTime.now(),
+        createdAt: widget.contact?.createdAt ?? DateTime.now(),
+        lastContacted: widget.contact?.lastContacted ?? DateTime.now(),
         avatarUrl: widget.contact?.avatarUrl,
       );
 
@@ -116,6 +123,20 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                   initialValue: _position,
                   decoration: const InputDecoration(labelText: 'Position'),
                   onSaved: (value) => _position = value!,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: _address,
+                  decoration: const InputDecoration(labelText: 'Address'),
+                  onSaved: (value) => _address = value!,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: _notes,
+                  decoration: const InputDecoration(labelText: 'Notes'),
+                  onSaved: (value) => _notes = value!,
+                  maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<ContactStatus>(

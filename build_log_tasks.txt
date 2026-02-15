@@ -1,0 +1,53 @@
+Running Gradle task 'assembleDebug'...                          
+lib/screens/tasks/widgets/task_card.dart:3:8: Error: Error when reading 'lib/screens/models/task_model.dart': The system cannot find the path specified
+import '../../models/task_model.dart';
+       ^
+lib/screens/tasks/widgets/task_card.dart:6:9: Error: Type 'TaskModel' not found.
+  final TaskModel task;
+        ^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:6:9: Error: 'TaskModel' isn't a type.
+  final TaskModel task;
+        ^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:23:37: Error: The getter 'TaskStatus' isn't defined for the type 'TaskCard'.
+ - 'TaskCard' is from 'package:field_crm/screens/tasks/widgets/task_card.dart' ('lib/screens/tasks/widgets/task_card.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TaskStatus'.
+    bool isOverdue = task.status != TaskStatus.done && 
+                                    ^^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:44:43: Error: The getter 'TaskStatus' isn't defined for the type 'TaskCard'.
+ - 'TaskCard' is from 'package:field_crm/screens/tasks/widgets/task_card.dart' ('lib/screens/tasks/widgets/task_card.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TaskStatus'.
+                    value: task.status == TaskStatus.done,
+                                          ^^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:57:56: Error: The getter 'TaskStatus' isn't defined for the type 'TaskCard'.
+ - 'TaskCard' is from 'package:field_crm/screens/tasks/widgets/task_card.dart' ('lib/screens/tasks/widgets/task_card.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TaskStatus'.
+                            decoration: task.status == TaskStatus.done
+                                                       ^^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:60:51: Error: The getter 'TaskStatus' isn't defined for the type 'TaskCard'.
+ - 'TaskCard' is from 'package:field_crm/screens/tasks/widgets/task_card.dart' ('lib/screens/tasks/widgets/task_card.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TaskStatus'.
+                            color: task.status == TaskStatus.done ? Colors.grey : null,
+                                                  ^^^^^^^^^^
+lib/screens/tasks/widgets/task_card.dart:74:38: Error: The getter 'TaskStatus' isn't defined for the type 'TaskCard'.
+ - 'TaskCard' is from 'package:field_crm/screens/tasks/widgets/task_card.dart' ('lib/screens/tasks/widgets/task_card.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TaskStatus'.
+                  if (task.status != TaskStatus.done)
+                                     ^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Program Files\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 16s
+Running Gradle task 'assembleDebug'...                             17.1s
+Gradle task assembleDebug failed with exit code 1
