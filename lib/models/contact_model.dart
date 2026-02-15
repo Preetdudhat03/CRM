@@ -76,4 +76,42 @@ class ContactModel {
       avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
+
+  factory ContactModel.fromJson(Map<String, dynamic> json) {
+    return ContactModel(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      company: json['company'] ?? '',
+      position: json['position'] ?? '',
+      address: json['address'],
+      notes: json['notes'],
+      status: ContactStatus.values.firstWhere(
+        (e) => e.name == (json['status'] ?? 'lead'),
+        orElse: () => ContactStatus.lead,
+      ),
+      createdAt: DateTime.parse(json['created_at']),
+      lastContacted: json['last_contacted'] != null
+          ? DateTime.parse(json['last_contacted'])
+          : DateTime.now(),
+      avatarUrl: json['avatar_url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'company': company,
+      'position': position,
+      'address': address,
+      'notes': notes,
+      'status': status.name,
+      'created_at': createdAt.toIso8601String(),
+      'last_contacted': lastContacted.toIso8601String(),
+      'avatar_url': avatarUrl,
+    };
+  }
 }

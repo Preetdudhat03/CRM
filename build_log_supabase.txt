@@ -1,0 +1,42 @@
+Running Gradle task 'assembleDebug'...                          
+The message received from the daemon indicates that the daemon has disappeared.
+Build request sent: Build{id=c03ab02b-628d-4cd2-a735-a21fefc3f078, currentDir=P:\projects\CRM\android}
+Attempting to read last messages from the daemon log...
+Daemon pid: 12948
+  log file: C:\Users\preet\.gradle\daemon\8.14\daemon-12948.out.log
+----- Last 20 lines from daemon log file - daemon-12948.out.log -----
+2026-02-15T13:33:32.477+0530 [DEBUG] [org.gradle.launcher.daemon.server.DefaultIncomingConnectionHandler] Starting executing command: Build{id=c03ab02b-628d-4cd2-a735-a21fefc3f078, currentDir=P:\projects\CRM\android} with connection: socket connection from /127.0.0.1:55261 to /127.0.0.1:55262.
+2026-02-15T13:33:32.480+0530 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Command execution: started DaemonCommandExecution[command = Build{id=c03ab02b-628d-4cd2-a735-a21fefc3f078, currentDir=P:\projects\CRM\android}, connection = DefaultDaemonConnection: socket connection from /127.0.0.1:55261 to /127.0.0.1:55262] after 0.0024333333333333334 minutes of idle
+2026-02-15T13:33:32.480+0530 [INFO] [org.gradle.launcher.daemon.server.DaemonRegistryUpdater] Marking the daemon as busy, address: [120151ff-42a4-4f45-91df-05e5725b3580 port:55261, addresses:[localhost/127.0.0.1]]
+2026-02-15T13:33:32.480+0530 [DEBUG] [org.gradle.launcher.daemon.registry.PersistentDaemonRegistry] Marking busy by address: [120151ff-42a4-4f45-91df-05e5725b3580 port:55261, addresses:[localhost/127.0.0.1]]
+2026-02-15T13:33:32.481+0530 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Waiting to acquire exclusive lock on daemon addresses registry.
+2026-02-15T13:33:32.482+0530 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Lock acquired on daemon addresses registry.
+2026-02-15T13:33:32.484+0530 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Releasing lock on daemon addresses registry.
+2026-02-15T13:33:32.484+0530 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] resetting idle timer
+2026-02-15T13:33:32.484+0530 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] daemon is running. Sleeping until state changes.
+2026-02-15T13:33:32.485+0530 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=c03ab02b-628d-4cd2-a735-a21fefc3f078, currentDir=P:\projects\CRM\android}. Dispatching build started information...
+2026-02-15T13:33:32.485+0530 [DEBUG] [org.gradle.launcher.daemon.server.SynchronizedDispatchConnection] thread 42: dispatching org.gradle.launcher.daemon.protocol.BuildStarted@f3d92ac
+2026-02-15T13:33:32.487+0530 [DEBUG] [org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment] Configuring env variables: [PATH, USERDOMAIN_ROAMINGPROFILE, NVM_SYMLINK, PROCESSOR_LEVEL, SYSTEMDRIVE, FLUTTER, POWERSHELL_EXECUTABLE, SESSIONNAME, ALLUSERSPROFILE, PROCESSOR_ARCHITECTURE, VSCODE_PYTHON_AUTOACTIVATE_GUARD, VSCODE_GIT_IPC_HANDLE, DRIVERDATA, PROGRAMFILES, PT8HOME, VSCODE_INJECTION, PSMODULEPATH, COLORTERM, PROGRAMDATA, DIRNAME, CHOCOLATEYLASTPATHUPDATE, USERNAME, VSCODE_GIT_ASKPASS_NODE, TERM_PROGRAM_VERSION, CMD_LINE_ARGS, GIT_ASKPASS, CHROME_CRASHPAD_PIPE_NAME, EXIT_WITH_ERRORLEVEL, FPS_BROWSER_USER_PROFILE_STRING, ONEDRIVE, APP_HOME, MINGIT_PATH, PATHEXT, EFC_11072_1262719628, PAGER, SNAPSHOT_PATH, SHARED_BIN, WINDIR, CURL, HOMEPATH, PROCESSOR_IDENTIFIER, PUBLIC, CACHE_DIR, EFC_11072_2283032206, EFC_11072_2775293581, _SKIP, EFC_11072_1592913036, LOCALAPPDATA, COMMONPROGRAMFILES(X86), USERDOMAIN, DART_SDK_PATH, FPS_BROWSER_APP_PROFILE_STRING, LOGONSERVER, JAVA_HOME, CLASSJAR, FLUTTER_TOOLS_DIR, PROMPT, PROGRAMFILES(X86), FLUTTER_ROOT, LANG, VSCODE_GIT_ASKPASS_MAIN, APPDATA, PROGRAMW6432, SYSTEMROOT, JAVA_EXE, CHOCOLATEYINSTALL, VSCODE_GIT_ASKPASS_EXTRA_ARGS, DART, ANTIGRAVITY_CLI_ALIAS, OS, TERM_PROGRAM, COMMONPROGRAMW6432, COMPUTERNAME, =P:, COMMONPROGRAMFILES, COMSPEC, NVM_HOME, PROCESSOR_REVISION, CLASSPATH, APP_BASE_NAME, TEMP, FLUTTER_ALREADY_LOCKED, HOMEDRIVE, USERPROFILE, TMP, EFC_11072_3789132940, NUMBER_OF_PROCESSORS, ANTIGRAVITY_AGENT]
+2026-02-15T13:33:32.493+0530 [DEBUG] [org.gradle.launcher.daemon.server.exec.LogToClient] About to start relaying all logs to the client via the connection.
+2026-02-15T13:33:32.493+0530 [INFO] [org.gradle.launcher.daemon.server.exec.LogToClient] The client will now receive all logging from the daemon (pid: 12948). The daemon log file: C:\Users\preet\.gradle\daemon\8.14\daemon-12948.out.log
+2026-02-15T13:33:32.495+0530 [DEBUG] [org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon] Requesting daemon stop after processing Build{id=c03ab02b-628d-4cd2-a735-a21fefc3f078, currentDir=P:\projects\CRM\android}
+2026-02-15T13:33:32.495+0530 [LIFECYCLE] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Daemon will be stopped at the end of the build 
+2026-02-15T13:33:32.495+0530 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Stop as soon as idle requested. The daemon is busy
+2026-02-15T13:33:32.495+0530 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] daemon stop has been requested. Sleeping until state changes.
+2026-02-15T13:33:32.495+0530 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] The daemon has started executing the build.
+2026-02-15T13:33:32.496+0530 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] Executing build with daemon context: DefaultDaemonContext[uid=05215dbe-0e8b-4a15-8a3e-85656b74f6e6,javaHome=C:\Program Files\Android\Android Studio\jbr,javaVersion=21,javaVendor=JetBrains s.r.o.,daemonRegistryDir=C:\Users\preet\.gradle\daemon,pid=12948,idleTimeout=120000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=4G,-XX:ReservedCodeCacheSize=512m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx8G,-Dfile.encoding=UTF-8,-Duser.country=IN,-Duser.language=en,-Duser.variant]----- End of the daemon log -----
+
+JVM crash log found: file:///P:/projects/CRM/android/hs_err_pid12948.log
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+Running Gradle task 'assembleDebug'...                             11.8s
+Gradle task assembleDebug failed with exit code 1

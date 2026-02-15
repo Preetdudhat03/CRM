@@ -120,4 +120,42 @@ class TaskModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+
+  factory TaskModel.fromJson(Map<String, dynamic> json) {
+    return TaskModel(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'] ?? '',
+      dueDate: DateTime.parse(json['due_date']),
+      status: TaskStatus.values.firstWhere(
+        (e) => e.name == (json['status'] ?? 'pending'),
+        orElse: () => TaskStatus.pending,
+      ),
+      priority: TaskPriority.values.firstWhere(
+        (e) => e.name == (json['priority'] ?? 'medium'),
+        orElse: () => TaskPriority.medium,
+      ),
+      assignedTo: json['assigned_to'] ?? '',
+      relatedEntityId: json['related_entity_id'],
+      relatedEntityType: json['related_entity_type'],
+      relatedEntityName: json['related_entity_name'], // Assuming denormalized
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'due_date': dueDate.toIso8601String(),
+      'status': status.name,
+      'priority': priority.name,
+      'assigned_to': assignedTo,
+      'related_entity_id': relatedEntityId,
+      'related_entity_type': relatedEntityType,
+      'related_entity_name': relatedEntityName, // If we decide to store it
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
 }

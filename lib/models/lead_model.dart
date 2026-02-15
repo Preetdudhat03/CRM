@@ -73,4 +73,35 @@ class LeadModel {
       estimatedValue: estimatedValue ?? this.estimatedValue,
     );
   }
+
+
+  factory LeadModel.fromJson(Map<String, dynamic> json) {
+    return LeadModel(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      source: json['source'] ?? '',
+      status: LeadStatus.values.firstWhere(
+        (e) => e.name == (json['status'] ?? 'newLead'),
+        orElse: () => LeadStatus.newLead,
+      ),
+      assignedTo: json['assigned_to'] ?? '',
+      createdAt: DateTime.parse(json['created_at']),
+      estimatedValue: (json['estimated_value'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'source': source,
+      'status': status.name,
+      'assigned_to': assignedTo,
+      'created_at': createdAt.toIso8601String(),
+      'estimated_value': estimatedValue,
+    };
+  }
 }

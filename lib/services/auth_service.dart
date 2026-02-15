@@ -2,31 +2,85 @@
 import '../models/user_model.dart';
 import '../models/role_model.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class AuthService {
-  // Mock user for initial setup
-  static const UserModel _mockUser = UserModel(
-    id: 'u123',
-    name: 'Preet Dudhat',
-    email: 'preet.dudhat@crm.app',
-    role: Role.admin, // User requested Admin role
-  );
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<UserModel> login(String email, String password) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    return _mockUser;
+    final AuthResponse res = await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    
+    final User? user = res.user;
+    if (user == null) {
+      throw Exception('Login failed: User is null');
+    }
+
+    // Fetch user role from metadata or profiles table
+    // For now, defaulting to Admin if not set, or fetching from metadata
+    final roleString = user.userMetadata?['role'] as String? ?? 'admin';
+    final role = Role.values.firstWhere(
+      (e) => e.name == roleString,
+      orElse: () => Role.viewer,
+    );
+
+    return UserModel(
+      id: user.id,
+      name: user.userMetadata?['name'] ?? email.split('@')[0],
+      email: email,
+      role: role,
+    );
   }
 
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _supabase.auth.signOut();
   }
 
   Future<void> refreshToken() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Supabase handles token refresh automatically
   }
 
   Future<UserModel?> getCurrentUser() async {
-    // Return mock user for now, as we don't have persistence yet
-    return _mockUser;
+    final User? user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final roleString = user.userMetadata?['role'] as String? ?? 'admin';
+    final role = Role.values.firstWhere(
+      (e) => e.name == roleString,
+      orElse: () => Role.viewer,
+    );
+
+    return UserModel(
+      id: user.id,
+      name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+      email: user.email ?? '',
+      role: role,
+    );
+  }
+
+  // Helper to register a new user (optional, good to have)
+  Future<UserModel> register(String email, String password, String name, Role role) async {
+    final AuthResponse res = await _supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: {
+        'name': name,
+        'role': role.name,
+      },
+    );
+    
+    final User? user = res.user;
+    if (user == null) {
+      throw Exception('Registration failed');
+    }
+
+    return UserModel(
+      id: user.id,
+      name: name,
+      email: email,
+      role: role,
+    );
   }
 }

@@ -1,93 +1,71 @@
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/deal_model.dart';
-import 'dart:math';
 
 class DealService {
-  // Mock data as per examples
-  static final List<DealModel> _mockDeals = [
-    DealModel(
-      id: 'd1',
-      title: 'Tesla CRM Development',
-      contactId: 'c2',
-      contactName: 'Rahul Patel',
-      companyName: 'Tesla',
-      value: 500000,
-      stage: DealStage.negotiation,
-      assignedTo: 'Preet Dudhat',
-      expectedCloseDate: DateTime.now().add(const Duration(days: 15)),
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    DealModel(
-      id: 'd2',
-      title: 'Infosys Mobile App',
-      contactId: 'c4',
-      contactName: 'Amit Shah',
-      companyName: 'Infosys',
-      value: 300000,
-      stage: DealStage.proposal,
-      assignedTo: 'Mike Ross',
-      expectedCloseDate: DateTime.now().add(const Duration(days: 45)),
-      createdAt: DateTime.now().subtract(const Duration(days: 20)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-    DealModel(
-      id: 'd3',
-      title: 'Google Dashboard',
-      contactId: 'c3',
-      contactName: 'John Smith',
-      companyName: 'Google',
-      value: 1000000,
-      stage: DealStage.qualification,
-      assignedTo: 'Preet Dudhat',
-      expectedCloseDate: DateTime.now().add(const Duration(days: 90)),
-      createdAt: DateTime.now().subtract(const Duration(days: 10)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    DealModel(
-      id: 'd4',
-      title: 'CompanyX Upgrade',
-      contactId: 'c1',
-      contactName: 'Preet Dudhat',
-      companyName: 'CompanyX',
-      value: 150000,
-      stage: DealStage.closedWon,
-      assignedTo: 'Sarah Connor',
-      expectedCloseDate: DateTime.now().subtract(const Duration(days: 5)),
-      createdAt: DateTime.now().subtract(const Duration(days: 60)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-  ];
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<List<DealModel>> getDeals() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network latency
-    return List.from(_mockDeals);
+    final response = await _supabase
+        .from('deals')
+        .select('*, contacts(name, company)');
+    
+    final List<dynamic> data = response as List<dynamic>;
+    return data.map((json) {
+      // Flatten the nested contacts object
+      final contact = json['contacts'];
+      if (contact != null) {
+        json['contact_name'] = contact['name'];
+        // If company_name is null in deal, fall back to contact's company
+        if (json['company_name'] == null) {
+          json['company_name'] = contact['company'];
+        }
+      }
+      return DealModel.fromJson(json);
+    }).toList();
   }
 
   Future<DealModel> addDeal(DealModel deal) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final newDeal = deal.copyWith(
-      id: 'd${_mockDeals.length + 1 + Random().nextInt(1000)}',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    _mockDeals.add(newDeal);
-    return newDeal;
+    final json = deal.toJson();
+    // Remove denormalized fields if we don't want to store them in deals table
+    // But schema.sql has company_name, so we keep it. 
+    // contact_name is NOT in schema, so we should remove it to avoid error?
+    // Supabase ignores unknown columns usually? No, it throws error.
+    json.remove('contact_name'); 
+    
+    final response = await _supabase
+        .from('deals')
+        .insert(json)
+        .select('*, contacts(name, company)')
+        .single();
+    
+    final contact = response['contacts'];
+    if (contact != null) {
+      response['contact_name'] = contact['name'];
+    }
+
+    return DealModel.fromJson(response);
   }
 
   Future<DealModel> updateDeal(DealModel deal) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final index = _mockDeals.indexWhere((d) => d.id == deal.id);
-    if (index != -1) {
-      final updatedDeal = deal.copyWith(updatedAt: DateTime.now());
-      _mockDeals[index] = updatedDeal;
-      return updatedDeal;
+    final json = deal.toJson();
+    json.remove('contact_name');
+
+    final response = await _supabase
+        .from('deals')
+        .update(json)
+        .eq('id', deal.id)
+        .select('*, contacts(name, company)')
+        .single();
+
+    final contact = response['contacts'];
+    if (contact != null) {
+      response['contact_name'] = contact['name'];
     }
-    throw Exception('Deal not found');
+
+    return DealModel.fromJson(response);
   }
 
   Future<void> deleteDeal(String id) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _mockDeals.removeWhere((d) => d.id == id);
+    await _supabase.from('deals').delete().eq('id', id);
   }
 }

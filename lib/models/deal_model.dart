@@ -104,4 +104,39 @@ class DealModel {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+  factory DealModel.fromJson(Map<String, dynamic> json) {
+    return DealModel(
+      id: json['id'],
+      title: json['title'],
+      contactId: json['contact_id'],
+      contactName: json['contact_name'] ?? '', // Assuming we store this denormalized, or fetched via join (requires updated query in service)
+      companyName: json['company_name'] ?? '', 
+      value: (json['value'] as num).toDouble(),
+      stage: DealStage.values.firstWhere(
+        (e) => e.name == (json['stage'] ?? 'qualification'),
+        orElse: () => DealStage.qualification,
+      ),
+      assignedTo: json['assigned_to'] ?? '',
+      expectedCloseDate: DateTime.parse(json['expected_close_date']),
+      notes: json['notes'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'contact_id': contactId,
+      'contact_name': contactName,
+      'company_name': companyName,
+      'value': value,
+      'stage': stage.name,
+      'assigned_to': assignedTo,
+      'expected_close_date': expectedCloseDate.toIso8601String(),
+      'notes': notes,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
 }
