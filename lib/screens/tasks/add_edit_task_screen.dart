@@ -5,6 +5,7 @@ import '../../models/task_model.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/task_provider.dart';
+import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditTaskScreen extends ConsumerStatefulWidget {
   final TaskModel? task;
@@ -94,136 +95,229 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFormField(
-                  initialValue: _title,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter a title' : null,
-                  onSaved: (value) => _title = value!,
-                ),
-                TextFormField(
-                  initialValue: _description,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  maxLines: 3,
-                  onSaved: (value) => _description = value ?? '',
-                ),
-                ListTile(
-                  title: Text('Due Date: ${_dueDate.toIso8601String().split('T')[0]}'),
-                  trailing: const Icon(Icons.calendar_today),
-                  contentPadding: EdgeInsets.zero,
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _dueDate,
-                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                      lastDate: DateTime(2101),
-                    );
-                    if (picked != null) {
-                      setState(() => _dueDate = picked);
-                    }
-                  },
-                ),
-                TextFormField(
-                  initialValue: _assignedTo,
-                  decoration: const InputDecoration(labelText: 'Assigned To'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please assign a user' : null,
-                  onSaved: (value) => _assignedTo = value!,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<TaskStatus>(
-                  value: _status,
-                  decoration: const InputDecoration(labelText: 'Status'),
-                  items: TaskStatus.values.map((status) {
-                    return DropdownMenuItem(
-                      value: status,
-                      child: Text(status.label),
-                    );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _status = value!),
-                ),
-                DropdownButtonFormField<TaskPriority>(
-                  value: _priority,
-                  decoration: const InputDecoration(labelText: 'Priority'),
-                  items: TaskPriority.values.map((priority) {
-                    return DropdownMenuItem(
-                      value: priority,
-                      child: Text(priority.label),
-                    );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _priority = value!),
-                ),
-                const SizedBox(height: 16),
-                Text('Related To (Optional)', style: Theme.of(context).textTheme.titleSmall),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _relatedEntityType,
-                        decoration: const InputDecoration(labelText: 'Type'),
-                        items: const [
-                          DropdownMenuItem(value: null, child: Text('None')),
-                          DropdownMenuItem(value: 'Contact', child: Text('Contact')),
-                          DropdownMenuItem(value: 'Deal', child: Text('Deal')),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _relatedEntityType = value;
-                            _relatedEntityId = null;
-                            _relatedEntityName = null;
-                          });
-                        },
-                      ),
+                FadeInSlide(
+                  delay: 0,
+                  child: TextFormField(
+                    initialValue: _title,
+                    decoration: const InputDecoration(
+                      labelText: 'Title',
+                      prefixIcon: Icon(Icons.title),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _relatedEntityType == 'Contact'
-                          ? contactsAsync.when(
-                              data: (contacts) => DropdownButtonFormField<String>(
-                                value: _relatedEntityId,
-                                isExpanded: true,
-                                decoration: const InputDecoration(labelText: 'Select Contact'),
-                                items: contacts.map((c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(c.name, overflow: TextOverflow.ellipsis),
-                                )).toList(),
-                                onChanged: (value) {
-                                  final contact = contacts.firstWhere((c) => c.id == value);
-                                  setState(() {
-                                    _relatedEntityId = value;
-                                    _relatedEntityName = contact.name;
-                                  });
-                                },
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter a title' : null,
+                    onSaved: (value) => _title = value!,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.1,
+                  child: TextFormField(
+                    initialValue: _description,
+                    decoration: const InputDecoration(
+                      labelText: 'Description',
+                      prefixIcon: Icon(Icons.description_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    maxLines: 3,
+                    onSaved: (value) => _description = value ?? '',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.2,
+                  child: Card(
+                     elevation: 0,
+                     shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(12),
+                       side: BorderSide(color: Theme.of(context).dividerColor),
+                     ),
+                     child: ListTile(
+                      title: Text('Due Date: ${_dueDate.toIso8601String().split('T')[0]}'),
+                      leading: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _dueDate,
+                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                          lastDate: DateTime(2101),
+                        );
+                        if (picked != null) {
+                          setState(() => _dueDate = picked);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.3,
+                  child: TextFormField(
+                    initialValue: _assignedTo,
+                    decoration: const InputDecoration(
+                      labelText: 'Assigned To',
+                      prefixIcon: Icon(Icons.person_outline),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please assign a user' : null,
+                    onSaved: (value) => _assignedTo = value!,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.4,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<TaskStatus>(
+                          value: _status,
+                          decoration: const InputDecoration(
+                            labelText: 'Status',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          ),
+                          items: TaskStatus.values.map((status) {
+                            return DropdownMenuItem(
+                              value: status,
+                              child: Text(
+                                status.label,
+                                style: const TextStyle(fontSize: 14),
                               ),
-                              loading: () => const LinearProgressIndicator(),
-                              error: (_, __) => const Text('Error'),
-                            )
-                          : _relatedEntityType == 'Deal'
-                              ? dealsAsync.when(
-                                  data: (deals) => DropdownButtonFormField<String>(
-                                    value: _relatedEntityId,
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(labelText: 'Select Deal'),
-                                    items: deals.map((d) => DropdownMenuItem(
-                                      value: d.id,
-                                      child: Text(d.title, overflow: TextOverflow.ellipsis),
-                                    )).toList(),
-                                    onChanged: (value) {
-                                      final deal = deals.firstWhere((d) => d.id == value);
-                                      setState(() {
-                                        _relatedEntityId = value;
-                                        _relatedEntityName = deal.title;
-                                      });
-                                    },
+                            );
+                          }).toList(),
+                          onChanged: (value) => setState(() => _status = value!),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: DropdownButtonFormField<TaskPriority>(
+                          value: _priority,
+                          decoration: const InputDecoration(
+                            labelText: 'Priority',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          ),
+                          items: TaskPriority.values.map((priority) {
+                            return DropdownMenuItem(
+                              value: priority,
+                              child: Text(
+                                priority.label,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) => setState(() => _priority = value!),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FadeInSlide(
+                  delay: 0.5,
+                  child: Text('Related To (Optional)', style: Theme.of(context).textTheme.titleSmall),
+                ),
+                const SizedBox(height: 8),
+                FadeInSlide(
+                  delay: 0.6,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _relatedEntityType,
+                          decoration: const InputDecoration(
+                            labelText: 'Type',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: null, child: Text('None')),
+                            DropdownMenuItem(value: 'Contact', child: Text('Contact')),
+                            DropdownMenuItem(value: 'Deal', child: Text('Deal')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _relatedEntityType = value;
+                              _relatedEntityId = null;
+                              _relatedEntityName = null;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _relatedEntityType == 'Contact'
+                            ? contactsAsync.when(
+                                data: (contacts) => DropdownButtonFormField<String>(
+                                  value: _relatedEntityId,
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Select Contact',
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                                   ),
-                                  loading: () => const LinearProgressIndicator(),
-                                  error: (_, __) => const Text('Error'),
-                                )
-                              : Container(),
+                                  items: contacts.map((c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: Text(c.name, overflow: TextOverflow.ellipsis),
+                                  )).toList(),
+                                  onChanged: (value) {
+                                    final contact = contacts.firstWhere((c) => c.id == value);
+                                    setState(() {
+                                      _relatedEntityId = value;
+                                      _relatedEntityName = contact.name;
+                                    });
+                                  },
+                                ),
+                                loading: () => const LinearProgressIndicator(),
+                                error: (_, __) => const Text('Error'),
+                              )
+                            : _relatedEntityType == 'Deal'
+                                ? dealsAsync.when(
+                                    data: (deals) => DropdownButtonFormField<String>(
+                                      value: _relatedEntityId,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Select Deal',
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                      ),
+                                      items: deals.map((d) => DropdownMenuItem(
+                                        value: d.id,
+                                        child: Text(d.title, overflow: TextOverflow.ellipsis),
+                                      )).toList(),
+                                      onChanged: (value) {
+                                        final deal = deals.firstWhere((d) => d.id == value);
+                                        setState(() {
+                                          _relatedEntityId = value;
+                                          _relatedEntityName = deal.title;
+                                        });
+                                      },
+                                    ),
+                                    loading: () => const LinearProgressIndicator(),
+                                    error: (_, __) => const Text('Error'),
+                                  )
+                                : Container(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FadeInSlide(
+                  delay: 0.7,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                  ],
+                    child: Text(
+                      widget.task == null ? 'Create Task' : 'Update Task',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ),

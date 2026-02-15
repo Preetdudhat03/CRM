@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/contact_provider.dart';
+import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditDealScreen extends ConsumerStatefulWidget {
   final DealModel? deal;
@@ -94,20 +95,34 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFormField(
-                  initialValue: _title,
-                  decoration: const InputDecoration(labelText: 'Deal Name'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter a deal name' : null,
-                  onSaved: (value) => _title = value!,
+                FadeInSlide(
+                  delay: 0,
+                  child: TextFormField(
+                    initialValue: _title,
+                    decoration: const InputDecoration(
+                      labelText: 'Deal Name',
+                      prefixIcon: Icon(Icons.work_outline),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter a deal name' : null,
+                    onSaved: (value) => _title = value!,
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.1,
                   child: contactsAsync.when(
                     data: (contacts) => DropdownButtonFormField<String>(
                       value: _contactId,
-                      decoration: const InputDecoration(labelText: 'Contact'),
+                      decoration: const InputDecoration(
+                        labelText: 'Contact',
+                        prefixIcon: Icon(Icons.person_outline),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      ),
                       items: contacts.map((c) => DropdownMenuItem(
                         value: c.id,
                         child: Text('${c.name} (${c.company})', overflow: TextOverflow.ellipsis),
@@ -126,66 +141,133 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     error: (_, __) => const Text('Error loading contacts'),
                   ),
                 ),
-                TextFormField(
-                  key: ValueKey(_companyName), // Force rebuild to show update
-                  initialValue: _companyName,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Company',
-                    filled: true,
-                    fillColor: Colors.grey[100],
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.2,
+                  child: TextFormField(
+                    key: ValueKey(_companyName), // Force rebuild to show update
+                    initialValue: _companyName,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Company',
+                      prefixIcon: const Icon(Icons.business),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
-                TextFormField(
-                  initialValue: _value.toString(),
-                  decoration: const InputDecoration(labelText: 'Value (INR)'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter value' : null,
-                  onSaved: (value) =>
-                      _value = double.tryParse(value ?? '0') ?? 0.0,
-                  keyboardType: TextInputType.number,
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.3,
+                  child: TextFormField(
+                    initialValue: _value.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Value (INR)',
+                      prefixIcon: Icon(Icons.currency_rupee),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter value' : null,
+                    onSaved: (value) =>
+                        _value = double.tryParse(value ?? '0') ?? 0.0,
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
-                TextFormField(
-                  initialValue: _assignedTo,
-                  decoration: const InputDecoration(labelText: 'Assigned To'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please assign a user' : null,
-                  onSaved: (value) => _assignedTo = value!,
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.4,
+                  child: TextFormField(
+                    initialValue: _assignedTo,
+                    decoration: const InputDecoration(
+                      labelText: 'Assigned To',
+                      prefixIcon: Icon(Icons.person_pin_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please assign a user' : null,
+                    onSaved: (value) => _assignedTo = value!,
+                  ),
                 ),
-                 ListTile(
-                  title: Text('Close Date: ${_expectedCloseDate.toIso8601String().split('T')[0]}'),
-                  trailing: const Icon(Icons.calendar_today),
-                  contentPadding: EdgeInsets.zero,
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _expectedCloseDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2101),
-                    );
-                    if (picked != null && picked != _expectedCloseDate) {
-                      setState(() {
-                        _expectedCloseDate = picked;
-                      });
-                    }
-                  },
+                 const SizedBox(height: 16),
+                 FadeInSlide(
+                   delay: 0.5,
+                   child: Card(
+                     elevation: 0,
+                     shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(12),
+                       side: BorderSide(color: Theme.of(context).dividerColor),
+                     ),
+                     child: ListTile(
+                      title: Text('Close Date: ${_expectedCloseDate.toIso8601String().split('T')[0]}'),
+                      leading: const Icon(Icons.event),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _expectedCloseDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (picked != null && picked != _expectedCloseDate) {
+                          setState(() {
+                            _expectedCloseDate = picked;
+                          });
+                        }
+                      },
+                    ),
+                   ),
+                 ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.6,
+                  child: DropdownButtonFormField<DealStage>(
+                    value: _stage,
+                    decoration: const InputDecoration(
+                      labelText: 'Stage',
+                      prefixIcon: Icon(Icons.stairs_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    ),
+                    items: DealStage.values.map((stage) {
+                      return DropdownMenuItem(
+                        value: stage,
+                        child: Text(stage.label),
+                      );
+                    }).toList(),
+                    onChanged: (value) => setState(() => _stage = value!),
+                  ),
                 ),
-                DropdownButtonFormField<DealStage>(
-                  value: _stage,
-                  decoration: const InputDecoration(labelText: 'Stage'),
-                  items: DealStage.values.map((stage) {
-                    return DropdownMenuItem(
-                      value: stage,
-                      child: Text(stage.label),
-                    );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _stage = value!),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.7,
+                  child: TextFormField(
+                    initialValue: _notes,
+                    decoration: const InputDecoration(
+                      labelText: 'Notes',
+                      prefixIcon: Icon(Icons.note_alt_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    ),
+                    maxLines: 3,
+                    onSaved: (value) => _notes = value ?? '',
+                  ),
                 ),
-                TextFormField(
-                  initialValue: _notes,
-                  decoration: const InputDecoration(labelText: 'Notes'),
-                  maxLines: 3,
-                  onSaved: (value) => _notes = value ?? '',
+                const SizedBox(height: 32),
+                FadeInSlide(
+                  delay: 0.8,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      widget.deal == null ? 'Create Deal' : 'Update Deal',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ),
