@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/lead_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 
 class AddEditLeadScreen extends StatefulWidget {
   final LeadModel? lead;
@@ -21,6 +23,7 @@ class _AddEditLeadScreenState extends State<AddEditLeadScreen> {
   late String _assignedTo;
   late double? _estimatedValue;
   late LeadStatus _status;
+  String _countryCode = '+1';
 
   @override
   void initState() {
@@ -96,25 +99,55 @@ class _AddEditLeadScreenState extends State<AddEditLeadScreen> {
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.2,
-                  child: TextFormField(
-                    initialValue: _phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone Number',
-                      prefixIcon: Icon(Icons.phone_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                         return 'Please enter a phone number';
-                      }
-                      final phoneRegex = RegExp(r'^[+]?[0-9\s-]{10,}$');
-                      if (!phoneRegex.hasMatch(value)) {
-                        return 'Enter a valid phone number';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _phone = value!,
-                    keyboardType: TextInputType.phone,
+                    child: Row(
+                      children: [
+                        CountryCodePicker(
+                          onChanged: (country) {
+                             setState(() {
+                               _countryCode = country.dialCode ?? '+1';
+                             });
+                          },
+                          initialSelection: _phone.isNotEmpty ? _phone : 'US',
+                          favorite: const ['+1', 'US', 'IN', 'GB'],
+                          showCountryOnly: false,
+                          showOnlyCountryWhenClosed: false,
+                          alignLeft: false,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _phone,
+                            decoration: const InputDecoration(
+                              hintText: 'Phone Number',
+                              border: InputBorder.none,
+                              counterText: "",
+                            ),
+                            keyboardType: TextInputType.phone,
+                            maxLength: 15,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Enter phone number';
+                              if (value.length < 7) return 'Too short';
+                              return null;
+                            },
+                            onSaved: (value) {
+                              if (value!.startsWith('+')) {
+                                _phone = value;
+                              } else {
+                                _phone = '$_countryCode $value';
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
