@@ -1,0 +1,28 @@
+Running Gradle task 'assembleDebug'...                          
+lib/screens/contacts/add_edit_contact_screen.dart:76:20: Error: Can't find ')' to match '('.
+    return Scaffold(
+                   ^
+lib/screens/contacts/add_edit_contact_screen.dart:92:13: Error: No named parameter with the name 'child'.
+            child: Column(
+            ^^^^^
+/C:/Program%20Files/flutter/packages/flutter/lib/src/widgets/basic.dart:6008:9: Context: Found this candidate, but the arguments don't match.
+  const Column({
+        ^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\Program Files\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 16s
+Running Gradle task 'assembleDebug'...                             16.6s
+Gradle task assembleDebug failed with exit code 1
