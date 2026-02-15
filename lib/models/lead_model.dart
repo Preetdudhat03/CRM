@@ -99,7 +99,7 @@ class LeadModel {
       'phone': phone,
       'source': source,
       'status': status.name,
-      'assigned_to': assignedTo,
+      'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'created_at': createdAt.toIso8601String(),
       'estimated_value': estimatedValue,
     };

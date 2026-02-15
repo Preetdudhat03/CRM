@@ -48,7 +48,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         ]);
       });
     } catch (e) {
-      // Handle error
+      rethrow;
     }
   }
 
