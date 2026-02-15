@@ -29,25 +29,42 @@ class _AddEditUserScreenState extends ConsumerState<AddEditUserScreen> {
     _role = widget.user?.role ?? Role.employee;
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final userManagementNotifier = ref.read(userManagementProvider.notifier);
 
-      if (widget.user == null) {
-        userManagementNotifier.addUser(_name, _email, _role);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User added successfully')),
-        );
-      } else {
-        userManagementNotifier.updateUser(
-          widget.user!.copyWith(name: _name, email: _email, role: _role),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User updated successfully')),
-        );
+      try {
+        if (widget.user == null) {
+          await userManagementNotifier.addUser(_name, _email, _role);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('User added successfully')),
+            );
+          }
+        } else {
+          await userManagementNotifier.updateUser(
+            widget.user!.copyWith(name: _name, email: _email, role: _role),
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('User updated successfully')),
+            );
+          }
+        }
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString().replaceAll("Exception:", "")}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
-      Navigator.of(context).pop();
     }
   }
 

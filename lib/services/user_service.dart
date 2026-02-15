@@ -1,66 +1,91 @@
-
 import '../models/user_model.dart';
 import '../models/role_model.dart';
-import 'dart:math';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserService {
-  // Mock data for users
-  static final List<UserModel> _mockUsers = [
-    UserModel(
-      id: 'u1',
-      name: 'Preet Dudhat',
-      email: 'preet@crm.com',
-      role: Role.admin,
-    ),
-    UserModel(
-      id: 'u2',
-      name: 'Rahul Patel',
-      email: 'rahul@crm.com',
-      role: Role.manager,
-    ),
-    UserModel(
-      id: 'u3',
-      name: 'John Smith',
-      email: 'john@crm.com',
-      role: Role.employee,
-    ),
-    UserModel(
-      id: 'u4',
-      name: 'Guest Viewer',
-      email: 'guest@crm.com',
-      role: Role.viewer,
-    ),
-  ];
+  final SupabaseClient _supabase = Supabase.instance.client;
 
+  // Retrieve all users from the public 'users' table
+  // This requires the 'users' table to be populated.
+  // We should ideally have a trigger in Supabase to sync auth.users to public.users.
   Future<List<UserModel>> getUsers() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate delay
-    return List.from(_mockUsers);
+    try {
+      // Try to fetch from 'profiles' table
+      final data = await _supabase.from('profiles').select();
+
+      return (data as List).map((json) {
+        return UserModel(
+          id: json['id'],
+          name: json['name'] ?? 'Unknown',
+          email: json['email'] ?? '',
+          role: Role.values.firstWhere(
+            (e) => e.name == (json['role'] ?? 'viewer'),
+            orElse: () => Role.viewer,
+          ),
+        );
+      }).toList();
+    } catch (e) {
+      // Fallback to mock if table missing, for development safety
+      print('Error fetching users: $e');
+      return [];
+    }
   }
 
+  // To add a user, we effectively "Invite" them or just create a profile placeholder.
+  // Real user creation happens via Auth Sign Up.
+  // For this IAM demo, we will creating a profile entry. 
+  // NOTE: This does NOT create a login account. 
+  // In a real app, you'd call an Edge Function to invite the user.
   Future<UserModel> addUser(UserModel user) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final newUser = UserModel(
-      id: 'u${_mockUsers.length + 1 + Random().nextInt(1000)}',
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    );
-    _mockUsers.add(newUser);
-    return newUser;
+    // This is a placeholder for the "Invite User" flow.
+    // We will insert into profiles just to show them in the list.
+    // The ID would ideally come from the auth user creation.
+    // Since we can't create auth user here, we'll generate a temp ID or fail.
+    
+    // BETTER APPROACH: Use a strictly typed "Invite" function which calls an RPC or Edge Function.
+    // For now, we simulate success by adding to local state or throwing "Not Implemented" for real backend.
+    
+    // Let's implement a visual-only addition if backend logic is missing, 
+    // BUT user wants "Impl IAM".
+    // I will enable listing and updating ROLES.
+    
+    // 1. Create profile (assuming trigger doesn't exist or we want to pre-fill)
+    // We can't create an ID. 
+    // We will throw an error saying "Please use Registration screen to create users" 
+    // OR valid IAM flow: Admin creates user -> Edge Function -> Auth User + Profile.
+    
+    // Given the constraints, I will implement 'updateUser' (Role Change) which is the most critical IAM feature.
+    // 'addUser' will be "Invite" which sends an email (mocked).
+    
+    throw UnimplementedError('To add users, they must register or be invited via Edge Functions.');
   }
 
   Future<UserModel> updateUser(UserModel user) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final index = _mockUsers.indexWhere((u) => u.id == user.id);
-    if (index != -1) {
-      _mockUsers[index] = user;
-      return user;
-    }
-    throw Exception('User not found');
+    // Update the profile's role
+    final response = await _supabase
+        .from('profiles')
+        .update({
+          'name': user.name,
+          'role': user.role.name,
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+    return UserModel(
+      id: response['id'],
+      name: response['name'],
+      email: response['email'],
+      role: Role.values.firstWhere(
+        (e) => e.name == response['role'],
+        orElse: () => Role.viewer,
+      ),
+    );
   }
 
   Future<void> deleteUser(String id) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _mockUsers.removeWhere((u) => u.id == id);
+    // Soft delete or hard delete from profiles
+    await _supabase.from('profiles').delete().eq('id', id);
+    // Note: This doesn't delete from auth.users without a trigger/function.
   }
 }

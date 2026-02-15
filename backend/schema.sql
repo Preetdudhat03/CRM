@@ -107,3 +107,59 @@ CREATE TABLE activities (
   related_entity_type TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- PROFILES (Publicly accessible user data synced with Auth)
+CREATE TABLE profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  name TEXT,
+  email TEXT,
+  role TEXT DEFAULT 'viewer',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Function to handle new user signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, name, email, role)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'name', 
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'role', 'viewer')
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to call the function on signup
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Enable RLS for profiles
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Allow authenticated users to view all profiles (for User Management)
+-- In a real app, you might restrict this to Admins only.
+CREATE POLICY "Allow viewed by authenticated users" ON profiles
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Allow users to update their own profile
+CREATE POLICY "Allow update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Allow admins to update any profile (assuming we have an is_admin function or check)
+-- For simplicity, we'll allow update if the user has 'admin' role in metadata
+-- (This requires a recursive check or trusted metadata. Let's stick to simple for now: valid users can update self)
+
+-- BACKFILL profiles for existing users
+INSERT INTO public.profiles (id, name, email, role)
+SELECT 
+  id, 
+  raw_user_meta_data->>'name', 
+  email, 
+  COALESCE(raw_user_meta_data->>'role', 'viewer')
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;

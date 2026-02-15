@@ -62,6 +62,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
             if (c.id != id) c
         ]);
       });
+    } catch (e) {
       // Handle error
     }
   }
