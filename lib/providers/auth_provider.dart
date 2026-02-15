@@ -41,4 +41,8 @@ class AuthNotifier extends StateNotifier<UserModel?> {
     await _authService.logout();
     state = null;
   }
+
+  Future<void> refreshUser() async {
+    state = await _authService.getCurrentUser();
+  }
 }

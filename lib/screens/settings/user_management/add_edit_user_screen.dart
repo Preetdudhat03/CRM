@@ -43,9 +43,15 @@ class _AddEditUserScreenState extends ConsumerState<AddEditUserScreen> {
             );
           }
         } else {
-          await userManagementNotifier.updateUser(
-            widget.user!.copyWith(name: _name, email: _email, role: _role),
-          );
+          final updatedUser = widget.user!.copyWith(name: _name, email: _email, role: _role);
+          await userManagementNotifier.updateUser(updatedUser);
+          
+          // Check if we updated ourselves and refresh current user provider
+          final currentUser = ref.read(currentUserProvider);
+          if (currentUser?.id == widget.user!.id) {
+            await ref.read(currentUserProvider.notifier).refreshUser();
+          }
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('User updated successfully')),

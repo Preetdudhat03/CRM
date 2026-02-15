@@ -12,11 +12,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: 'https://iyylebbrcawebwsqxzup.supabase.co',
-    anonKey: 'sb_publishable_Ek1PWmFz6ZR13fgSg2u4rg_DZi_FRrS',
-  );
+  try {
+    // Initialize Supabase
+    await Supabase.initialize(
+      url: 'https://iyylebbrcawebwsqxzup.supabase.co',
+      anonKey: 'sb_publishable_Ek1PWmFz6ZR13fgSg2u4rg_DZi_FRrS',
+    );
+  } catch (e) {
+    runApp(MaterialApp(home: Scaffold(body: Center(child: Text('Failed to initialize: $e')))));
+    return;
+  }
   
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
