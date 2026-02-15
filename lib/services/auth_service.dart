@@ -19,20 +19,41 @@ class AuthService {
         throw Exception('Login failed: User is null');
       }
   
-      // Fetch user role from metadata or profiles table
-      // For now, defaulting to Admin if not set, or fetching from metadata
-      final roleString = user.userMetadata?['role'] as String? ?? 'admin';
-      final role = Role.values.firstWhere(
-        (e) => e.name == roleString,
-        orElse: () => Role.viewer,
-      );
-  
-      return UserModel(
-        id: user.id,
-        name: user.userMetadata?['name'] ?? email.split('@')[0],
-        email: email,
-        role: role,
-      );
+      // Fetch user role from profiles table
+      try {
+        final profile = await _supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+
+        final roleString = profile['role'] as String? ?? 'viewer';
+        final role = Role.values.firstWhere(
+          (e) => e.name == roleString,
+          orElse: () => Role.viewer,
+        );
+
+        return UserModel(
+          id: user.id,
+          name: profile['name'] ?? user.userMetadata?['name'] ?? email.split('@')[0],
+          email: profile['email'] ?? email,
+          role: role,
+        );
+      } catch (e) {
+        // Fallback
+        final roleString = user.userMetadata?['role'] as String? ?? 'admin';
+        final role = Role.values.firstWhere(
+          (e) => e.name == roleString,
+          orElse: () => Role.viewer,
+        );
+    
+        return UserModel(
+          id: user.id,
+          name: user.userMetadata?['name'] ?? email.split('@')[0],
+          email: email,
+          role: role,
+        );
+      }
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
         throw Exception('Email not confirmed. Please check your inbox or ask admin to confirm.');
@@ -55,18 +76,42 @@ class AuthService {
     final User? user = _supabase.auth.currentUser;
     if (user == null) return null;
 
-    final roleString = user.userMetadata?['role'] as String? ?? 'admin';
-    final role = Role.values.firstWhere(
-      (e) => e.name == roleString,
-      orElse: () => Role.viewer,
-    );
+    try {
+      // Fetch latest profile data to get up-to-date role
+      final profile = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .single();
 
-    return UserModel(
-      id: user.id,
-      name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
-      email: user.email ?? '',
-      role: role,
-    );
+      final roleString = profile['role'] as String? ?? 'viewer';
+      final role = Role.values.firstWhere(
+        (e) => e.name == roleString,
+        orElse: () => Role.viewer,
+      );
+
+      return UserModel(
+        id: user.id,
+        name: profile['name'] ?? user.email?.split('@')[0] ?? 'User',
+        email: profile['email'] ?? user.email ?? '',
+        role: role,
+      );
+    } catch (e) {
+      // Fallback to metadata if profile fetch fails (e.g. table issue)
+      // print('Error fetching profile: $e');
+      final roleString = user.userMetadata?['role'] as String? ?? 'viewer';
+      final role = Role.values.firstWhere(
+        (e) => e.name == roleString,
+        orElse: () => Role.viewer,
+      );
+
+      return UserModel(
+        id: user.id,
+        name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+        email: user.email ?? '',
+        role: role,
+      );
+    }
   }
 
   // Helper to register a new user (optional, good to have)
