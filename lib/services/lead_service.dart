@@ -37,14 +37,33 @@ class LeadService {
       );
     }).toList();
 
-    // Merge and sort
-    // Put contactLeads FIRST, so that real leads (if duplicates exist) OVERWRITE them in the map
-    final allLeads = [...contactLeads, ...leads];
-    // Remove duplicates based on ID
-    final uniqueLeads = {for (var l in allLeads) l.id: l}.values.toList();
-    uniqueLeads.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // 3. Deduplicate: Prioritize 'leads' records over 'contact' records
+    // Create sets for fast lookup of existing real leads
+    final Set<String> leadIds = leads.map((l) => l.id).toSet();
+    final Set<String> leadEmails = leads
+        .map((l) => l.email.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .toSet();
+
+    // Filter contact leads that are already present as real leads
+    final filteredContactLeads = contactLeads.where((c) {
+      // If a real lead has this ID, exclude the contact version
+      if (leadIds.contains(c.id)) return false;
+      
+      // If a real lead has this Email, exclude the contact version (avoids duplicates with different IDs)
+      final email = c.email.trim().toLowerCase();
+      if (email.isNotEmpty && leadEmails.contains(email)) return false;
+      
+      return true;
+    }).toList();
+
+    // Merge: Real leads + Non-duplicated contact leads
+    final allLeads = [...leads, ...filteredContactLeads];
     
-    return uniqueLeads;
+    // Final robust sort
+    allLeads.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return allLeads;
   }
 
   Future<LeadModel> addLead(LeadModel lead) async {
