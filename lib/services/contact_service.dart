@@ -43,4 +43,11 @@ class ContactService {
   Future<void> deleteContact(String id) async {
     await _supabase.from('contacts').delete().eq('id', id);
   }
+
+  Future<void> toggleFavorite(String id, bool currentStatus) async {
+    await _supabase
+        .from('contacts')
+        .update({'is_favorite': !currentStatus})
+        .eq('id', id);
+  }
 }

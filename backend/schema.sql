@@ -51,7 +51,8 @@ CREATE TABLE contacts (
   status TEXT DEFAULT 'lead', 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_contacted TIMESTAMP WITH TIME ZONE,
-  avatar_url TEXT
+  avatar_url TEXT,
+  is_favorite BOOLEAN DEFAULT FALSE
 );
 
 -- LEADS

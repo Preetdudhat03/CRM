@@ -31,6 +31,7 @@ class ContactModel {
   final DateTime createdAt;
   final DateTime lastContacted;
   final String? avatarUrl;
+  final bool isFavorite;
 
   const ContactModel({
     required this.id,
@@ -45,6 +46,7 @@ class ContactModel {
     required this.createdAt,
     required this.lastContacted,
     this.avatarUrl,
+    this.isFavorite = false,
   });
 
   ContactModel copyWith({
@@ -60,6 +62,7 @@ class ContactModel {
     DateTime? createdAt,
     DateTime? lastContacted,
     String? avatarUrl,
+    bool? isFavorite,
   }) {
     return ContactModel(
       id: id ?? this.id,
@@ -74,6 +77,7 @@ class ContactModel {
       createdAt: createdAt ?? this.createdAt,
       lastContacted: lastContacted ?? this.lastContacted,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 
@@ -96,6 +100,7 @@ class ContactModel {
           ? DateTime.parse(json['last_contacted'])
           : DateTime.now(),
       avatarUrl: json['avatar_url'],
+      isFavorite: json['is_favorite'] ?? false,
     );
   }
 
@@ -112,6 +117,7 @@ class ContactModel {
       'created_at': createdAt.toIso8601String(),
       'last_contacted': lastContacted.toIso8601String(),
       'avatar_url': avatarUrl,
+      'is_favorite': isFavorite,
     };
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
 import 'screens/main_layout_screen.dart';
+import 'screens/auth/auth_gate.dart';
 import 'providers/theme_provider.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -51,7 +52,7 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      home: const MainLayoutScreen(),
+      home: const AuthGate(),
     );
   }
 }

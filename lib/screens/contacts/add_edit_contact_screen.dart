@@ -54,6 +54,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
         createdAt: widget.contact?.createdAt ?? DateTime.now(),
         lastContacted: widget.contact?.lastContacted ?? DateTime.now(),
         avatarUrl: widget.contact?.avatarUrl,
+        isFavorite: widget.contact?.isFavorite ?? false,
       );
 
       if (widget.contact == null) {
@@ -131,6 +132,17 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                       prefixIcon: Icon(Icons.phone_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                         return 'Please enter a phone number';
+                      }
+                      // Basic regex for phone validation (allows +, space, -, and digits, min 10 chars)
+                      final phoneRegex = RegExp(r'^[+]?[0-9\s-]{10,}$');
+                      if (!phoneRegex.hasMatch(value)) {
+                        return 'Enter a valid phone number';
+                      }
+                      return null;
+                    },
                     onSaved: (value) => _phone = value!,
                     keyboardType: TextInputType.phone,
                   ),

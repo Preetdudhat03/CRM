@@ -1,5 +1,8 @@
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/contact_provider.dart';
 import 'package:flutter/material.dart';
+import 'add_edit_contact_screen.dart';
 import '../../models/contact_model.dart';
 
 class ContactDetailScreen extends StatelessWidget {
@@ -13,14 +16,45 @@ class ContactDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(contact.name),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.star_border),
-            onPressed: () {},
+          // We need a Consumer here to access the provider ref
+          Consumer(
+            builder: (context, ref, child) {
+              // Watch the specific contact to update UI when provider updates
+              // BUT we are in a stateless widget inside a list, watching the whole list is inefficient.
+              // However, since we are inside detail screen, we can just use the passed contact or
+              // rebuild the widget when the list updates.
+              // Simple hack: We just toggle. The parent screen (ContactsScreen) needs to pass updated object if we go back.
+              // For detail screen to reflect change LIVE, we should query provider by ID.
+              final contactsAsync = ref.watch(contactsProvider);
+              final updatedContact = contactsAsync.value?.firstWhere((c) => c.id == contact.id, orElse: () => contact) ?? contact;
+
+              return IconButton(
+                icon: Icon(
+                  updatedContact.isFavorite ? Icons.star : Icons.star_border,
+                  color: updatedContact.isFavorite ? Colors.amber : null,
+                ),
+                onPressed: () {
+                  ref.read(contactsProvider.notifier).toggleFavorite(contact.id, updatedContact.isFavorite);
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(updatedContact.isFavorite ? 'Removed from favorites' : 'Added to favorites'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // Navigation to edit handled by parent or could be added here
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddEditContactScreen(contact: contact),
+                ),
+              );
             },
           ),
         ],

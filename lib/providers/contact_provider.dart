@@ -62,6 +62,19 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
             if (c.id != id) c
         ]);
       });
+      // Handle error
+    }
+  }
+
+  Future<void> toggleFavorite(String id, bool currentStatus) async {
+    try {
+      await _contactService.toggleFavorite(id, currentStatus);
+      state.whenData((contacts) {
+        state = AsyncValue.data([
+          for (final c in contacts)
+            if (c.id == id) c.copyWith(isFavorite: !currentStatus) else c
+        ]);
+      });
     } catch (e) {
       // Handle error
     }

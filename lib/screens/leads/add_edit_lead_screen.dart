@@ -103,6 +103,16 @@ class _AddEditLeadScreenState extends State<AddEditLeadScreen> {
                       prefixIcon: Icon(Icons.phone_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                         return 'Please enter a phone number';
+                      }
+                      final phoneRegex = RegExp(r'^[+]?[0-9\s-]{10,}$');
+                      if (!phoneRegex.hasMatch(value)) {
+                        return 'Enter a valid phone number';
+                      }
+                      return null;
+                    },
                     onSaved: (value) => _phone = value!,
                     keyboardType: TextInputType.phone,
                   ),

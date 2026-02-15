@@ -39,12 +39,12 @@ class ContactCard extends StatelessWidget {
         leading: CircleAvatar(
           radius: 28,
           backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-          backgroundImage: contact.avatarUrl != null
+          backgroundImage: contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
               ? NetworkImage(contact.avatarUrl!)
               : null,
-          child: contact.avatarUrl == null
+          child: (contact.avatarUrl == null || contact.avatarUrl!.isEmpty)
               ? Text(
-                  contact.name.substring(0, 1).toUpperCase(),
+                  contact.name.isNotEmpty ? contact.name.substring(0, 1).toUpperCase() : 'C',
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 20,

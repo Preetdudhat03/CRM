@@ -98,8 +98,8 @@ When creating a user in Supabase Authentication:
 ```sql
 -- Update a user to be an Admin
 UPDATE auth.users
-SET raw_user_meta_data = '{"role": "admin", "name": "Admin User"}'
-WHERE email = 'your.email@example.com';
+SET raw_user_meta_data = '{"role": "admin", "name": "preet"}'
+WHERE email = 'preet@crm.com';
 ```
 
 Supported Roles:
@@ -108,6 +108,22 @@ Supported Roles:
 *   `manager`
 *   `employee`
 *   `viewer`
+
+### 2.1 "Email Not Confirmed" Error
+
+If you get a login error saying **"Email not confirmed"**, it means Supabase is waiting for you to click a link in your email. For development, you can bypass this:
+
+1.  **Option A (Recommended for Dev):** Run this SQL to manually confirm the user:
+    ```sql
+    UPDATE auth.users
+    SET email_confirmed_at = NOW()
+    WHERE email = 'preet@crm.com';
+    ```
+
+2.  **Option B (Disable Confirmation):**
+    *   Go to **Authentication** > **Providers** > **Email**.
+    *   Here, disable **"Confirm email"**.
+    *   *Note: This only applies to NEW users signed up after this change.*
 
 ## 3. Storage (Optional)
 
