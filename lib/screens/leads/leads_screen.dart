@@ -47,57 +47,75 @@ class LeadsScreen extends ConsumerWidget {
         ),
       ),
       body: leadsAsync.when(
-        data: (leads) => leads.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.leaderboard_outlined, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No leads found',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+        data: (leads) => RefreshIndicator(
+          onRefresh: () => ref.read(leadsProvider.notifier).getLeads(),
+          child: leads.isEmpty
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - 200, // Adjust for AppBar
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.leaderboard_outlined, size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No leads found',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: leads.length,
+                  itemBuilder: (context, index) {
+                    final lead = leads[index];
+                    return LeadCard(
+                      lead: lead,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                LeadDetailScreen(lead: lead),
+                          ),
+                        );
+                      },
+                      onEdit: canEdit
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddEditLeadScreen(lead: lead),
+                                ),
+                              );
+                            }
+                          : null,
+                      onDelete: canDelete
+                          ? () {
+                              _showDeleteConfirmation(context, ref, lead);
+                            }
+                          : null,
+                    );
+                  },
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: leads.length,
-                itemBuilder: (context, index) {
-                  final lead = leads[index];
-                  return LeadCard(
-                    lead: lead,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              LeadDetailScreen(lead: lead),
-                        ),
-                      );
-                    },
-                    onEdit: canEdit
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddEditLeadScreen(lead: lead),
-                              ),
-                            );
-                          }
-                        : null,
-                    onDelete: canDelete
-                        ? () {
-                            _showDeleteConfirmation(context, ref, lead);
-                          }
-                        : null,
-                  );
-                },
-              ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => RefreshIndicator(
+          onRefresh: () => ref.read(leadsProvider.notifier).getLeads(),
+          child: SingleChildScrollView(
+             physics: const AlwaysScrollableScrollPhysics(),
+             child: SizedBox(
+               height: MediaQuery.of(context).size.height,
+               child: Center(child: Text('Error: $error')),
+             ),
+          ),
+        ),
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(

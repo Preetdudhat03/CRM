@@ -47,57 +47,75 @@ class DealsScreen extends ConsumerWidget {
         ),
       ),
       body: dealsAsync.when(
-        data: (deals) => deals.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.monetization_on_outlined, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No deals found',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+        data: (deals) => RefreshIndicator(
+          onRefresh: () => ref.read(dealsProvider.notifier).getDeals(),
+          child: deals.isEmpty
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - 200,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.monetization_on_outlined, size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No deals found',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: deals.length,
+                  itemBuilder: (context, index) {
+                    final deal = deals[index];
+                    return DealCard(
+                      deal: deal,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DealDetailScreen(deal: deal),
+                          ),
+                        );
+                      },
+                      onEdit: canEdit
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddEditDealScreen(deal: deal),
+                                ),
+                              );
+                            }
+                          : null,
+                      onDelete: canDelete
+                          ? () {
+                              _showDeleteConfirmation(context, ref, deal);
+                            }
+                          : null,
+                    );
+                  },
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: deals.length,
-                itemBuilder: (context, index) {
-                  final deal = deals[index];
-                  return DealCard(
-                    deal: deal,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              DealDetailScreen(deal: deal),
-                        ),
-                      );
-                    },
-                    onEdit: canEdit
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddEditDealScreen(deal: deal),
-                              ),
-                            );
-                          }
-                        : null,
-                    onDelete: canDelete
-                        ? () {
-                            _showDeleteConfirmation(context, ref, deal);
-                          }
-                        : null,
-                  );
-                },
-              ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => RefreshIndicator(
+          onRefresh: () => ref.read(dealsProvider.notifier).getDeals(),
+          child: SingleChildScrollView(
+             physics: const AlwaysScrollableScrollPhysics(),
+             child: SizedBox(
+               height: MediaQuery.of(context).size.height,
+               child: Center(child: Text('Error: $error')),
+             ),
+          ),
+        ),
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(

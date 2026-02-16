@@ -47,57 +47,75 @@ class ContactsScreen extends ConsumerWidget {
         ),
       ),
       body: contactsAsync.when(
-        data: (contacts) => contacts.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No contacts found',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+        data: (contacts) => RefreshIndicator(
+          onRefresh: () => ref.read(contactsProvider.notifier).getContacts(),
+          child: contacts.isEmpty
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - 200,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No contacts found',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: contacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = contacts[index];
+                    return ContactCard(
+                      contact: contact,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ContactDetailScreen(contact: contact),
+                          ),
+                        );
+                      },
+                      onEdit: canEdit
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddEditContactScreen(contact: contact),
+                                ),
+                              );
+                            }
+                          : null,
+                      onDelete: canDelete
+                          ? () {
+                              _showDeleteConfirmation(context, ref, contact);
+                            }
+                          : null,
+                    );
+                  },
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: contacts.length,
-                itemBuilder: (context, index) {
-                  final contact = contacts[index];
-                  return ContactCard(
-                    contact: contact,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ContactDetailScreen(contact: contact),
-                        ),
-                      );
-                    },
-                    onEdit: canEdit
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddEditContactScreen(contact: contact),
-                              ),
-                            );
-                          }
-                        : null,
-                    onDelete: canDelete
-                        ? () {
-                            _showDeleteConfirmation(context, ref, contact);
-                          }
-                        : null,
-                  );
-                },
-              ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => RefreshIndicator(
+          onRefresh: () => ref.read(contactsProvider.notifier).getContacts(),
+          child: SingleChildScrollView(
+             physics: const AlwaysScrollableScrollPhysics(),
+             child: SizedBox(
+               height: MediaQuery.of(context).size.height,
+               child: Center(child: Text('Error: $error')),
+             ),
+          ),
+        ),
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(

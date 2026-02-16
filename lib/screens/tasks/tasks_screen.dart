@@ -55,63 +55,81 @@ class TasksScreen extends ConsumerWidget {
         ),
       ),
       body: tasksAsync.when(
-        data: (tasks) => tasks.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No tasks found',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+        data: (tasks) => RefreshIndicator(
+          onRefresh: () => ref.read(tasksProvider.notifier).getTasks(),
+          child: tasks.isEmpty
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - 200,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No tasks found',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return TaskCard(
+                      task: task,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TaskDetailScreen(task: task),
+                          ),
+                        );
+                      },
+                      onStatusChanged: (value) {
+                        final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
+                        ref.read(tasksProvider.notifier).updateTask(
+                          task.copyWith(status: newStatus)
+                        );
+                      },
+                      onEdit: canEdit
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddEditTaskScreen(task: task),
+                                ),
+                              );
+                            }
+                          : null,
+                      onDelete: canDelete
+                          ? () {
+                              _showDeleteConfirmation(context, ref, task);
+                            }
+                          : null,
+                    );
+                  },
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return TaskCard(
-                    task: task,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TaskDetailScreen(task: task),
-                        ),
-                      );
-                    },
-                    onStatusChanged: (value) {
-                      final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
-                      ref.read(tasksProvider.notifier).updateTask(
-                        task.copyWith(status: newStatus)
-                      );
-                    },
-                    onEdit: canEdit
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddEditTaskScreen(task: task),
-                              ),
-                            );
-                          }
-                        : null,
-                    onDelete: canDelete
-                        ? () {
-                            _showDeleteConfirmation(context, ref, task);
-                          }
-                        : null,
-                  );
-                },
-              ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => RefreshIndicator(
+          onRefresh: () => ref.read(tasksProvider.notifier).getTasks(),
+          child: SingleChildScrollView(
+             physics: const AlwaysScrollableScrollPhysics(),
+             child: SizedBox(
+               height: MediaQuery.of(context).size.height,
+               child: Center(child: Text('Error: $error')),
+             ),
+          ),
+        ),
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(
