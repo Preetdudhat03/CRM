@@ -18,6 +18,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   Role _selectedRole = Role.admin; // Default to Admin for first user
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
@@ -111,13 +112,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   delay: 0.4,
                   child: TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                    ),
-                    obscureText: true,
                     validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

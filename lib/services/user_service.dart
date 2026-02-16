@@ -61,26 +61,54 @@ class UserService {
   }
 
   Future<UserModel> updateUser(UserModel user) async {
-    // Update the profile's role
-    final response = await _supabase
-        .from('profiles')
-        .update({
-          'name': user.name,
-          'role': user.role.name,
-        })
-        .eq('id', user.id)
-        .select()
-        .single();
+    try {
+      // Update the profile's role
+      final response = await _supabase
+          .from('profiles')
+          .update({
+            'name': user.name,
+            'role': user.role.name,
+          })
+          .eq('id', user.id)
+          .select()
+          .single();
 
-    return UserModel(
-      id: response['id'],
-      name: response['name'],
-      email: response['email'],
-      role: Role.values.firstWhere(
-        (e) => e.name == response['role'],
-        orElse: () => Role.viewer,
-      ),
-    );
+      return UserModel(
+        id: response['id'],
+        name: response['name'],
+        email: response['email'],
+        role: Role.values.firstWhere(
+          (e) => e.name == response['role'],
+          orElse: () => Role.viewer,
+        ),
+      );
+    } catch (e) {
+      // If direct update fails (e.g. RLS), try via Admin RPC
+      try {
+        final response = await _supabase.rpc('admin_update_profile', params: {
+          'target_user_id': user.id,
+          'new_name': user.name,
+          'new_role': user.role.name,
+        });
+
+        // Use the returned data or the input user if RPC is void/bool
+        // The SQL function returns the updated fields
+        final data = response as Map<String, dynamic>;
+        
+        return UserModel(
+          id: data['id'] ?? user.id,
+          name: data['name'] ?? user.name,
+          email: user.email, // Email usually doesn't change here
+          role: Role.values.firstWhere(
+            (e) => e.name == (data['role'] ?? user.role.name),
+            orElse: () => Role.viewer,
+          ),
+        );
+      } catch (rpcError) {
+        // If both fail, throw the original error
+        throw e;
+      }
+    }
   }
 
   Future<void> deleteUser(String id) async {

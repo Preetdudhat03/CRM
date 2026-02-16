@@ -51,6 +51,7 @@ class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> 
       });
     } catch (e) {
       // Handle error
+      rethrow;
     }
   }
 
@@ -64,6 +65,7 @@ class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> 
       });
     } catch (e) {
       // Handle error
+      rethrow;
     }
   }
 }
