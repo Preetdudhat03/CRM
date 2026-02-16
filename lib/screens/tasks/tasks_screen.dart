@@ -79,55 +79,47 @@ class TasksScreen extends ConsumerWidget {
                     ),
                   ),
                 )
-              : GridView.builder(
-                padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16, top: 16),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 600,
-                  mainAxisExtent: 140, // Adjust based on TaskCard height
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return TaskCard(
-                    task: task,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TaskDetailScreen(task: task),
-                        ),
-                      );
-                    },
-                    onStatusChanged: canEdit 
-                      ? (value) {
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return TaskCard(
+                      task: task,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TaskDetailScreen(task: task),
+                          ),
+                        );
+                      },
+                      onStatusChanged: (value) {
                         final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
                         ref.read(tasksProvider.notifier).updateTask(
                           task.copyWith(status: newStatus)
                         );
-                      }
-                      : null, // Disable checkbox if can't edit
-                    onEdit: canEdit
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddEditTaskScreen(task: task),
-                              ),
-                            );
-                          }
-                        : null,
-                    onDelete: canDelete
-                        ? () {
-                            _showDeleteConfirmation(context, ref, task);
-                          }
-                        : null,
-                  );
-                },
-              ),
+                      },
+                      onEdit: canEdit
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddEditTaskScreen(task: task),
+                                ),
+                              );
+                            }
+                          : null,
+                      onDelete: canDelete
+                          ? () {
+                              _showDeleteConfirmation(context, ref, task);
+                            }
+                          : null,
+                    );
+                  },
+                ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(

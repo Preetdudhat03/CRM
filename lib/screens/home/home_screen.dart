@@ -84,8 +84,11 @@ class HomeScreen extends ConsumerWidget {
               LayoutBuilder(
                 builder: (context, constraints) {
                   int crossAxisCount = 2;
-                  if (constraints.maxWidth > 600) crossAxisCount = 3;
-                  if (constraints.maxWidth > 900) crossAxisCount = 4;
+                  if (constraints.maxWidth > 1200) {
+                    crossAxisCount = 4;
+                  } else if (constraints.maxWidth > 800) {
+                    crossAxisCount = 3;
+                  }
 
                   return GridView.count(
                     crossAxisCount: crossAxisCount,
@@ -93,86 +96,86 @@ class HomeScreen extends ConsumerWidget {
                     mainAxisSpacing: 16,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: constraints.maxWidth > 600 ? 1.5 : 1.2, // Adjust aspect ratio for wider cards
+                    childAspectRatio: 1.3, // Adjust aspect ratio for better look on wide screens
                     children: [
-                   // Dynamic Stats Cards
-                  FadeInSlide(
-                    delay: 0.1,
-                    child: _buildStatCard(
-                      contactStats,
-                      title: 'Total Contacts',
-                      icon: Icons.people_outline,
-                      color: Colors.blue,
-                      valueKey: 'total',
-                      onTap: () {
-                        ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
-                      },
-                    ),
-                  ),
-                  FadeInSlide(
-                    delay: 0.2,
-                    child: _buildStatCard(
-                      leadStats, // Using correct Leads Provider
-                      title: 'Total Leads',
-                      icon: Icons.leaderboard_outlined,
-                      color: Colors.orange,
-                      valueKey: 'total', // Using 'total' key for leads
-                      onTap: () {
-                        ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
-                      },
-                    ),
-                  ),
-                  FadeInSlide(
-                    delay: 0.3,
-                    child: _buildStatCard(
-                      dealStats,
-                      title: 'Active Deals',
-                      valueKey: 'activeCount',
-                      icon: Icons.handshake_outlined,
-                      color: Colors.purple,
-                      onTap: () {
-                        ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
-                      },
-                    ),
-                  ),
-                  // Revenue Card - Restricted Access
-                  if (canViewAnalytics)
-                    FadeInSlide(
-                      delay: 0.4,
-                      child: _buildStatCard(
-                        dealStats,
-                        title: 'Revenue (Won)',
-                        valueKey: 'revenueWon',
-                        icon: Icons.attach_money,
-                        color: Colors.green,
-                        isCurrency: true,
-                        onTap: () {
-                          // Navigate to Analytics/Deals or show breakdown
-                          ref.read(bottomNavIndexProvider.notifier).state = 3;
-                        },
-                      ),
-                    )
-                  else
-                    FadeInSlide(
-                      delay: 0.4,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                      // Dynamic Stats Cards
+                      FadeInSlide(
+                        delay: 0.1,
+                        child: _buildStatCard(
+                          contactStats,
+                          title: 'Total Contacts',
+                          icon: Icons.people_outline,
+                          color: Colors.blue,
+                          valueKey: 'total',
+                          onTap: () {
+                            ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
+                          },
                         ),
-                        child: const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.lock_outline, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text('Access Restricted'),
-                            ],
+                      ),
+                      FadeInSlide(
+                        delay: 0.2,
+                        child: _buildStatCard(
+                          leadStats, // Using correct Leads Provider
+                          title: 'Total Leads',
+                          icon: Icons.leaderboard_outlined,
+                          color: Colors.orange,
+                          valueKey: 'total', // Using 'total' key for leads
+                          onTap: () {
+                            ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
+                          },
+                        ),
+                      ),
+                      FadeInSlide(
+                        delay: 0.3,
+                        child: _buildStatCard(
+                          dealStats,
+                          title: 'Active Deals',
+                          valueKey: 'activeCount',
+                          icon: Icons.handshake_outlined,
+                          color: Colors.purple,
+                          onTap: () {
+                            ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
+                          },
+                        ),
+                      ),
+                      // Revenue Card - Restricted Access
+                      if (canViewAnalytics)
+                        FadeInSlide(
+                          delay: 0.4,
+                          child: _buildStatCard(
+                            dealStats,
+                            title: 'Revenue (Won)',
+                            valueKey: 'revenueWon',
+                            icon: Icons.attach_money,
+                            color: Colors.green,
+                            isCurrency: true,
+                            onTap: () {
+                              // Navigate to Analytics/Deals or show breakdown
+                              ref.read(bottomNavIndexProvider.notifier).state = 3;
+                            },
+                          ),
+                        )
+                      else
+                        FadeInSlide(
+                          delay: 0.4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Theme.of(context).dividerColor),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.lock_outline, color: Colors.grey),
+                                  SizedBox(height: 8),
+                                  Text('Access Restricted'),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
                     ],
                   );
                 },

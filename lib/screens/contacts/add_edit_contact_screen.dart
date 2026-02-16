@@ -152,9 +152,9 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Avatar Picker
-                FadeInSlide(
+                  children: [
+                    // Avatar Picker
+                    FadeInSlide(
                   child: Center(
                     child: Stack(
                       children: [
@@ -399,13 +399,13 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                      ),
                    ),
                  ),
-                ],
+              ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
