@@ -71,41 +71,47 @@ class DealsScreen extends ConsumerWidget {
                     ),
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: deals.length,
-                  itemBuilder: (context, index) {
-                    final deal = deals[index];
-                    return DealCard(
-                      deal: deal,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                DealDetailScreen(deal: deal),
-                          ),
-                        );
-                      },
-                      onEdit: canEdit
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditDealScreen(deal: deal),
-                                ),
-                              );
-                            }
-                          : null,
-                      onDelete: canDelete
-                          ? () {
-                              _showDeleteConfirmation(context, ref, deal);
-                            }
-                          : null,
-                    );
-                  },
+               GridView.builder(
+                padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16, top: 16),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 600,
+                  mainAxisExtent: 160,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
+                itemCount: deals.length,
+                itemBuilder: (context, index) {
+                  final deal = deals[index];
+                  return DealCard(
+                    deal: deal,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DealDetailScreen(deal: deal),
+                        ),
+                      );
+                    },
+                    onEdit: canEdit
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddEditDealScreen(deal: deal),
+                              ),
+                            );
+                          }
+                        : null,
+                    onDelete: canDelete
+                        ? () {
+                            _showDeleteConfirmation(context, ref, deal);
+                          }
+                        : null,
+                  );
+                },
+              ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(

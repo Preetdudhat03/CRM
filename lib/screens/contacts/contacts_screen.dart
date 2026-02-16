@@ -71,41 +71,47 @@ class ContactsScreen extends ConsumerWidget {
                     ),
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: contacts.length,
-                  itemBuilder: (context, index) {
-                    final contact = contacts[index];
-                    return ContactCard(
-                      contact: contact,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ContactDetailScreen(contact: contact),
-                          ),
-                        );
-                      },
-                      onEdit: canEdit
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditContactScreen(contact: contact),
-                                ),
-                              );
-                            }
-                          : null,
-                      onDelete: canDelete
-                          ? () {
-                              _showDeleteConfirmation(context, ref, contact);
-                            }
-                          : null,
-                    );
-                  },
+               GridView.builder(
+                padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16, top: 16),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 600,
+                  mainAxisExtent: 140, // Adjust based on ContactCard height
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  final contact = contacts[index];
+                  return ContactCard(
+                    contact: contact,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ContactDetailScreen(contact: contact),
+                        ),
+                      );
+                    },
+                    onEdit: canEdit
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddEditContactScreen(contact: contact),
+                              ),
+                            );
+                          }
+                        : null,
+                    onDelete: canDelete
+                        ? () {
+                            _showDeleteConfirmation(context, ref, contact);
+                          }
+                        : null,
+                  );
+                },
+              ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(

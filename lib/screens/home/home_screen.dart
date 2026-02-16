@@ -81,14 +81,21 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  // Dynamic Stats Cards
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  int crossAxisCount = 2;
+                  if (constraints.maxWidth > 600) crossAxisCount = 3;
+                  if (constraints.maxWidth > 900) crossAxisCount = 4;
+
+                  return GridView.count(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: constraints.maxWidth > 600 ? 1.5 : 1.2, // Adjust aspect ratio for wider cards
+                    children: [
+                   // Dynamic Stats Cards
                   FadeInSlide(
                     delay: 0.1,
                     child: _buildStatCard(
@@ -166,7 +173,9 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                ],
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 32),
               FadeInSlide(

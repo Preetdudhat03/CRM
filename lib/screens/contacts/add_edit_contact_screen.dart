@@ -147,8 +147,11 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Avatar Picker
                 FadeInSlide(
@@ -396,11 +399,13 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                      ),
                    ),
                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

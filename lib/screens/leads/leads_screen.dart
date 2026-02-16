@@ -71,41 +71,47 @@ class LeadsScreen extends ConsumerWidget {
                     ),
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: leads.length,
-                  itemBuilder: (context, index) {
-                    final lead = leads[index];
-                    return LeadCard(
-                      lead: lead,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                LeadDetailScreen(lead: lead),
-                          ),
-                        );
-                      },
-                      onEdit: canEdit
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditLeadScreen(lead: lead),
-                                ),
-                              );
-                            }
-                          : null,
-                      onDelete: canDelete
-                          ? () {
-                              _showDeleteConfirmation(context, ref, lead);
-                            }
-                          : null,
-                    );
-                  },
+               GridView.builder(
+                padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16, top: 16),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 600,
+                  mainAxisExtent: 160, // Leads might have more info than contacts
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
+                itemCount: leads.length,
+                itemBuilder: (context, index) {
+                  final lead = leads[index];
+                  return LeadCard(
+                    lead: lead,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              LeadDetailScreen(lead: lead),
+                        ),
+                      );
+                    },
+                    onEdit: canEdit
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddEditLeadScreen(lead: lead),
+                              ),
+                            );
+                          }
+                        : null,
+                    onDelete: canDelete
+                        ? () {
+                            _showDeleteConfirmation(context, ref, lead);
+                          }
+                        : null,
+                  );
+                },
+              ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(

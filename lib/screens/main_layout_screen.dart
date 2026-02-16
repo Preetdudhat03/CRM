@@ -31,16 +31,77 @@ class MainLayoutScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      body: AnimatedIndexedStack(
-        index: currentIndex,
-        children: screens,
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          ref.read(bottomNavIndexProvider.notifier).state = index;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 600) {
+            // Mobile Layout
+            return AnimatedIndexedStack(
+              index: currentIndex,
+              children: screens,
+            );
+          } else {
+            // Desktop/Tablet Layout
+            return Row(
+              children: [
+                NavigationRail(
+                  selectedIndex: currentIndex,
+                  onDestinationSelected: (index) {
+                    ref.read(bottomNavIndexProvider.notifier).state = index;
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: const [
+                     NavigationRailDestination(
+                      icon: Icon(Icons.dashboard_outlined),
+                      selectedIcon: Icon(Icons.dashboard),
+                      label: Text('Home'),
+                    ),
+                     NavigationRailDestination(
+                      icon: Icon(Icons.people_outline),
+                      selectedIcon: Icon(Icons.people),
+                      label: Text('Contacts'),
+                    ),
+                     NavigationRailDestination(
+                      icon: Icon(Icons.leaderboard_outlined),
+                      selectedIcon: Icon(Icons.leaderboard),
+                      label: Text('Leads'),
+                    ),
+                     NavigationRailDestination(
+                      icon: Icon(Icons.monetization_on_outlined),
+                      selectedIcon: Icon(Icons.monetization_on),
+                      label: Text('Deals'),
+                    ),
+                     NavigationRailDestination(
+                      icon: Icon(Icons.task_outlined),
+                      selectedIcon: Icon(Icons.task),
+                      label: Text('Tasks'),
+                    ),
+                     NavigationRailDestination(
+                      icon: Icon(Icons.settings_outlined),
+                      selectedIcon: Icon(Icons.settings),
+                      label: Text('Settings'),
+                    ),
+                  ],
+                ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(
+                  child: AnimatedIndexedStack(
+                    index: currentIndex,
+                    children: screens,
+                  ),
+                ),
+              ],
+            );
+          }
         },
       ),
+      bottomNavigationBar: MediaQuery.of(context).size.width < 600
+          ? CustomBottomNavBar(
+              currentIndex: currentIndex,
+              onTap: (index) {
+                ref.read(bottomNavIndexProvider.notifier).state = index;
+              },
+            )
+          : null,
     );
   }
 }
