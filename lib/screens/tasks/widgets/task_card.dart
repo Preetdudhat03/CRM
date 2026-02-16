@@ -116,15 +116,27 @@ class TaskCard extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     itemBuilder: (context) => [
                       if (onEdit != null)
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Text('Edit'),
-                      ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20, color: Colors.grey),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
                       if (onDelete != null)
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Delete', style: TextStyle(color: Colors.red)),
-                      ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 20, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
                     ],
                     onSelected: (value) {
                       if (value == 'edit' && onEdit != null) onEdit!();
