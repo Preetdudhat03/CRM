@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
 import '../../providers/auth_provider.dart';
+import '../../services/storage_service.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -10,9 +12,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
-
-import 'dart:io';
-import '../../services/storage_service.dart';
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
