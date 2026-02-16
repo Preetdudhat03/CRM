@@ -5,26 +5,31 @@ import 'package:flutter/material.dart';
 import 'add_edit_contact_screen.dart';
 import '../../models/contact_model.dart';
 
-class ContactDetailScreen extends StatelessWidget {
+import '../../core/services/permission_service.dart';
+import '../../providers/auth_provider.dart';
+
+class ContactDetailScreen extends ConsumerWidget {
   final ContactModel contact;
 
   const ContactDetailScreen({super.key, required this.contact});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final canEdit = PermissionService.canEditContacts(user);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(contact.name),
         actions: [
-          // We need a Consumer here to access the provider ref
+          // Watch the specific contact to update UI when provider updates
+          // BUT we are in a stateless widget inside a list, watching the whole list is inefficient.
+          // However, since we are inside detail screen, we can just use the passed contact or
+          // rebuild the widget when the list updates.
+          // Simple hack: We just toggle. The parent screen (ContactsScreen) needs to pass updated object if we go back.
+          // For detail screen to reflect change LIVE, we should query provider by ID.
           Consumer(
             builder: (context, ref, child) {
-              // Watch the specific contact to update UI when provider updates
-              // BUT we are in a stateless widget inside a list, watching the whole list is inefficient.
-              // However, since we are inside detail screen, we can just use the passed contact or
-              // rebuild the widget when the list updates.
-              // Simple hack: We just toggle. The parent screen (ContactsScreen) needs to pass updated object if we go back.
-              // For detail screen to reflect change LIVE, we should query provider by ID.
               final contactsAsync = ref.watch(contactsProvider);
               final updatedContact = contactsAsync.value?.firstWhere((c) => c.id == contact.id, orElse: () => contact) ?? contact;
 
@@ -37,7 +42,7 @@ class ContactDetailScreen extends StatelessWidget {
                   ref.read(contactsProvider.notifier).toggleFavorite(contact.id, updatedContact.isFavorite);
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                     SnackBar(
                       content: Text(updatedContact.isFavorite ? 'Removed from favorites' : 'Added to favorites'),
                       duration: const Duration(seconds: 1),
                     ),
@@ -46,17 +51,18 @@ class ContactDetailScreen extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddEditContactScreen(contact: contact),
-                ),
-              );
-            },
-          ),
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditContactScreen(contact: contact),
+                  ),
+                );
+              },
+            ),
         ],
       ),
       body: SingleChildScrollView(

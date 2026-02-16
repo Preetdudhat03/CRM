@@ -14,14 +14,15 @@ import 'widgets/recent_activity_widget.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../main_layout_screen.dart';
 
+import '../../core/services/permission_service.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canViewAnalytics = permissions.contains(Permission.viewAnalytics);
+    final canViewAnalytics = PermissionService.canViewAnalytics(user);
 
     final contactStats = ref.watch(contactStatsProvider);
     final dealStats = ref.watch(dealStatsProvider);

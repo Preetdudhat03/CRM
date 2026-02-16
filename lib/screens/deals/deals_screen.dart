@@ -9,16 +9,18 @@ import 'widgets/deal_card.dart';
 import 'add_edit_deal_screen.dart';
 import 'deal_detail_screen.dart';
 
+import '../../core/services/permission_service.dart';
+
 class DealsScreen extends ConsumerWidget {
   const DealsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dealsAsync = ref.watch(filteredDealsProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canCreate = permissions.contains(Permission.createDeals);
-    final canEdit = permissions.contains(Permission.editDeals);
-    final canDelete = permissions.contains(Permission.deleteDeals);
+    final user = ref.watch(currentUserProvider);
+    final canCreate = PermissionService.canCreateDeals(user);
+    final canEdit = PermissionService.canEditDeals(user);
+    final canDelete = PermissionService.canDeleteDeals(user);
 
     return Scaffold(
       appBar: AppBar(

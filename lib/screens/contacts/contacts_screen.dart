@@ -9,16 +9,18 @@ import 'widgets/contact_card.dart';
 import 'add_edit_contact_screen.dart';
 import 'contact_detail_screen.dart';
 
+import '../../core/services/permission_service.dart';
+
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contactsAsync = ref.watch(filteredContactsProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canCreate = permissions.contains(Permission.createContacts);
-    final canEdit = permissions.contains(Permission.editContacts);
-    final canDelete = permissions.contains(Permission.deleteContacts);
+    final user = ref.watch(currentUserProvider);
+    final canCreate = PermissionService.canCreateContacts(user);
+    final canEdit = PermissionService.canEditContacts(user);
+    final canDelete = PermissionService.canDeleteContacts(user);
 
     return Scaffold(
       appBar: AppBar(

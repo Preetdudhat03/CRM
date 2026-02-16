@@ -9,16 +9,18 @@ import 'widgets/lead_card.dart';
 import 'add_edit_lead_screen.dart';
 import 'lead_detail_screen.dart';
 
+import '../../core/services/permission_service.dart';
+
 class LeadsScreen extends ConsumerWidget {
   const LeadsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leadsAsync = ref.watch(filteredLeadsProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canCreate = permissions.contains(Permission.createLeads);
-    final canEdit = permissions.contains(Permission.editLeads);
-    final canDelete = permissions.contains(Permission.deleteLeads);
+    final user = ref.watch(currentUserProvider);
+    final canCreate = PermissionService.canCreateLeads(user);
+    final canEdit = PermissionService.canEditLeads(user);
+    final canDelete = PermissionService.canDeleteLeads(user);
 
     return Scaffold(
       appBar: AppBar(

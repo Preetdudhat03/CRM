@@ -9,16 +9,18 @@ import 'widgets/task_card.dart';
 import 'add_edit_task_screen.dart';
 import 'task_detail_screen.dart';
 
+import '../../core/services/permission_service.dart';
+
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(filteredTasksProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canCreate = permissions.contains(Permission.createTasks);
-    final canEdit = permissions.contains(Permission.editTasks);
-    final canDelete = permissions.contains(Permission.deleteTasks);
+    final user = ref.watch(currentUserProvider);
+    final canCreate = PermissionService.canCreateTasks(user);
+    final canEdit = PermissionService.canEditTasks(user);
+    final canDelete = PermissionService.canDeleteTasks(user);
 
     return Scaffold(
       appBar: AppBar(

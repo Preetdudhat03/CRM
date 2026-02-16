@@ -9,6 +9,7 @@ import 'user_management/user_management_screen.dart';
 import 'profile_screen.dart';
 import 'roles_permissions_screen.dart';
 import '../../providers/theme_provider.dart';
+import '../../core/services/permission_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,8 +17,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final permissions = ref.watch(userPermissionsProvider);
-    final canManageUsers = permissions.contains(Permission.manageUsers);
+    // final permissions = ref.watch(userPermissionsProvider); // Unused
+    final canManageUsers = PermissionService.canManageUsers(user);
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
