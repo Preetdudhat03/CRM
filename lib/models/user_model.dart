@@ -8,6 +8,7 @@ class UserModel {
   final String email;
   final Role role;
   final String? avatarUrl;
+  final List<Permission>? customPermissions;
 
   const UserModel({
     required this.id,
@@ -15,10 +16,14 @@ class UserModel {
     required this.email,
     required this.role,
     this.avatarUrl,
+    this.customPermissions,
   });
 
-  // Check if user has a specific permission based on their role
+  // Check if user has a specific permission based on their role or custom permissions
   bool hasPermission(Permission permission) {
+    if (customPermissions != null) {
+      return customPermissions!.contains(permission);
+    }
     return role.permissions.contains(permission);
   }
 
@@ -29,6 +34,7 @@ class UserModel {
     String? email,
     Role? role,
     String? avatarUrl,
+    List<Permission>? customPermissions,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -36,6 +42,7 @@ class UserModel {
       email: email ?? this.email,
       role: role ?? this.role,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      customPermissions: customPermissions ?? this.customPermissions,
     );
   }
 }

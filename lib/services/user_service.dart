@@ -1,5 +1,6 @@
 import '../models/user_model.dart';
 import '../models/role_model.dart';
+import '../models/permission_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserService {
@@ -23,6 +24,9 @@ class UserService {
             orElse: () => Role.viewer,
           ),
           avatarUrl: json['avatar_url'],
+          customPermissions: (json['custom_permissions'] as List?)
+              ?.map((e) => Permission.values.firstWhere((p) => p.name == e))
+              .toList(),
         );
       }).toList();
     } catch (e) {
@@ -69,6 +73,7 @@ class UserService {
           .update({
             'name': user.name,
             'role': user.role.name,
+            'custom_permissions': user.customPermissions?.map((e) => e.name).toList(),
           })
           .eq('id', user.id)
           .select()
@@ -83,6 +88,9 @@ class UserService {
           orElse: () => Role.viewer,
         ),
         avatarUrl: response['avatar_url'],
+        customPermissions: (response['custom_permissions'] as List?)
+            ?.map((e) => Permission.values.firstWhere((p) => p.name == e))
+            .toList(),
       );
     } catch (e) {
       // If direct update fails (e.g. RLS), try via Admin RPC
@@ -91,6 +99,7 @@ class UserService {
           'target_user_id': user.id,
           'new_name': user.name,
           'new_role': user.role.name,
+          'new_custom_permissions': user.customPermissions?.map((e) => e.name).toList(),
         });
 
         // Use the returned data or the input user if RPC is void/bool
@@ -106,6 +115,9 @@ class UserService {
             orElse: () => Role.viewer,
           ),
           avatarUrl: data['avatar_url'] ?? user.avatarUrl,
+          customPermissions: (data['custom_permissions'] as List?)
+              ?.map((e) => Permission.values.firstWhere((p) => p.name == e))
+              .toList(),
         );
       } catch (rpcError) {
         // If both fail, throw the original error
