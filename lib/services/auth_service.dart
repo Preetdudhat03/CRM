@@ -162,6 +162,14 @@ class AuthService {
       ),
     );
   }
+  Future<void> updatePassword(String newPassword) async {
+    await _supabase.auth.updateUser(
+      UserAttributes(
+        password: newPassword,
+      ),
+    );
+  }
+
   // Check connectivity by making a lightweight request
   Future<bool> checkConnection() async {
     try {

@@ -23,6 +23,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   File? _imageFile;
   bool _isLoading = false;
   
+  String? _password;
+  String? _confirmPassword;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +67,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         await ref.read(currentUserProvider.notifier).updateProfile(updatedUser);
 
+        // Update password if provided
+        if (_password != null && _password!.isNotEmpty) {
+           await ref.read(currentUserProvider.notifier).updatePassword(_password!);
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile updated successfully')),
@@ -90,135 +98,196 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FadeInSlide(
-                child: Center(
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Theme.of(context).primaryColor,
-                            backgroundImage: _imageFile != null
-                                ? FileImage(_imageFile!)
-                                : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
-                                    ? NetworkImage(_avatarUrl!) as ImageProvider
-                                    : null,
-                            child: (_imageFile == null && (_avatarUrl == null || _avatarUrl!.isEmpty))
-                                ? Text(
-                                    _name.isNotEmpty
-                                        ? _name.substring(0, 1).toUpperCase()
-                                        : 'U',
-                                    style: const TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FadeInSlide(
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        GestureDetector(
                           onTap: _pickImage,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Theme.of(context).scaffoldBackgroundColor,
+                                color: Theme.of(context).primaryColor,
                                 width: 2,
                               ),
                             ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              size: 20,
-                              color: Colors.white,
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              backgroundImage: _imageFile != null
+                                  ? FileImage(_imageFile!)
+                                  : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
+                                      ? NetworkImage(_avatarUrl!) as ImageProvider
+                                      : null,
+                              child: (_imageFile == null && (_avatarUrl == null || _avatarUrl!.isEmpty))
+                                  ? Text(
+                                      _name.isNotEmpty
+                                          ? _name.substring(0, 1).toUpperCase()
+                                          : 'U',
+                                      style: const TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              FadeInSlide(
-                delay: 0.1,
-                child: TextFormField(
-                  initialValue: _name,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                  ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter your name' : null,
-                  onSaved: (value) => _name = value!,
-                ),
-              ),
-              const SizedBox(height: 20),
-              
-              FadeInSlide(
-                delay: 0.2,
-                child: TextFormField(
-                  initialValue: _email,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              
-              FadeInSlide(
-                delay: 0.3,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20, 
-                          width: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2)
-                        )
-                      : const Text(
-                          'Save Changes',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Theme.of(context).scaffoldBackgroundColor,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 32),
+                
+                FadeInSlide(
+                  delay: 0.1,
+                  child: TextFormField(
+                    initialValue: _name,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      prefixIcon: Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter your name' : null,
+                    onSaved: (value) => _name = value!,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                FadeInSlide(
+                  delay: 0.2,
+                  child: TextFormField(
+                    initialValue: _email,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                const Divider(),
+                const SizedBox(height: 16),
+                Text(
+                  'Change Password',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+
+                FadeInSlide(
+                  delay: 0.3,
+                  child: TextFormField(
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'New Password',
+                      prefixIcon: Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      helperText: 'Leave empty to keep current password',
+                    ),
+                    validator: (value) {
+                       if (value != null && value.isNotEmpty && value.length < 6) {
+                         return 'Password must be at least 6 characters';
+                       }
+                       return null;
+                    },
+                    onChanged: (value) => _password = value,
+                    onSaved: (value) => _password = value,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                FadeInSlide(
+                  delay: 0.4,
+                  child: TextFormField(
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm New Password',
+                      prefixIcon: Icon(Icons.lock_reset),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                    validator: (value) {
+                       if (_password != null && _password!.isNotEmpty) {
+                         if (value == null || value.isEmpty) {
+                           return 'Please confirm password';
+                         }
+                         if (value != _password) {
+                           return 'Passwords do not match';
+                         }
+                       }
+                       return null;
+                    },
+                    onSaved: (value) => _confirmPassword = value,
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+                
+                FadeInSlide(
+                  delay: 0.5,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20, 
+                            width: 20, 
+                            child: CircularProgressIndicator(strokeWidth: 2)
+                          )
+                        : const Text(
+                            'Save Changes',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
             ],
           ),
         ),

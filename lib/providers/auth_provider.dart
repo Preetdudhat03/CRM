@@ -49,4 +49,7 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   Future<void> updateProfile(UserModel user) async {
     state = await _authService.updateProfile(user);
   }
+  Future<void> updatePassword(String newPassword) async {
+    await _authService.updatePassword(newPassword);
+  }
 }
