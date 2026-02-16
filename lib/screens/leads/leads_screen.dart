@@ -71,7 +71,7 @@ class LeadsScreen extends ConsumerWidget {
                     ),
                   ),
                 )
-               GridView.builder(
+              : GridView.builder(
                 padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16, top: 16),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 600,
