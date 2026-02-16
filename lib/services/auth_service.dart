@@ -38,6 +38,7 @@ class AuthService {
           name: profile['name'] ?? user.userMetadata?['name'] ?? email.split('@')[0],
           email: profile['email'] ?? email,
           role: role,
+          avatarUrl: profile['avatar_url'],
         );
       } catch (e) {
         // Fallback
@@ -95,6 +96,7 @@ class AuthService {
         name: profile['name'] ?? user.email?.split('@')[0] ?? 'User',
         email: profile['email'] ?? user.email ?? '',
         role: role,
+        avatarUrl: profile['avatar_url'],
       );
     } catch (e) {
       // Fallback to metadata if profile fetch fails (e.g. table issue)
@@ -135,6 +137,29 @@ class AuthService {
       name: name,
       email: email,
       role: role,
+    );
+  }
+
+  Future<UserModel> updateProfile(UserModel user) async {
+    final response = await _supabase
+        .from('profiles')
+        .update({
+          'name': user.name,
+          'avatar_url': user.avatarUrl,
+          // 'email': user.email, // Usually not updated here directly
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+    final roleString = response['role'] as String? ?? 'viewer';
+    return user.copyWith(
+      name: response['name'],
+      avatarUrl: response['avatar_url'],
+      role: Role.values.firstWhere(
+        (e) => e.name == roleString,
+        orElse: () => Role.viewer,
+      ),
     );
   }
   // Check connectivity by making a lightweight request

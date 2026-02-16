@@ -45,4 +45,8 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   Future<void> refreshUser() async {
     state = await _authService.getCurrentUser();
   }
+
+  Future<void> updateProfile(UserModel user) async {
+    state = await _authService.updateProfile(user);
+  }
 }

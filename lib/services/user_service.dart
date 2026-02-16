@@ -22,6 +22,7 @@ class UserService {
             (e) => e.name == (json['role'] ?? 'viewer'),
             orElse: () => Role.viewer,
           ),
+          avatarUrl: json['avatar_url'],
         );
       }).toList();
     } catch (e) {
@@ -81,6 +82,7 @@ class UserService {
           (e) => e.name == response['role'],
           orElse: () => Role.viewer,
         ),
+        avatarUrl: response['avatar_url'],
       );
     } catch (e) {
       // If direct update fails (e.g. RLS), try via Admin RPC
@@ -103,6 +105,7 @@ class UserService {
             (e) => e.name == (data['role'] ?? user.role.name),
             orElse: () => Role.viewer,
           ),
+          avatarUrl: data['avatar_url'] ?? user.avatarUrl,
         );
       } catch (rpcError) {
         // If both fail, throw the original error
