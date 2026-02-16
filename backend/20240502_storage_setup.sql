@@ -10,6 +10,7 @@ ON CONFLICT (id) DO NOTHING;
 -- 2. Set up RLS Policies for Storage
 
 -- Allow public access to view avatars
+DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
 CREATE POLICY "Avatar images are publicly accessible"
 ON storage.objects FOR SELECT
 USING ( bucket_id = 'avatars' );
@@ -18,6 +19,7 @@ USING ( bucket_id = 'avatars' );
 -- We'll use a folder structure: avatars/{user_id}/filename
 -- Or just random filenames.
 -- For simplicity, let's allow authenticated users to upload to 'avatars' bucket.
+DROP POLICY IF EXISTS "Authenticated users can upload avatars" ON storage.objects;
 CREATE POLICY "Authenticated users can upload avatars"
 ON storage.objects FOR INSERT
 WITH CHECK (
@@ -28,6 +30,7 @@ WITH CHECK (
 -- Allow users to update/delete their own avatars
 -- This requires checking that the owner matches auth.uid()
 -- Supabase storage stores owner_id which matches auth.users.id
+DROP POLICY IF EXISTS "Users can update own avatars" ON storage.objects;
 CREATE POLICY "Users can update own avatars"
 ON storage.objects FOR UPDATE
 USING (
@@ -35,6 +38,7 @@ USING (
   auth.uid() = owner
 );
 
+DROP POLICY IF EXISTS "Users can delete own avatars" ON storage.objects;
 CREATE POLICY "Users can delete own avatars"
 ON storage.objects FOR DELETE
 USING (

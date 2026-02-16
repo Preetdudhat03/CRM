@@ -37,11 +37,31 @@ class StorageService {
       
       final storagePath = '$path.$fileExt'; // e.g. users/123.jpg
 
+      String mimeType;
+      switch (fileExt) {
+        case 'jpg':
+        case 'jpeg':
+          mimeType = 'image/jpeg';
+          break;
+        case 'png':
+          mimeType = 'image/png';
+          break;
+        case 'webp':
+          mimeType = 'image/webp';
+          break;
+        default:
+          mimeType = 'application/octet-stream';
+      }
+
       // Upload file (upsert: true overwrites existing file at same path)
       await _supabase.storage.from('avatars').upload(
             storagePath,
             file,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+            fileOptions: FileOptions(
+              cacheControl: '3600',
+              upsert: true,
+              contentType: mimeType,
+            ),
           );
 
       // Get public URL
