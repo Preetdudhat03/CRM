@@ -1,26 +1,32 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/lead_model.dart';
+import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
 
 // Service Provider
 final leadServiceProvider = Provider<LeadService>((ref) => LeadService());
+
+final leadRepositoryProvider = Provider<LeadRepository>((ref) {
+  return LeadRepository(ref.watch(leadServiceProvider));
+});
+
 
 // State Provider for Search Query
 final leadSearchQueryProvider = StateProvider<String>((ref) => '');
 
 // State Notifier for Lead List management
 class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
-  final LeadService _leadService;
+  final LeadRepository _repository;
 
-  LeadNotifier(this._leadService) : super(const AsyncValue.loading()) {
+  LeadNotifier(this._repository) : super(const AsyncValue.loading()) {
     getLeads();
   }
 
   Future<void> getLeads() async {
     try {
       state = const AsyncValue.loading();
-      final leads = await _leadService.getLeads();
+      final leads = await _repository.getLeads();
       state = AsyncValue.data(leads);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -29,7 +35,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
   Future<void> addLead(LeadModel lead) async {
     try {
-      final newLead = await _leadService.addLead(lead);
+      final newLead = await _repository.addLead(lead);
       state.whenData((leads) {
         state = AsyncValue.data([...leads, newLead]);
       });
@@ -40,7 +46,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
   Future<void> updateLead(LeadModel lead) async {
     try {
-      await _leadService.updateLead(lead);
+      await _repository.updateLead(lead);
       state.whenData((leads) {
         state = AsyncValue.data([
           for (final l in leads)
@@ -54,7 +60,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
   Future<void> deleteLead(String id) async {
     try {
-      await _leadService.deleteLead(id);
+      await _repository.deleteLead(id);
       state.whenData((leads) {
         state = AsyncValue.data([
           for (final l in leads)
@@ -70,7 +76,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 // Leads List Provider
 final leadsProvider =
     StateNotifierProvider<LeadNotifier, AsyncValue<List<LeadModel>>>((ref) {
-  return LeadNotifier(ref.watch(leadServiceProvider));
+  return LeadNotifier(ref.watch(leadRepositoryProvider));
 });
 
 // Filtered Leads Provider

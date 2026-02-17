@@ -1,26 +1,32 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/deal_model.dart';
+import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
 
 // Service Provider
 final dealServiceProvider = Provider<DealService>((ref) => DealService());
+
+final dealRepositoryProvider = Provider<DealRepository>((ref) {
+  return DealRepository(ref.watch(dealServiceProvider));
+});
+
 
 // State Provider for Search Query
 final dealSearchQueryProvider = StateProvider<String>((ref) => '');
 
 // State Notifier for Deal List management
 class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
-  final DealService _dealService;
+  final DealRepository _repository;
 
-  DealNotifier(this._dealService) : super(const AsyncValue.loading()) {
+  DealNotifier(this._repository) : super(const AsyncValue.loading()) {
     getDeals();
   }
 
   Future<void> getDeals() async {
     try {
       state = const AsyncValue.loading();
-      final deals = await _dealService.getDeals();
+      final deals = await _repository.getDeals();
       state = AsyncValue.data(deals);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -29,7 +35,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 
   Future<void> addDeal(DealModel deal) async {
     try {
-      final newDeal = await _dealService.addDeal(deal);
+      final newDeal = await _repository.addDeal(deal);
       state.whenData((deals) {
         state = AsyncValue.data([...deals, newDeal]);
       });
@@ -40,7 +46,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 
   Future<void> updateDeal(DealModel deal) async {
     try {
-      final updatedDeal = await _dealService.updateDeal(deal);
+      final updatedDeal = await _repository.updateDeal(deal);
       state.whenData((deals) {
         state = AsyncValue.data([
           for (final d in deals)
@@ -54,7 +60,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 
   Future<void> deleteDeal(String id) async {
     try {
-      await _dealService.deleteDeal(id);
+      await _repository.deleteDeal(id);
       state.whenData((deals) {
         state = AsyncValue.data([
           for (final d in deals)
@@ -70,7 +76,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 // Deals List Provider
 final dealsProvider =
     StateNotifierProvider<DealNotifier, AsyncValue<List<DealModel>>>((ref) {
-  return DealNotifier(ref.watch(dealServiceProvider));
+  return DealNotifier(ref.watch(dealRepositoryProvider));
 });
 
 // Filtered Deals Provider

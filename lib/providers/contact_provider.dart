@@ -1,26 +1,31 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/contact_model.dart';
+import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
 
 // Service Provider
 final contactServiceProvider = Provider<ContactService>((ref) => ContactService());
+
+final contactRepositoryProvider = Provider<ContactRepository>((ref) {
+  return ContactRepository(ref.watch(contactServiceProvider));
+});
 
 // State Provider for Search Query
 final contactSearchQueryProvider = StateProvider<String>((ref) => '');
 
 // State Notifier for Contact List management
 class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
-  final ContactService _contactService;
+  final ContactRepository _repository;
 
-  ContactNotifier(this._contactService) : super(const AsyncValue.loading()) {
+  ContactNotifier(this._repository) : super(const AsyncValue.loading()) {
     getContacts();
   }
 
   Future<void> getContacts() async {
     try {
       state = const AsyncValue.loading();
-      final contacts = await _contactService.getContacts();
+      final contacts = await _repository.getContacts();
       state = AsyncValue.data(contacts);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -29,7 +34,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> addContact(ContactModel contact) async {
     try {
-      final newContact = await _contactService.addContact(contact);
+      final newContact = await _repository.addContact(contact);
       state.whenData((contacts) {
         state = AsyncValue.data([...contacts, newContact]);
       });
@@ -41,7 +46,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> updateContact(ContactModel contact) async {
     try {
-      await _contactService.updateContact(contact);
+      await _repository.updateContact(contact);
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
@@ -55,7 +60,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> deleteContact(String id) async {
     try {
-      await _contactService.deleteContact(id);
+      await _repository.deleteContact(id);
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
@@ -69,7 +74,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> toggleFavorite(String id, bool currentStatus) async {
     try {
-      await _contactService.toggleFavorite(id, currentStatus);
+      await _repository.toggleFavorite(id, currentStatus);
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
@@ -85,7 +90,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 // Contacts List Provider
 final contactsProvider =
     StateNotifierProvider<ContactNotifier, AsyncValue<List<ContactModel>>>((ref) {
-  return ContactNotifier(ref.watch(contactServiceProvider));
+  return ContactNotifier(ref.watch(contactRepositoryProvider));
 });
 
 // Filtered Contacts Provider
