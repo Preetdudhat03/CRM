@@ -69,7 +69,7 @@ class StorageService {
       
       // Add timestamp to foil caching if needed, though getPublicUrl usually returns clean URL.
       // For immediate refresh, UI might need to handle cache busting.
-      return publicUrl;
+      return '$publicUrl?t=${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
       print('Error uploading avatar: $e');
       rethrow;

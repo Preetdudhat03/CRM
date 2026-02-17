@@ -32,9 +32,18 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            const CircleAvatar(
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=preet'),
+            CircleAvatar(
+              backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                  ? NetworkImage(user.avatarUrl!)
+                  : null,
               radius: 18,
+              backgroundColor: Theme.of(context).primaryColor,
+              child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                  ? Text(
+                      (user?.name ?? 'G').substring(0, 1).toUpperCase(),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    )
+                  : null,
             ),
             const SizedBox(width: 12),
             Column(

@@ -50,10 +50,15 @@ class UserManagementScreen extends ConsumerWidget {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           leading: CircleAvatar(
                             backgroundColor: Theme.of(context).primaryColor,
-                            child: Text(
-                              user.name.substring(0, 1).toUpperCase(),
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
+                            backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                                ? NetworkImage(user.avatarUrl!)
+                                : null,
+                            child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
+                                ? Text(
+                                    user.name.substring(0, 1).toUpperCase(),
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  )
+                                : null,
                           ),
                           title: Text(
                             user.name,

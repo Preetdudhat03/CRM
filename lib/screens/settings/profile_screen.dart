@@ -60,6 +60,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (_imageFile != null) {
           final path = 'users/${currentUser.id}'; // Overwrite existing
           newAvatarUrl = await _storageService.uploadAvatar(_imageFile!, path);
+        } else if (_avatarUrl == null) {
+          // If avatarUrl is null (deleted), we want to update the profile to remove it
+          newAvatarUrl = '';
         }
 
         // Update profile
@@ -166,6 +169,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                         ),
+                         if (_imageFile != null || (_avatarUrl != null && _avatarUrl!.isNotEmpty))
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _imageFile = null;
+                                  _avatarUrl = null;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ],
                     ),
                   ),
