@@ -26,6 +26,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _password;
   String? _confirmPassword;
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -217,11 +220,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 FadeInSlide(
                   delay: 0.3,
                   child: TextFormField(
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
                       labelText: 'New Password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                       helperText: 'Leave empty to keep current password',
@@ -241,11 +254,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 FadeInSlide(
                   delay: 0.4,
                   child: TextFormField(
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscureConfirmPassword,
+                    decoration: InputDecoration(
                       labelText: 'Confirm New Password',
-                      prefixIcon: Icon(Icons.lock_reset),
-                      border: OutlineInputBorder(
+                      prefixIcon: const Icon(Icons.lock_reset),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                     ),
@@ -292,6 +315,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
