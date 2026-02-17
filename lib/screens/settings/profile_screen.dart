@@ -196,6 +196,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   color: Colors.white,
                                 ),
                               ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
