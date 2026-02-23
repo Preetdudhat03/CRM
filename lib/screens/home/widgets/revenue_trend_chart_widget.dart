@@ -118,7 +118,7 @@ class RevenueTrendChart extends ConsumerWidget {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 45,
+                          reservedSize: 55,
                           getTitlesWidget: (value, meta) {
                             if (value == 0) return const Text('');
                             return Text(
