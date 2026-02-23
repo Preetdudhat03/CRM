@@ -4,6 +4,8 @@ import '../models/contact_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
 import 'dashboard_provider.dart';
+import 'auth_provider.dart';
+import 'notification_provider.dart';
 
 // Service Provider
 final contactServiceProvider = Provider<ContactService>((ref) => ContactService());
@@ -18,8 +20,9 @@ final contactSearchQueryProvider = StateProvider<String>((ref) => '');
 // State Notifier for Contact List management
 class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   final ContactRepository _repository;
+  final Ref _ref;
 
-  ContactNotifier(this._repository) : super(const AsyncValue.loading()) {
+  ContactNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     getContacts();
   }
 
@@ -39,6 +42,15 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       state.whenData((contacts) {
         state = AsyncValue.data([...contacts, newContact]);
       });
+      
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'New Contact Created',
+        '$userName added a new contact: ${newContact.name}',
+        relatedEntityId: newContact.id,
+        relatedEntityType: 'contact',
+      );
     } catch (e) {
       // Handle or propagate error
       rethrow;
@@ -91,7 +103,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 // Contacts List Provider
 final contactsProvider =
     StateNotifierProvider<ContactNotifier, AsyncValue<List<ContactModel>>>((ref) {
-  return ContactNotifier(ref.watch(contactRepositoryProvider));
+  return ContactNotifier(ref.watch(contactRepositoryProvider), ref);
 });
 
 // Filtered Contacts Provider
