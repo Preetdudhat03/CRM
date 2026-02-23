@@ -28,11 +28,17 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   }
 
   Future<void> addNotification(NotificationModel notification) async {
-    try {
-      await _repository.addNotification(notification);
+    // Optimistically update local state so the feeds work real-time even if Supabase isn't synced yet
+    if (state.hasValue) {
       state.whenData((notifications) {
         state = AsyncValue.data([notification, ...notifications]);
       });
+    } else {
+      state = AsyncValue.data([notification]);
+    }
+
+    try {
+      await _repository.addNotification(notification);
     } catch (e) {
       print('Failed to add notification: $e');
     }
