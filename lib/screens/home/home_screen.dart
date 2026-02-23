@@ -13,6 +13,8 @@ import '../../providers/lead_provider.dart';
 import 'widgets/recent_activity_widget.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../main_layout_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../../providers/notification_provider.dart';
 
 import '../../core/services/permission_service.dart';
 
@@ -27,6 +29,7 @@ class HomeScreen extends ConsumerWidget {
     final contactStats = ref.watch(contactStatsProvider);
     final dealStats = ref.watch(dealStatsProvider);
     final leadStats = ref.watch(leadStatsProvider);
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -62,9 +65,46 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 8),
         ],

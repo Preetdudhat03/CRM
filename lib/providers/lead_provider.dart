@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/lead_model.dart';
 import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
+import 'auth_provider.dart';
+import 'notification_provider.dart';
 
 // Service Provider
 final leadServiceProvider = Provider<LeadService>((ref) => LeadService());
@@ -18,8 +20,9 @@ final leadSearchQueryProvider = StateProvider<String>((ref) => '');
 // State Notifier for Lead List management
 class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   final LeadRepository _repository;
+  final Ref _ref;
 
-  LeadNotifier(this._repository) : super(const AsyncValue.loading()) {
+  LeadNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     getLeads();
   }
 
@@ -39,6 +42,15 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       state.whenData((leads) {
         state = AsyncValue.data([...leads, newLead]);
       });
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'New Lead Added',
+        '$userName added a new lead: ${newLead.name}',
+        relatedEntityId: newLead.id,
+        relatedEntityType: 'lead',
+      );
     } catch (e) {
       rethrow;
     }
@@ -47,11 +59,28 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   Future<void> updateLead(LeadModel lead) async {
     try {
       await _repository.updateLead(lead);
+      
+      // Determine if assignedTo changed, or just a general update
+      bool isAssigned = lead.assignedTo.isNotEmpty;
+
       state.whenData((leads) {
+        final existingLead = leads.firstWhere((l) => l.id == lead.id, orElse: () => lead);
+        
         state = AsyncValue.data([
           for (final l in leads)
             if (l.id == lead.id) lead else l
         ]);
+
+        if (existingLead.assignedTo != lead.assignedTo && isAssigned) {
+          final currentUser = _ref.read(currentUserProvider);
+          final userName = currentUser?.name ?? 'Someone';
+          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+            'Lead Assigned',
+            '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
+            relatedEntityId: lead.id,
+            relatedEntityType: 'lead',
+          );
+        }
       });
     } catch (e) {
       rethrow;
@@ -76,7 +105,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 // Leads List Provider
 final leadsProvider =
     StateNotifierProvider<LeadNotifier, AsyncValue<List<LeadModel>>>((ref) {
-  return LeadNotifier(ref.watch(leadRepositoryProvider));
+  return LeadNotifier(ref.watch(leadRepositoryProvider), ref);
 });
 
 // Filtered Leads Provider

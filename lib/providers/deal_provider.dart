@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/deal_model.dart';
 import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
+import 'auth_provider.dart';
+import 'notification_provider.dart';
 
 // Service Provider
 final dealServiceProvider = Provider<DealService>((ref) => DealService());
@@ -18,8 +20,9 @@ final dealSearchQueryProvider = StateProvider<String>((ref) => '');
 // State Notifier for Deal List management
 class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
   final DealRepository _repository;
+  final Ref _ref;
 
-  DealNotifier(this._repository) : super(const AsyncValue.loading()) {
+  DealNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     getDeals();
   }
 
@@ -39,6 +42,15 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       state.whenData((deals) {
         state = AsyncValue.data([...deals, newDeal]);
       });
+      
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'New Deal Created',
+        '$userName added a new deal: ${newDeal.title}',
+        relatedEntityId: newDeal.id,
+        relatedEntityType: 'deal',
+      );
     } catch (e) {
       rethrow;
     }
@@ -48,10 +60,23 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     try {
       final updatedDeal = await _repository.updateDeal(deal);
       state.whenData((deals) {
+        final existingDeal = deals.firstWhere((d) => d.id == deal.id, orElse: () => deal);
+        
         state = AsyncValue.data([
           for (final d in deals)
             if (d.id == deal.id) updatedDeal else d
         ]);
+
+        if (existingDeal.stage != deal.stage) {
+          final currentUser = _ref.read(currentUserProvider);
+          final userName = currentUser?.name ?? 'Someone';
+          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+            'Deal Stage Updated',
+            '$userName moved the deal ${deal.title} to ${deal.stage.label}',
+            relatedEntityId: deal.id,
+            relatedEntityType: 'deal',
+          );
+        }
       });
     } catch (e) {
       // Handle error
@@ -76,7 +101,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 // Deals List Provider
 final dealsProvider =
     StateNotifierProvider<DealNotifier, AsyncValue<List<DealModel>>>((ref) {
-  return DealNotifier(ref.watch(dealRepositoryProvider));
+  return DealNotifier(ref.watch(dealRepositoryProvider), ref);
 });
 
 // Filtered Deals Provider
