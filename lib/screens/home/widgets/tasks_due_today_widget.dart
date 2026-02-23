@@ -61,7 +61,10 @@ class TasksDueTodayWidget extends ConsumerWidget {
               final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
               final dueTodayOrOverdue = tasks.where((t) {
-                if (t.status == TaskStatus.completed) return false;
+                if (t.status == TaskStatus.completed) {
+                  // Only show completed tasks if they were due today
+                   return t.dueDate.isAfter(todayStart) && t.dueDate.isBefore(todayEnd);
+                }
                 // is overdue or due today
                 return t.dueDate.isBefore(todayEnd);
               }).toList();
@@ -112,7 +115,11 @@ class TasksDueTodayWidget extends ConsumerWidget {
                     ),
                     title: Text(
                       task.title,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                         fontWeight: FontWeight.w600,
+                         decoration: task.status == TaskStatus.completed ? TextDecoration.lineThrough : null,
+                         color: task.status == TaskStatus.completed ? Colors.grey : null,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -128,9 +135,9 @@ class TasksDueTodayWidget extends ConsumerWidget {
                     trailing: Checkbox(
                       value: task.status == TaskStatus.completed,
                       onChanged: (val) {
-                        if (val == true) {
+                        if (val != null) {
                           ref.read(tasksProvider.notifier).updateTask(
-                            task.copyWith(status: TaskStatus.completed),
+                            task.copyWith(status: val ? TaskStatus.completed : TaskStatus.pending),
                           );
                         }
                       },
