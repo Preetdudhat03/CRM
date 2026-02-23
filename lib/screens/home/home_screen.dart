@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/permission_model.dart';
 import '../../models/role_model.dart';
 import '../../models/user_model.dart';
+import '../../models/deal_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/dashboard_card.dart';

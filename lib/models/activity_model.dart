@@ -16,6 +16,7 @@ class ActivityModel {
   final ActivityType type;
   final String? relatedEntityId;
   final String? relatedEntityType; // 'contact', 'lead', 'deal', 'task'
+  final String? performedBy; // Name of person who did this
   final DateTime createdAt;
 
   const ActivityModel({
@@ -26,6 +27,7 @@ class ActivityModel {
     required this.type,
     this.relatedEntityId,
     this.relatedEntityType,
+    this.performedBy,
     required this.createdAt,
   });
 
@@ -41,6 +43,7 @@ class ActivityModel {
       ),
       relatedEntityId: json['related_entity_id'],
       relatedEntityType: json['related_entity_type'],
+      performedBy: json['performed_by'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -54,6 +57,7 @@ class ActivityModel {
       'type': type.name,
       'related_entity_id': relatedEntityId,
       'related_entity_type': relatedEntityType,
+      'performed_by': performedBy,
       'created_at': createdAt.toIso8601String(),
     };
   }

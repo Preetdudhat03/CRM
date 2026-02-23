@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../providers/activity_provider.dart';
-import '../../../../models/activity_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../providers/notification_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../../utils/error_handler.dart';
 
@@ -10,7 +10,7 @@ class RecentActivityList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activityAsync = ref.watch(recentActivityProvider);
+    final activityAsync = ref.watch(notificationsProvider);
 
     return activityAsync.when(
       data: (activities) {
@@ -22,26 +22,38 @@ class RecentActivityList extends ConsumerWidget {
             ),
           );
         }
+        
+        // Take top 5 recent activities for the dashboard
+        final recentActivities = activities.take(5).toList();
+
         return ListView.separated(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: activities.length,
+          itemCount: recentActivities.length,
           separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (context, index) {
-            final item = activities[index];
+            final item = recentActivities[index];
+            final typeStr = item.relatedEntityType ?? 'other';
+            
             return ListTile(
               leading: CircleAvatar(
-                backgroundColor: _getColorForType(item.type).withOpacity(0.1),
-                child: Icon(_getIconForType(item.type), color: _getColorForType(item.type), size: 20),
+                backgroundColor: _getColorForType(typeStr).withOpacity(0.1),
+                child: Icon(_getIconForType(typeStr), color: _getColorForType(typeStr), size: 20),
               ),
               title: Text(
                 item.title,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              subtitle: Text(item.description),
-              trailing: Text(
-                timeago.format(item.date),
-                style: Theme.of(context).textTheme.bodySmall,
+              subtitle: Text(item.message),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    timeago.format(item.date),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
             );
           },
@@ -52,31 +64,31 @@ class RecentActivityList extends ConsumerWidget {
     );
   }
 
-  Color _getColorForType(ActivityType type) {
+  Color _getColorForType(String type) {
     switch (type) {
-      case ActivityType.created:
+      case 'deal':
         return Colors.green;
-      case ActivityType.updated:
+      case 'task':
         return Colors.blue;
-      case ActivityType.deleted:
-        return Colors.red;
-      case ActivityType.completed:
+      case 'lead':
         return Colors.orange;
+      case 'contact':
+        return Colors.purple;
       default:
         return Colors.grey;
     }
   }
 
-  IconData _getIconForType(ActivityType type) {
+  IconData _getIconForType(String type) {
     switch (type) {
-      case ActivityType.created:
-        return Icons.add_circle_outline;
-      case ActivityType.updated:
-        return Icons.edit;
-      case ActivityType.deleted:
-        return Icons.delete_outline;
-      case ActivityType.completed:
+      case 'deal':
+        return Icons.attach_money;
+      case 'task':
         return Icons.check_circle_outline;
+      case 'lead':
+        return Icons.person_add_alt_1_outlined;
+      case 'contact':
+        return Icons.contacts_outlined;
       default:
         return Icons.info_outline;
     }
