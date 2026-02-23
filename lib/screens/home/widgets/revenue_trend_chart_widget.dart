@@ -77,8 +77,8 @@ class RevenueTrendChart extends ConsumerWidget {
                   index++;
                 });
 
-                // Adding 10% vertical padding so chart doesn't clip
-                maxRevenue = maxRevenue > 0 ? maxRevenue * 1.2 : 1000;
+                // Adding 20% vertical padding so chart doesn't clip with the ceiling and numbers don't overlay
+                maxRevenue = maxRevenue > 0 ? maxRevenue * 1.25 : 1000.0;
 
                 return LineChart(
                   LineChartData(
@@ -118,9 +118,10 @@ class RevenueTrendChart extends ConsumerWidget {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 55,
+                          reservedSize: 75,
+                          interval: maxRevenue > 0 ? maxRevenue / 4 : 250,
                           getTitlesWidget: (value, meta) {
-                            if (value == 0) return const Text('');
+                            if (value == 0 || value >= maxRevenue * 0.95) return const Text(''); // Hide the zero and absolute ceiling to prevent overlapping corners
                             return Text(
                               '\$${compactNumber(value)}',
                               style: Theme.of(context).textTheme.bodySmall,

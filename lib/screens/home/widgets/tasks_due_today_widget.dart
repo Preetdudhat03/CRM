@@ -144,7 +144,21 @@ class TasksDueTodayWidget extends ConsumerWidget {
               padding: EdgeInsets.all(24.0),
               child: CircularProgressIndicator(),
             )),
-            error: (error, __) => Center(child: Text('Error loading tasks: $error')),
+            error: (error, __) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 48, color: Colors.green.withOpacity(0.5)),
+                    const SizedBox(height: 16),
+                    Text(
+                      'You\'re all caught up for today!',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
