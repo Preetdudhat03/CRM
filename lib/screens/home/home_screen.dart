@@ -12,6 +12,7 @@ import '../../providers/deal_provider.dart';
 import '../../providers/lead_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import 'widgets/recent_activity_widget.dart';
+import 'widgets/pipeline_widget.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../main_layout_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -265,6 +266,28 @@ class HomeScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 32),
+              
+              // Deal Pipeline Horizontal Snapshot
+              FadeInSlide(
+                delay: 0.45,
+                child: dealStats.when(
+                  data: (stats) {
+                    final Map<DealStage, int>? pipeline = stats['pipeline'];
+                    if (pipeline == null || pipeline.isEmpty) return const SizedBox();
+                    
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PipelineWidget(pipelineData: pipeline),
+                        const SizedBox(height: 32),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, __) => Text('Error loading pipeline: $error'),
+                ),
+              ),
+
               FadeInSlide(
                 delay: 0.5,
                 child: Row(
