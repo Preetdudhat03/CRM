@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/contact_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
+import 'dashboard_provider.dart';
 
 // Service Provider
 final contactServiceProvider = Provider<ContactService>((ref) => ContactService());
@@ -108,18 +109,29 @@ final filteredContactsProvider = Provider<AsyncValue<List<ContactModel>>>((ref) 
   });
 });
 // Dashboard Stats Provider
-final contactStatsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
+final contactStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
   final contactsAsync = ref.watch(contactsProvider);
+  final period = ref.watch(dashboardPeriodProvider);
 
   return contactsAsync.whenData((contacts) {
     int totalContacts = contacts.length;
     int leads = contacts.where((c) => c.status == ContactStatus.lead).length;
     int customers = contacts.where((c) => c.status == ContactStatus.customer).length;
     
+    final currentPeriodContacts = contacts.where((c) => c.createdAt.isAfter(period.startDate)).length;
+    final previousPeriodContacts = contacts.where((c) => 
+      c.createdAt.isAfter(period.previousPeriodStartDate) && 
+      c.createdAt.isBefore(period.previousPeriodEndDate)
+    ).length;
+    
+    final trendData = calculateTrend(currentPeriodContacts, previousPeriodContacts);
+
     return {
       'total': totalContacts,
       'leads': leads,
       'customers': customers,
+      'trendPercentage': trendData['trend'],
+      'isUpTrend': trendData['isUp'],
     };
   });
 });

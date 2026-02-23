@@ -10,6 +10,7 @@ import 'widgets/dashboard_card.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/lead_provider.dart';
+import '../../providers/dashboard_provider.dart';
 import 'widgets/recent_activity_widget.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../main_layout_screen.dart';
@@ -30,6 +31,7 @@ class HomeScreen extends ConsumerWidget {
     final dealStats = ref.watch(dealStatsProvider);
     final leadStats = ref.watch(leadStatsProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final currentPeriod = ref.watch(dashboardPeriodProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -124,9 +126,34 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FadeInSlide(
-                child: Text(
-                  'Dashboard Overview',
-                  style: Theme.of(context).textTheme.titleLarge,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Dashboard Overview',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    DropdownButton<DashboardPeriod>(
+                      value: currentPeriod,
+                      underline: const SizedBox(),
+                      icon: const Icon(Icons.arrow_drop_down),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      items: DashboardPeriod.values.map((period) {
+                        return DropdownMenuItem(
+                          value: period,
+                          child: Text(period.label),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref.read(dashboardPeriodProvider.notifier).state = value;
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -156,6 +183,8 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.people_outline,
                           color: Colors.blue,
                           valueKey: 'total',
+                          trendKey: 'trendPercentage',
+                          isUpTrendKey: 'isUpTrend',
                           onTap: () {
                             ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
                           },
@@ -169,6 +198,8 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.leaderboard_outlined,
                           color: Colors.orange,
                           valueKey: 'total', // Using 'total' key for leads
+                          trendKey: 'trendPercentage',
+                          isUpTrendKey: 'isUpTrend',
                           onTap: () {
                             ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
                           },
@@ -180,6 +211,8 @@ class HomeScreen extends ConsumerWidget {
                           dealStats,
                           title: 'Active Deals',
                           valueKey: 'activeCount',
+                          trendKey: 'activeCountTrendPercentage',
+                          isUpTrendKey: 'activeCountIsUpTrend',
                           icon: Icons.handshake_outlined,
                           color: Colors.purple,
                           onTap: () {
@@ -195,6 +228,8 @@ class HomeScreen extends ConsumerWidget {
                             dealStats,
                             title: 'Revenue (Won)',
                             valueKey: 'revenueWon',
+                            trendKey: 'revenueWonTrendPercentage',
+                            isUpTrendKey: 'revenueWonIsUpTrend',
                             icon: Icons.attach_money,
                             color: Colors.green,
                             isCurrency: true,
@@ -261,12 +296,17 @@ class HomeScreen extends ConsumerWidget {
     required IconData icon,
     required Color color,
     required String valueKey,
+    String? trendKey,
+    String? isUpTrendKey,
     bool isCurrency = false,
     VoidCallback? onTap,
   }) {
     return statsAsync.when(
       data: (stats) {
         final value = stats[valueKey];
+        final double? trend = trendKey != null ? stats[trendKey] : null;
+        final bool? isUp = isUpTrendKey != null ? stats[isUpTrendKey] : null;
+        
         String displayValue = '0';
         if (value != null) {
             if (isCurrency && value is num) {
@@ -282,6 +322,8 @@ class HomeScreen extends ConsumerWidget {
         value: displayValue,
         icon: icon,
         color: color,
+        trendPercentage: trend,
+        isUpTrend: isUp,
         onTap: onTap,
       );
       },

@@ -6,6 +6,8 @@ class DashboardCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final double? trendPercentage;
+  final bool? isUpTrend;
   final VoidCallback? onTap;
 
   const DashboardCard({
@@ -14,6 +16,8 @@ class DashboardCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    this.trendPercentage,
+    this.isUpTrend,
     this.onTap,
   });
 
@@ -46,7 +50,33 @@ class DashboardCard extends StatelessWidget {
                     ),
                     child: Icon(icon, color: color, size: 24),
                   ),
-                  // Optional: Add growth indicator or simpler icon
+                  if (trendPercentage != null && isUpTrend != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isUpTrend! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isUpTrend! ? Icons.arrow_upward : Icons.arrow_downward,
+                            color: isUpTrend! ? Colors.green : Colors.red,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${trendPercentage!.toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: isUpTrend! ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 16),

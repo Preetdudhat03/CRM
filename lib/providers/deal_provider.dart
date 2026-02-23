@@ -5,6 +5,7 @@ import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'dashboard_provider.dart';
 
 // Service Provider
 final dealServiceProvider = Provider<DealService>((ref) => DealService());
@@ -122,6 +123,7 @@ final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
 // Dashboard Stats Provider (Revenue, Counts)
 final dealStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
   final dealsAsync = ref.watch(dealsProvider);
+  final period = ref.watch(dashboardPeriodProvider);
 
   return dealsAsync.whenData((deals) {
     int totalDeals = deals.length;
@@ -140,12 +142,49 @@ final dealStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
     for (var stage in DealStage.values) {
       pipeline[stage] = deals.where((d) => d.stage == stage).length;
     }
+
+    final currentPeriodActiveDeals = deals.where((d) => 
+      d.createdAt.isAfter(period.startDate) &&
+      d.stage != DealStage.closedWon && d.stage != DealStage.closedLost
+    ).length;
+
+    final previousPeriodActiveDeals = deals.where((d) => 
+      d.createdAt.isAfter(period.previousPeriodStartDate) &&
+      d.createdAt.isBefore(period.previousPeriodEndDate) &&
+      d.stage != DealStage.closedWon && d.stage != DealStage.closedLost
+    ).length;
+    final activeDealsTrend = calculateTrend(currentPeriodActiveDeals, previousPeriodActiveDeals);
+
+    final currentPeriodRevenueWon = deals.where((d) => 
+      d.createdAt.isAfter(period.startDate) && d.stage == DealStage.closedWon
+    ).fold(0.0, (sum, d) => sum + d.value);
+
+    final previousPeriodRevenueWon = deals.where((d) => 
+      d.createdAt.isAfter(period.previousPeriodStartDate) &&
+      d.createdAt.isBefore(period.previousPeriodEndDate) &&
+      d.stage == DealStage.closedWon
+    ).fold(0.0, (sum, d) => sum + d.value);
     
+    // Calculate double trend using the same function since it works for doubles implicitly converted assuming int wouldn't affect the string but calculateTrend takes int
+    double rvChange = 0.0;
+    bool rvIsUp = true;
+    if (previousPeriodRevenueWon == 0) {
+      if (currentPeriodRevenueWon > 0) {
+        rvChange = 100.0;
+      }
+    } else {
+      rvChange = ((currentPeriodRevenueWon - previousPeriodRevenueWon) / previousPeriodRevenueWon) * 100;
+    }
+
     return {
       'totalCount': totalDeals,
       'totalValue': totalRevenue,
       'revenueWon': revenueWon,
+      'revenueWonTrendPercentage': rvChange.abs(),
+      'revenueWonIsUpTrend': rvChange >= 0,
       'activeCount': activeDeals,
+      'activeCountTrendPercentage': activeDealsTrend['trend'],
+      'activeCountIsUpTrend': activeDealsTrend['isUp'],
       'pipeline': pipeline,
     };
   });

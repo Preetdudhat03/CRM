@@ -5,6 +5,7 @@ import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'dashboard_provider.dart';
 
 // Service Provider
 final leadServiceProvider = Provider<LeadService>((ref) => LeadService());
@@ -124,8 +125,9 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
 });
 
 // Dashboard Stats Provider
-final leadStatsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
+final leadStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
   final leadsAsync = ref.watch(leadsProvider);
+  final period = ref.watch(dashboardPeriodProvider);
 
   return leadsAsync.whenData((leads) {
     int total = leads.length;
@@ -133,11 +135,21 @@ final leadStatsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
     int interested = leads.where((l) => l.status == LeadStatus.interested).length;
     int qualified = leads.where((l) => l.status == LeadStatus.qualified).length;
     
+    final currentPeriodLeads = leads.where((l) => l.createdAt.isAfter(period.startDate)).length;
+    final previousPeriodLeads = leads.where((l) => 
+      l.createdAt.isAfter(period.previousPeriodStartDate) && 
+      l.createdAt.isBefore(period.previousPeriodEndDate)
+    ).length;
+    
+    final trendData = calculateTrend(currentPeriodLeads, previousPeriodLeads);
+
     return {
       'total': total,
       'new': newLeads,
       'interested': interested,
       'qualified': qualified,
+      'trendPercentage': trendData['trend'],
+      'isUpTrend': trendData['isUp'],
     };
   });
 });
