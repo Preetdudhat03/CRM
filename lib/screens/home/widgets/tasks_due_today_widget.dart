@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../providers/task_provider.dart';
 import '../../../../models/task_model.dart';
 import '../../../../widgets/animations/fade_in_slide.dart';
-import '../../../tasks/tasks_screen.dart'; // Ensure correct path for navigation if needed
+import '../../tasks/tasks_screen.dart';
 
 class TasksDueTodayWidget extends ConsumerWidget {
   const TasksDueTodayWidget({super.key});
