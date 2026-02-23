@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/role_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import '../../utils/error_handler.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -41,7 +42,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${e.toString().replaceAll('Exception: ', '')}')),
+        SnackBar(content: Text('Registration failed: ${ErrorHandler.formatError(e)}')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

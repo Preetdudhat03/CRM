@@ -10,6 +10,7 @@ import 'add_edit_lead_screen.dart';
 import 'lead_detail_screen.dart';
 
 import '../../core/services/permission_service.dart';
+import '../../utils/error_handler.dart';
 
 class LeadsScreen extends ConsumerWidget {
   const LeadsScreen({super.key});
@@ -119,7 +120,7 @@ class LeadsScreen extends ConsumerWidget {
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(
                height: MediaQuery.of(context).size.height,
-               child: Center(child: Text('Error: $error')),
+               child: Center(child: Text('Error: ${ErrorHandler.formatError(error ?? '')}')),
              ),
           ),
         ),

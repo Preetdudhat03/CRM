@@ -6,6 +6,7 @@ import '../../models/lead_model.dart';
 import '../../providers/lead_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import '../../utils/error_handler.dart';
 
 class AddEditLeadScreen extends ConsumerStatefulWidget {
   final LeadModel? lead;
@@ -77,7 +78,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}')),
           );
         }
       }

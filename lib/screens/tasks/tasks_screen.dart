@@ -10,6 +10,7 @@ import 'add_edit_task_screen.dart';
 import 'task_detail_screen.dart';
 
 import '../../core/services/permission_service.dart';
+import '../../utils/error_handler.dart';
 
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
@@ -128,7 +129,7 @@ class TasksScreen extends ConsumerWidget {
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(
                height: MediaQuery.of(context).size.height,
-               child: Center(child: Text('Error: $error')),
+               child: Center(child: Text('Error: ${ErrorHandler.formatError(error ?? '')}')),
              ),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../providers/activity_provider.dart';
 import '../../../../models/activity_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../../utils/error_handler.dart';
 
 class RecentActivityList extends ConsumerWidget {
   const RecentActivityList({super.key});
@@ -47,7 +48,7 @@ class RecentActivityList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text('Error: ${ErrorHandler.formatError(error)}')),
     );
   }
 

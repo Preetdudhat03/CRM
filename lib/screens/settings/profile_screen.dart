@@ -5,6 +5,7 @@ import 'dart:io';
 import '../../providers/auth_provider.dart';
 import '../../services/storage_service.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import '../../utils/error_handler.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -87,7 +88,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+             SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}'), backgroundColor: Colors.red),
           );
         }
       } finally {

@@ -8,6 +8,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
 
 import '../../../models/permission_model.dart';
+import '../../../utils/error_handler.dart';
 // ... previous imports ...
 
 class AddEditUserScreen extends ConsumerStatefulWidget {
@@ -111,7 +112,7 @@ class _AddEditUserScreenState extends ConsumerState<AddEditUserScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${e.toString().replaceAll("Exception:", "")}'),
+              content: Text('Error: ${ErrorHandler.formatError(e)}'),
               backgroundColor: Colors.red,
             ),
           );

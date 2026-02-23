@@ -6,6 +6,7 @@ import '../../../providers/user_management_provider.dart';
 import '../../../models/user_model.dart';
 import 'add_edit_user_screen.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
+import '../../../utils/error_handler.dart';
 
 class UserManagementScreen extends ConsumerWidget {
   const UserManagementScreen({super.key});
@@ -143,7 +144,7 @@ class UserManagementScreen extends ConsumerWidget {
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(
                height: MediaQuery.of(context).size.height,
-               child: Center(child: Text('Error: $error')),
+               child: Center(child: Text('Error: ${ErrorHandler.formatError(error ?? '')}')),
              ),
           ),
         ),

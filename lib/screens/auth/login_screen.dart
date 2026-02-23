@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import '../../utils/error_handler.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -29,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: ${e.toString().replaceAll('Exception: ', '')}')),
+        SnackBar(content: Text('Login failed: ${ErrorHandler.formatError(e)}')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -7,6 +7,7 @@ import '../../providers/contact_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import '../../services/storage_service.dart';
+import '../../utils/error_handler.dart';
 
 class AddEditContactScreen extends ConsumerStatefulWidget {
   final ContactModel? contact;
@@ -118,7 +119,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+             SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}'), backgroundColor: Colors.red),
           );
         }
       } finally {
