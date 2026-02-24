@@ -35,11 +35,20 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   }
 
   Future<void> _init() async {
-    state = await _repository.getCurrentUser();
+    // 1. Immediately surface cached UI data so user never stares at a load screen
+    state = _repository.getCachedUser();
+    
+    // 2. Refresh the session stealthily in the background
+    final freshUser = await _repository.getCurrentUser();
+    if (freshUser != null) {
+      state = freshUser;
+    }
   }
 
   Future<void> login(String email, String password) async {
     state = await _repository.login(email, password);
+    // Background refresh to catch profile avatars silently just in case
+    refreshUser();
   }
 
   Future<void> logout() async {
