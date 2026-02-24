@@ -21,7 +21,7 @@ class LocalNotificationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings: initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         // Handle notification tapped logic here if needed
       },
