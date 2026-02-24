@@ -9,6 +9,7 @@ import 'screens/auth/auth_gate.dart';
 import 'providers/theme_provider.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'services/local_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,9 @@ Future<void> main() async {
     return;
   }
   
+  // Initialize Local Notifications
+  await LocalNotificationService.initialize();
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/notification_repository.dart';
 import '../services/notification_service.dart';
 import '../models/notification_model.dart';
+import '../services/local_notification_service.dart';
 import 'package:uuid/uuid.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
@@ -94,6 +95,13 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     );
 
     addNotification(notification);
+    
+    // Trigger actual device push notification
+    LocalNotificationService.showNotification(
+       id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+       title: title,
+       body: message,
+    );
   }
 }
 
