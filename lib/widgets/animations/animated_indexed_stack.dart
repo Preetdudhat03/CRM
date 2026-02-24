@@ -20,11 +20,14 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
   late AnimationController _controller;
   late Animation<double> _animation;
   late int _currentIndex;
+  late List<bool> _mountedTabs;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.index;
+    _mountedTabs = List.generate(widget.children.length, (index) => index == _currentIndex);
+    
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 150));
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -35,6 +38,7 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
   @override
   void didUpdateWidget(covariant AnimatedIndexedStack oldWidget) {
     if (widget.index != _currentIndex) {
+      _mountedTabs[widget.index] = true;
       _controller.reverse().then((_) {
         if (mounted) {
           setState(() => _currentIndex = widget.index);
@@ -53,11 +57,19 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
 
   @override
   Widget build(BuildContext context) {
+    final lazyChildren = List<Widget>.generate(widget.children.length, (i) {
+      if (_mountedTabs[i]) {
+        return widget.children[i];
+      } else {
+        return const SizedBox.shrink(); // Prevent unvisited tabs from mounting and firing API queries
+      }
+    });
+
     return FadeTransition(
       opacity: _animation,
       child: IndexedStack(
         index: _currentIndex,
-        children: widget.children,
+        children: lazyChildren,
       ),
     );
   }
