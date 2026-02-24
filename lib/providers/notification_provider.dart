@@ -22,7 +22,12 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
 
   NotificationNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     getNotifications();
-    _initRealtimeListeners();
+    
+    // Defer realtime initialization to avoid deadlocking the HTTP client pool 
+    // during concurrent app boot!
+    Future.delayed(const Duration(seconds: 3), () {
+       _initRealtimeListeners();
+    });
   }
 
   void _initRealtimeListeners() {

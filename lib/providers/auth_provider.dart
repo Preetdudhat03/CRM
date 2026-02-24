@@ -57,7 +57,14 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   }
 
   Future<void> refreshUser() async {
-    state = await _repository.getCurrentUser();
+    try {
+      final fresh = await _repository.getCurrentUser();
+      if (fresh != null) {
+        state = fresh;
+      }
+    } catch (e) {
+      // Silently fail and keep using the cached session
+    }
   }
 
   Future<void> updateProfile(UserModel user) async {
