@@ -7,6 +7,24 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  UserModel? getCachedUser() {
+    final User? user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final roleString = user.userMetadata?['role'] as String? ?? 'viewer';
+    final role = Role.values.firstWhere(
+      (e) => e.name == roleString,
+      orElse: () => Role.viewer,
+    );
+
+    return UserModel(
+      id: user.id,
+      name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+      email: user.email ?? '',
+      role: role,
+    );
+  }
+
   Future<UserModel> login(String email, String password) async {
     try {
       final AuthResponse res = await _supabase.auth.signInWithPassword(
@@ -19,42 +37,8 @@ class AuthService {
         throw Exception('Login failed: User is null');
       }
   
-      // Fetch user role from profiles table
-      try {
-        final profile = await _supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .single();
-
-        final roleString = profile['role'] as String? ?? 'viewer';
-        final role = Role.values.firstWhere(
-          (e) => e.name == roleString,
-          orElse: () => Role.viewer,
-        );
-
-        return UserModel(
-          id: user.id,
-          name: profile['name'] ?? user.userMetadata?['name'] ?? email.split('@')[0],
-          email: profile['email'] ?? email,
-          role: role,
-          avatarUrl: profile['avatar_url'],
-        );
-      } catch (e) {
-        // Fallback
-        final roleString = user.userMetadata?['role'] as String? ?? 'admin';
-        final role = Role.values.firstWhere(
-          (e) => e.name == roleString,
-          orElse: () => Role.viewer,
-        );
-    
-        return UserModel(
-          id: user.id,
-          name: user.userMetadata?['name'] ?? email.split('@')[0],
-          email: email,
-          role: role,
-        );
-      }
+      // Return metadata immediately to not block the UI for a secondary database ping
+      return getCachedUser()!;
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
         throw Exception('Email not confirmed. Please check your inbox or ask admin to confirm.');
