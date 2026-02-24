@@ -9,6 +9,7 @@ import 'user_management/user_management_screen.dart';
 import 'profile_screen.dart';
 import 'roles_permissions_screen.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/notification_settings_provider.dart';
 import '../../core/services/permission_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -20,6 +21,7 @@ class SettingsScreen extends ConsumerWidget {
     // final permissions = ref.watch(userPermissionsProvider); // Unused
     final canManageUsers = PermissionService.canManageUsers(user);
     final themeMode = ref.watch(themeModeProvider);
+    final notificationsEnabled = ref.watch(notificationSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -195,8 +197,10 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.notifications_outlined),
                 title: const Text('Notifications'),
                 trailing: Switch(
-                  value: true, // Placeholder
-                  onChanged: (val) {},
+                  value: notificationsEnabled,
+                  onChanged: (val) {
+                    ref.read(notificationSettingsProvider.notifier).setEnabled(val);
+                  },
                 ),
               ),
             ),
