@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-class AnimatedIndexedStack extends StatelessWidget {
+class AnimatedIndexedStack extends StatefulWidget {
   final int index;
   final List<Widget> children;
 
@@ -12,15 +12,52 @@ class AnimatedIndexedStack extends StatelessWidget {
   });
 
   @override
+  State<AnimatedIndexedStack> createState() => _AnimatedIndexedStackState();
+}
+
+class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.index;
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 150));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedIndexedStack oldWidget) {
+    if (widget.index != _currentIndex) {
+      _controller.reverse().then((_) {
+        if (mounted) {
+          setState(() => _currentIndex = widget.index);
+          _controller.forward();
+        }
+      });
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      child: KeyedSubtree(
-        key: ValueKey<int>(index),
-        child: children[index],
+    return FadeTransition(
+      opacity: _animation,
+      child: IndexedStack(
+        index: _currentIndex,
+        children: widget.children,
       ),
     );
   }
