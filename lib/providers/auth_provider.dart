@@ -35,20 +35,11 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   }
 
   Future<void> _init() async {
-    // 1. Immediately surface cached UI data so user never stares at a load screen
-    state = _repository.getCachedUser();
-    
-    // 2. Refresh the session stealthily in the background
-    final freshUser = await _repository.getCurrentUser();
-    if (freshUser != null) {
-      state = freshUser;
-    }
+    state = await _repository.getCurrentUser();
   }
 
   Future<void> login(String email, String password) async {
     state = await _repository.login(email, password);
-    // Background refresh to catch profile avatars silently just in case
-    refreshUser();
   }
 
   Future<void> logout() async {
@@ -57,14 +48,7 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   }
 
   Future<void> refreshUser() async {
-    try {
-      final fresh = await _repository.getCurrentUser();
-      if (fresh != null) {
-        state = fresh;
-      }
-    } catch (e) {
-      // Silently fail and keep using the cached session
-    }
+    state = await _repository.getCurrentUser();
   }
 
   Future<void> updateProfile(UserModel user) async {

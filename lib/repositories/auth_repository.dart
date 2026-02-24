@@ -19,10 +19,6 @@ class AuthRepository {
     return _service.getCurrentUser();
   }
 
-  UserModel? getCachedUser() {
-    return _service.getCachedUser();
-  }
-
   Future<UserModel> updateProfile(UserModel user) async {
     return _service.updateProfile(user);
   }
