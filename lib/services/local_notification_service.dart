@@ -21,7 +21,7 @@ class LocalNotificationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings,
+      initializationSettings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         // Handle notification tapped logic here if needed
       },
@@ -56,10 +56,10 @@ class LocalNotificationService {
       );
 
       await _notificationsPlugin.show(
-        id,
-        title,
-        body,
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
       );
     } on Exception catch (e) {
       debugPrint('Error showing local notification: $e');
