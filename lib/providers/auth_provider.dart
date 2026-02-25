@@ -15,8 +15,11 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 // Current User State
 final currentUserProvider = StateNotifierProvider<AuthNotifier, UserModel?>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
+  return AuthNotifier(ref.watch(authRepositoryProvider), ref);
 });
+
+// Tracks whether the initial auth check is still in progress
+final authInitializingProvider = StateProvider<bool>((ref) => true);
 
 // Derived Providers for Role and Permissions
 final userRoleProvider = Provider<Role?>((ref) {
@@ -29,13 +32,20 @@ final userPermissionsProvider = Provider<List<Permission>>((ref) {
 
 class AuthNotifier extends StateNotifier<UserModel?> {
   final AuthRepository _repository;
+  final Ref _ref;
 
-  AuthNotifier(this._repository) : super(null) {
+  AuthNotifier(this._repository, this._ref) : super(null) {
     _init();
   }
 
   Future<void> _init() async {
-    state = await _repository.getCurrentUser();
+    try {
+      state = await _repository.getCurrentUser();
+    } catch (_) {
+      state = null;
+    } finally {
+      _ref.read(authInitializingProvider.notifier).state = false;
+    }
   }
 
   Future<void> login(String email, String password) async {
