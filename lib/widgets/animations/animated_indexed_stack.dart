@@ -15,10 +15,7 @@ class AnimatedIndexedStack extends StatefulWidget {
   State<AnimatedIndexedStack> createState() => _AnimatedIndexedStackState();
 }
 
-class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _AnimatedIndexedStackState extends State<AnimatedIndexedStack> {
   late int _currentIndex;
 
   // Track which tabs have been visited — only build those
@@ -28,45 +25,29 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
   void initState() {
     super.initState();
     _currentIndex = widget.index;
-    _visitedIndices = {widget.index}; // Only the initial tab is visited
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 150));
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    _controller.forward();
+    _visitedIndices = {widget.index};
   }
 
   @override
   void didUpdateWidget(covariant AnimatedIndexedStack oldWidget) {
     if (widget.index != _currentIndex) {
-      _controller.reverse().then((_) {
-        if (mounted) {
-          setState(() {
-            _currentIndex = widget.index;
-            _visitedIndices.add(widget.index); // Mark as visited on first switch
-          });
-          _controller.forward();
-        }
+      setState(() {
+        _currentIndex = widget.index;
+        _visitedIndices.add(widget.index);
       });
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
       child: IndexedStack(
+        key: ValueKey(_currentIndex),
         index: _currentIndex,
         children: [
           for (int i = 0; i < widget.children.length; i++)
-            // Only build child if the tab has been visited; otherwise use empty placeholder
             _visitedIndices.contains(i)
                 ? widget.children[i]
                 : const SizedBox.shrink(),
