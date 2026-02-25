@@ -16,48 +16,89 @@ class RecentActivityList extends ConsumerWidget {
         final recentActivities = metrics['recentActivities'] as List<dynamic>? ?? [];
 
         if (recentActivities.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('No recent activity'),
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.history, size: 32, color: Colors.grey[400]),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No recent activity',
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Activities will appear here when you create contacts, leads, deals, or tasks',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         }
 
-        return ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: recentActivities.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final item = recentActivities[index];
-            final typeStr = item['type'] ?? 'other';
-            final title = item['title'] ?? 'Activity';
-            final dateStr = item['date'] ?? item['created_at'];
-            final date = dateStr != null ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now() : DateTime.now();
-            
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: _getColorForType(typeStr).withOpacity(0.1),
-                child: Icon(_getIconForType(typeStr), color: _getColorForType(typeStr), size: 20),
-              ),
-              title: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: const Text(''), // Activity table doesn't have message explicitly in this simple mock
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    timeago.format(date),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            );
-          },
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          ),
+          child: ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: recentActivities.length,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 56,
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
+            ),
+            itemBuilder: (context, index) {
+              final item = recentActivities[index];
+              final typeStr = item['type'] ?? 'other';
+              final title = item['title'] ?? 'Activity';
+              final createdBy = item['created_by'] ?? '';
+              final dateStr = item['date'] ?? item['created_at'];
+              final date = dateStr != null
+                  ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
+                  : DateTime.now();
+
+              return ListTile(
+                dense: true,
+                leading: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: _getColorForType(typeStr).withOpacity(0.1),
+                  child: Icon(_getIconForType(typeStr), color: _getColorForType(typeStr), size: 18),
+                ),
+                title: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: createdBy.isNotEmpty
+                    ? Text(
+                        'by $createdBy',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    : null,
+                trailing: Text(
+                  timeago.format(date),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                ),
+              );
+            },
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -94,13 +135,4 @@ class RecentActivityList extends ConsumerWidget {
         return Icons.info_outline;
     }
   }
-}
-
-class _ActivityItem {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  _ActivityItem(this.title, this.description, this.icon, this.color);
 }
