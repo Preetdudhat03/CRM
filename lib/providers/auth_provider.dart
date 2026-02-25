@@ -5,6 +5,7 @@ import '../models/role_model.dart';
 import '../models/permission_model.dart';
 import '../repositories/auth_repository.dart';
 import '../services/auth_service.dart';
+import '../services/push_notification_service.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
