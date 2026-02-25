@@ -72,7 +72,18 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   }
 
   Future<void> refresh() async {
-    return loadInitial();
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    try {
+      final contacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      if (contacts.length < _pageSize) _hasMore = false;
+      state = AsyncValue.data(contacts);
+    } catch (e, stack) {
+      if (!state.hasValue) {
+        state = AsyncValue.error(e, stack);
+      }
+    }
   }
 
   Future<void> addContact(ContactModel contact) async {
