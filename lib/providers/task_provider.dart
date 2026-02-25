@@ -84,7 +84,20 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
   }
 
   Future<void> refresh() async {
-    return loadInitial();
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    try {
+      // Don't set state to loading — keep the list visible during refresh
+      final tasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      if (tasks.length < _pageSize) _hasMore = false;
+      state = AsyncValue.data(tasks);
+    } catch (e, stack) {
+      // On refresh error, keep existing data rather than showing error
+      if (!state.hasValue) {
+        state = AsyncValue.error(e, stack);
+      }
+    }
   }
 
   Future<void> addTask(TaskModel task) async {
