@@ -17,8 +17,8 @@ Future<void> main() async {
   try {
     // Initialize Supabase
     await Supabase.initialize(
-      url: 'https://iyylebbrcawebwsqxzup.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eWxlYmJyY2F3ZWJ3c3F4enVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMzMwMzksImV4cCI6MjA4NjcwOTAzOX0.KvcQj5CYblv708lgKzBQPbnd6oDiiH4AC1cMhwMnRjY',
+      url: 'https://lwtyiqtxxhpcxksaipng.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3dHlpcXR4eGhwY3hrc2FpcG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTUzNzAsImV4cCI6MjA4NzU5MTM3MH0.QkpZnyuIsy7OedJPUsjCaHJ_L6IPCRTuQpV4lL42njw',
     );
   } catch (e) {
     runApp(MaterialApp(home: Scaffold(body: Center(child: Text('Failed to initialize: $e')))));
