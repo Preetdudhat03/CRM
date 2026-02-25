@@ -10,31 +10,38 @@ class NotificationService {
 
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final localData = prefs.getString('local_notifications');
-      
-      if (localData != null) {
-         final List<dynamic> decoded = jsonDecode(localData);
-         return decoded.map((json) => NotificationModel.fromJson(json)).toList();
-      }
-
+      // Always try Supabase first — this gets notifications from ALL users
       final response = await _supabase
           .from('notifications')
           .select()
-          .order('date', ascending: false);
+          .order('date', ascending: false)
+          .limit(50);
       
       final List<dynamic> data = response as List<dynamic>;
-      return data.map((json) => NotificationModel.fromJson(json)).toList();
+      final notifications = data.map((json) => NotificationModel.fromJson(json)).toList();
+      
+      // Cache to local for offline access
+      await _saveLocally(notifications);
+      return notifications;
     } catch (e) {
-      print('Error fetching notifications (fallback to local if available): $e');
+      print('Error fetching notifications from Supabase, falling back to local: $e');
+      // Fallback to local cache if Supabase is unreachable
+      return _getLocalNotifications();
+    }
+  }
+
+  Future<List<NotificationModel>> _getLocalNotifications() async {
+    try {
       final prefs = await SharedPreferences.getInstance();
       final localData = prefs.getString('local_notifications');
       if (localData != null) {
-         final List<dynamic> decoded = jsonDecode(localData);
-         return decoded.map((json) => NotificationModel.fromJson(json)).toList();
+        final List<dynamic> decoded = jsonDecode(localData);
+        return decoded.map((json) => NotificationModel.fromJson(json)).toList();
       }
-      return [];
+    } catch (e) {
+      print('Error reading local notifications: $e');
     }
+    return [];
   }
 
   Future<void> _saveLocally(List<NotificationModel> notifications) async {
@@ -54,30 +61,36 @@ class NotificationService {
         data['id'] = _uuid.v4();
       }
 
-      // Add to local cache first
-      final current = await getNotifications();
+      // Save to Supabase first — this makes it visible to ALL users
+      await _supabase.from('notifications').insert(data);
+      
+      // Also update local cache
+      final current = await _getLocalNotifications();
       current.insert(0, notification);
       await _saveLocally(current);
-
-      await _supabase.from('notifications').insert(data);
     } catch (e) {
-      print('Error adding notification to remote: $e');
+      print('Error adding notification: $e');
+      // Still save locally even if Supabase fails
+      final current = await _getLocalNotifications();
+      current.insert(0, notification);
+      await _saveLocally(current);
     }
   }
 
   Future<void> markAsRead(String id) async {
     try {
-      final current = await getNotifications();
+      await _supabase
+          .from('notifications')
+          .update({'is_read': true})
+          .eq('id', id);
+
+      // Update local cache too
+      final current = await _getLocalNotifications();
       final updated = current.map((n) {
           if (n.id == id) return n.copyWith(isRead: true);
           return n;
       }).toList();
       await _saveLocally(updated);
-
-      await _supabase
-          .from('notifications')
-          .update({'is_read': true})
-          .eq('id', id);
     } catch (e) {
       print('Error marking notification read: $e');
     }
@@ -85,14 +98,14 @@ class NotificationService {
 
   Future<void> markAllAsRead() async {
     try {
-      final current = await getNotifications();
-      final updated = current.map((n) => n.copyWith(isRead: true)).toList();
-      await _saveLocally(updated);
-
       await _supabase
           .from('notifications')
           .update({'is_read': true})
-          .eq('is_read', false); // Updates all unread to read
+          .eq('is_read', false);
+
+      final current = await _getLocalNotifications();
+      final updated = current.map((n) => n.copyWith(isRead: true)).toList();
+      await _saveLocally(updated);
     } catch (e) {
       print('Error marking all notifications read: $e');
     }
