@@ -42,7 +42,7 @@ class PushNotificationService {
 
     // Initialize local notifications
     await _localNotifications.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
     );
@@ -52,10 +52,10 @@ class PushNotificationService {
       final notification = message.notification;
       if (notification != null) {
         _localNotifications.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
+          id: notification.hashCode,
+          title: notification.title,
+          body: notification.body,
+          notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               androidChannel.id,
               androidChannel.name,
