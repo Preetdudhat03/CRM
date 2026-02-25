@@ -325,7 +325,12 @@ class HomeScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AllActivitiesScreen()),
+                        );
+                      },
                       child: const Text('View All'),
                     ),
                   ],
