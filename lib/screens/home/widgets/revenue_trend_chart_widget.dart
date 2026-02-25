@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../providers/deal_provider.dart';
 import '../../../../models/deal_model.dart';
-import '../../../../widgets/animations/fade_in_slide.dart';
 
 class RevenueTrendChart extends ConsumerWidget {
   const RevenueTrendChart({super.key});
@@ -36,49 +35,78 @@ class RevenueTrendChart extends ConsumerWidget {
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _legendDot(Colors.green, 'Won'),
+              const SizedBox(width: 16),
+              _legendDot(Colors.red, 'Lost'),
+              const SizedBox(width: 16),
+              _legendDot(Colors.blue, 'Net'),
+            ],
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             height: 220,
             child: dealsAsync.when(
               data: (deals) {
-                // Generate last 6 months list
                 final now = DateTime.now();
                 List<DateTime> last6Months = [];
                 for (int i = 5; i >= 0; i--) {
                   last6Months.add(DateTime(now.year, now.month - i, 1));
                 }
 
-                // Group closed won deals by month
-                Map<String, double> monthlyRevenue = {};
+                // Group deals by month — Won and Lost separately
+                Map<String, double> monthlyWon = {};
+                Map<String, double> monthlyLost = {};
                 for (var month in last6Months) {
                   final key = DateFormat('MMM').format(month);
-                  monthlyRevenue[key] = 0.0;
+                  monthlyWon[key] = 0.0;
+                  monthlyLost[key] = 0.0;
                 }
 
+                final cutoff = DateTime(now.year, now.month - 5, 1);
                 for (var deal in deals) {
+                  final dealDate = deal.updatedAt;
+                  if (dealDate.isBefore(cutoff)) continue;
+
+                  final key = DateFormat('MMM').format(dealDate);
                   if (deal.stage == DealStage.closedWon) {
-                    // check if inside the last 6 months window
-                    if (deal.updatedAt.isAfter(DateTime(now.year, now.month - 5, 1))) {
-                        final key = DateFormat('MMM').format(deal.updatedAt);
-                        if (monthlyRevenue.containsKey(key)) {
-                           monthlyRevenue[key] = monthlyRevenue[key]! + deal.value;
-                        }
+                    if (monthlyWon.containsKey(key)) {
+                      monthlyWon[key] = monthlyWon[key]! + deal.value;
+                    }
+                  } else if (deal.stage == DealStage.closedLost) {
+                    if (monthlyLost.containsKey(key)) {
+                      monthlyLost[key] = monthlyLost[key]! + deal.value;
                     }
                   }
                 }
 
-                List<FlSpot> spots = [];
-                double maxRevenue = 0;
+                // Build spots
+                List<FlSpot> wonSpots = [];
+                List<FlSpot> lostSpots = [];
+                List<FlSpot> netSpots = [];
+                double maxVal = 0;
+                double minVal = 0;
                 int index = 0;
-                
-                monthlyRevenue.forEach((key, value) {
-                  spots.add(FlSpot(index.toDouble(), value));
-                  if (value > maxRevenue) maxRevenue = value;
-                  index++;
-                });
 
-                // Adding 20% vertical padding so chart doesn't clip with the ceiling and numbers don't overlay
-                maxRevenue = maxRevenue > 0 ? maxRevenue * 1.25 : 1000.0;
+                final keys = monthlyWon.keys.toList();
+                for (var key in keys) {
+                  final won = monthlyWon[key]!;
+                  final lost = monthlyLost[key]!;
+                  final net = won - lost;
+                  wonSpots.add(FlSpot(index.toDouble(), won));
+                  lostSpots.add(FlSpot(index.toDouble(), lost));
+                  netSpots.add(FlSpot(index.toDouble(), net));
+                  if (won > maxVal) maxVal = won;
+                  if (lost > maxVal) maxVal = lost;
+                  if (net > maxVal) maxVal = net;
+                  if (net < minVal) minVal = net;
+                  index++;
+                }
+
+                maxVal = maxVal > 0 ? maxVal * 1.25 : 1000.0;
+                minVal = minVal < 0 ? minVal * 1.25 : 0;
 
                 return LineChart(
                   LineChartData(
@@ -103,7 +131,7 @@ class RevenueTrendChart extends ConsumerWidget {
                           interval: 1,
                           getTitlesWidget: (value, meta) {
                             if (value.toInt() < 0 || value.toInt() >= last6Months.length) {
-                               return const Text('');
+                              return const Text('');
                             }
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
@@ -119,9 +147,9 @@ class RevenueTrendChart extends ConsumerWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 75,
-                          interval: maxRevenue > 0 ? maxRevenue / 4 : 250,
+                          interval: maxVal > 0 ? (maxVal - minVal) / 4 : 250,
                           getTitlesWidget: (value, meta) {
-                            if (value == 0 || value >= maxRevenue * 0.95) return const Text(''); // Hide the zero and absolute ceiling to prevent overlapping corners
+                            if (value >= maxVal * 0.95) return const Text('');
                             return Text(
                               '\$${compactNumber(value)}',
                               style: Theme.of(context).textTheme.bodySmall,
@@ -134,19 +162,46 @@ class RevenueTrendChart extends ConsumerWidget {
                     borderData: FlBorderData(show: false),
                     minX: 0,
                     maxX: 5,
-                    minY: 0,
-                    maxY: maxRevenue,
+                    minY: minVal,
+                    maxY: maxVal,
                     lineBarsData: [
+                      // Won line (green)
                       LineChartBarData(
-                        spots: spots,
+                        spots: wonSpots,
                         isCurved: true,
                         color: Colors.green,
+                        barWidth: 2,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(show: true),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.green.withOpacity(0.08),
+                        ),
+                      ),
+                      // Lost line (red)
+                      LineChartBarData(
+                        spots: lostSpots,
+                        isCurved: true,
+                        color: Colors.red,
+                        barWidth: 2,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(show: true),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.red.withOpacity(0.08),
+                        ),
+                      ),
+                      // Net revenue line (blue, main)
+                      LineChartBarData(
+                        spots: netSpots,
+                        isCurved: true,
+                        color: Colors.blue,
                         barWidth: 3,
                         isStrokeCapRound: true,
                         dotData: FlDotData(show: true),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.blue.withOpacity(0.05),
                         ),
                       ),
                     ],
@@ -162,9 +217,24 @@ class RevenueTrendChart extends ConsumerWidget {
     );
   }
 
+  Widget _legendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+
   String compactNumber(double num) {
-    if (num >= 1000000) return '${(num / 1000000).toStringAsFixed(1)}M';
-    if (num >= 1000) return '${(num / 1000).toStringAsFixed(1)}k';
+    if (num.abs() >= 1000000) return '${(num / 1000000).toStringAsFixed(1)}M';
+    if (num.abs() >= 1000) return '${(num / 1000).toStringAsFixed(1)}k';
     return num.toStringAsFixed(0);
   }
 }

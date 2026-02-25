@@ -2,54 +2,71 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/dashboard_service.dart';
 
 enum DashboardPeriod {
-  thisWeek,
-  thisMonth,
+  today,
+  quarter,
+  thisYear,
+  allTime,
 }
 
 extension DashboardPeriodExtension on DashboardPeriod {
   String get label {
     switch (this) {
-      case DashboardPeriod.thisWeek:
-        return 'This Week';
-      case DashboardPeriod.thisMonth:
-        return 'This Month';
+      case DashboardPeriod.today:
+        return 'Today';
+      case DashboardPeriod.quarter:
+        return 'Quarter';
+      case DashboardPeriod.thisYear:
+        return 'This Year';
+      case DashboardPeriod.allTime:
+        return 'All Time';
     }
   }
 
   DateTime get startDate {
     final now = DateTime.now();
     switch (this) {
-      case DashboardPeriod.thisWeek:
-        // Assuming week starts on Monday
-        return DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
-      case DashboardPeriod.thisMonth:
-        return DateTime(now.year, now.month, 1);
+      case DashboardPeriod.today:
+        return DateTime(now.year, now.month, now.day);
+      case DashboardPeriod.quarter:
+        final quarterMonth = ((now.month - 1) ~/ 3) * 3 + 1;
+        return DateTime(now.year, quarterMonth, 1);
+      case DashboardPeriod.thisYear:
+        return DateTime(now.year, 1, 1);
+      case DashboardPeriod.allTime:
+        return DateTime(2000, 1, 1);
     }
   }
 
   DateTime get previousPeriodStartDate {
     final start = startDate;
     switch (this) {
-      case DashboardPeriod.thisWeek:
-        return start.subtract(const Duration(days: 7));
-      case DashboardPeriod.thisMonth:
-        return DateTime(start.year, start.month - 1, 1);
+      case DashboardPeriod.today:
+        return start.subtract(const Duration(days: 1));
+      case DashboardPeriod.quarter:
+        return DateTime(start.year, start.month - 3, 1);
+      case DashboardPeriod.thisYear:
+        return DateTime(start.year - 1, 1, 1);
+      case DashboardPeriod.allTime:
+        return DateTime(2000, 1, 1);
     }
   }
 
   DateTime get previousPeriodEndDate {
     final start = startDate;
     switch (this) {
-      case DashboardPeriod.thisWeek:
-        return start.subtract(const Duration(microseconds: 1)); // Just before this week starts
-      case DashboardPeriod.thisMonth:
-        return DateTime(start.year, start.month, 1).subtract(const Duration(microseconds: 1)); // Just before this month starts
+      case DashboardPeriod.today:
+        return start.subtract(const Duration(microseconds: 1));
+      case DashboardPeriod.quarter:
+        return start.subtract(const Duration(microseconds: 1));
+      case DashboardPeriod.thisYear:
+        return DateTime(start.year, 1, 1).subtract(const Duration(microseconds: 1));
+      case DashboardPeriod.allTime:
+        return DateTime.now();
     }
   }
 }
 
-
-final dashboardPeriodProvider = StateProvider<DashboardPeriod>((ref) => DashboardPeriod.thisMonth);
+final dashboardPeriodProvider = StateProvider<DashboardPeriod>((ref) => DashboardPeriod.allTime);
 
 // Helper function to calculate trend
 Map<String, dynamic> calculateTrend(int current, int previous) {
