@@ -4,6 +4,7 @@ import '../models/task_model.dart';
 import '../models/role_model.dart';
 import '../repositories/task_repository.dart';
 import '../services/task_service.dart';
+import '../services/activity_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
 
@@ -93,6 +94,8 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         state = AsyncValue.data([...tasks, newTask]);
       });
 
+      ActivityService.log(title: 'Created task: ${newTask.title}', type: 'task', relatedEntityId: newTask.id);
+
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
       final role = currentUser?.role ?? Role.viewer;
@@ -146,6 +149,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
             if (t.id != id) t
         ]);
       });
+      ActivityService.log(title: 'Deleted a task', type: 'task', relatedEntityId: id);
     } catch (e) {
       // Handle error
     }
