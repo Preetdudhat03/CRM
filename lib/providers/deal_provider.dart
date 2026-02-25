@@ -4,6 +4,7 @@ import '../models/deal_model.dart';
 import '../models/role_model.dart';
 import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
+import '../services/activity_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
 import 'dashboard_provider.dart';
@@ -79,6 +80,8 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         state = AsyncValue.data([...deals, newDeal]);
       });
       
+      ActivityService.log(title: 'Created deal: ${newDeal.title}', type: 'deal', relatedEntityId: newDeal.id);
+      
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
       final role = currentUser?.role ?? Role.viewer;
@@ -132,6 +135,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
             if (d.id != id) d
         ]);
       });
+      ActivityService.log(title: 'Deleted a deal', type: 'deal', relatedEntityId: id);
     } catch (e) {
       // Handle error
     }

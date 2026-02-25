@@ -4,6 +4,7 @@ import '../models/lead_model.dart';
 import '../models/role_model.dart';
 import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
+import '../services/activity_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
 import 'dashboard_provider.dart';
@@ -79,6 +80,8 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         state = AsyncValue.data([...leads, newLead]);
       });
 
+      ActivityService.log(title: 'Created lead: ${newLead.name}', type: 'lead', relatedEntityId: newLead.id);
+
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
       final role = currentUser?.role ?? Role.viewer;
@@ -136,6 +139,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
             if (l.id != id) l
         ]);
       });
+      ActivityService.log(title: 'Deleted a lead', type: 'lead', relatedEntityId: id);
     } catch (e) {
       // Handle error
     }
