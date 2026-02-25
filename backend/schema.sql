@@ -102,9 +102,10 @@ CREATE TABLE activities (
   title TEXT,
   description TEXT,
   date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  type TEXT, -- e.g. 'call', 'meeting', 'email'
+  type TEXT, -- e.g. 'call', 'meeting', 'email', 'contact', 'lead', 'deal', 'task'
   related_entity_id UUID,
   related_entity_type TEXT,
+  created_by TEXT, -- name of the user who performed the activity
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
