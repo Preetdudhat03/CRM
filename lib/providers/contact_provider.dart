@@ -4,6 +4,7 @@ import '../models/contact_model.dart';
 import '../models/role_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
+import '../services/activity_service.dart';
 import 'dashboard_provider.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
@@ -81,6 +82,8 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
         state = AsyncValue.data([...contacts, newContact]);
       });
       
+      ActivityService.log(title: 'Created contact: ${newContact.name}', type: 'contact', relatedEntityId: newContact.id);
+
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
       final role = currentUser?.role ?? Role.viewer;
@@ -92,7 +95,6 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
         targetRoles: getUpperRanks(role),
       );
     } catch (e) {
-      // Handle or propagate error
       rethrow;
     }
   }
@@ -106,6 +108,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
             if (c.id == contact.id) contact else c
         ]);
       });
+      ActivityService.log(title: 'Updated contact: ${contact.name}', type: 'contact', relatedEntityId: contact.id);
     } catch (e) {
       // Handle error
     }
@@ -120,6 +123,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
             if (c.id != id) c
         ]);
       });
+      ActivityService.log(title: 'Deleted a contact', type: 'contact', relatedEntityId: id);
     } catch (e) {
       // Handle error
     }
