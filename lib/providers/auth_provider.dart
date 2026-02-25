@@ -50,6 +50,10 @@ class AuthNotifier extends StateNotifier<UserModel?> {
 
   Future<void> login(String email, String password) async {
     state = await _repository.login(email, password);
+    // Register FCM token after login
+    if (state != null) {
+      PushNotificationService.registerAfterLogin();
+    }
   }
 
   Future<void> logout() async {
