@@ -109,6 +109,18 @@ CREATE TABLE activities (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- NOTIFICATIONS (Cross-user notifications stored in Supabase)
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  message TEXT,
+  date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_read BOOLEAN DEFAULT FALSE,
+  related_entity_id TEXT,
+  related_entity_type TEXT, -- stores type and target roles encoded as 'type||roles:admin,manager'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- PROFILES (Publicly accessible user data synced with Auth)
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
