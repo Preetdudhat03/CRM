@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'screens/main_layout_screen.dart';
 import 'screens/auth/auth_gate.dart';
@@ -10,9 +11,13 @@ import 'providers/theme_provider.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/local_notification_service.dart';
+import 'services/push_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase first
+  await Firebase.initializeApp();
   
   try {
     // Initialize Supabase
@@ -27,6 +32,9 @@ Future<void> main() async {
   
   // Initialize Local Notifications
   await LocalNotificationService.initialize();
+  
+  // Initialize Push Notifications (FCM)
+  await PushNotificationService.init();
 
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
