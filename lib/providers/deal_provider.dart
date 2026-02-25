@@ -70,7 +70,18 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
   }
 
   Future<void> refresh() async {
-    return loadInitial();
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    try {
+      final deals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      if (deals.length < _pageSize) _hasMore = false;
+      state = AsyncValue.data(deals);
+    } catch (e, stack) {
+      if (!state.hasValue) {
+        state = AsyncValue.error(e, stack);
+      }
+    }
   }
 
   Future<void> addDeal(DealModel deal) async {

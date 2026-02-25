@@ -70,7 +70,18 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   }
 
   Future<void> refresh() async {
-    return loadInitial();
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    try {
+      final leads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      if (leads.length < _pageSize) _hasMore = false;
+      state = AsyncValue.data(leads);
+    } catch (e, stack) {
+      if (!state.hasValue) {
+        state = AsyncValue.error(e, stack);
+      }
+    }
   }
 
   Future<void> addLead(LeadModel lead) async {
