@@ -1,6 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/deal_model.dart';
+import '../models/role_model.dart';
 import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
 import 'auth_provider.dart';
@@ -23,18 +24,52 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
   final DealRepository _repository;
   final Ref _ref;
 
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
   DealNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
-    getDeals();
+    loadInitial();
   }
 
-  Future<void> getDeals() async {
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
+  Future<void> loadInitial() async {
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final deals = await _repository.getDeals();
+      final deals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      if (deals.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(deals);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state is AsyncLoading) return;
+
+    _isLoadingMore = true;
+    try {
+      _currentPage++;
+      final newDeals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      if (newDeals.length < _pageSize) _hasMore = false;
+      state.whenData((currentDeals) {
+        state = AsyncValue.data([...currentDeals, ...newDeals]);
+      });
+    } catch (e) {
+      _currentPage--;
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
+  Future<void> refresh() async {
+    return loadInitial();
   }
 
   Future<void> addDeal(DealModel deal) async {
@@ -46,11 +81,13 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
+      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Deal Created',
         '$userName added a new deal: ${newDeal.title}',
         relatedEntityId: newDeal.id,
         relatedEntityType: 'deal',
+        targetRoles: getUpperRanks(role),
       );
     } catch (e) {
       rethrow;
@@ -71,11 +108,13 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         if (existingDeal.stage != deal.stage) {
           final currentUser = _ref.read(currentUserProvider);
           final userName = currentUser?.name ?? 'Someone';
+          final role = currentUser?.role ?? Role.viewer;
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Deal Stage Updated',
             '$userName moved the deal ${deal.title} to ${deal.stage.label}',
             relatedEntityId: deal.id,
             relatedEntityType: 'deal',
+            targetRoles: getUpperRanks(role),
           );
         }
       });
@@ -120,72 +159,3 @@ final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
   });
 });
 
-// Dashboard Stats Provider (Revenue, Counts)
-final dealStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
-  final dealsAsync = ref.watch(dealsProvider);
-  final period = ref.watch(dashboardPeriodProvider);
-
-  return dealsAsync.whenData((deals) {
-    int totalDeals = deals.length;
-    double totalRevenue = deals.fold(0, (sum, deal) => sum + deal.value);
-    
-    // Revenue from closed won
-    double revenueWon = deals
-        .where((d) => d.stage == DealStage.closedWon)
-        .fold(0, (sum, deal) => sum + deal.value);
-
-    int activeDeals = deals.where((d) => 
-        d.stage != DealStage.closedWon && d.stage != DealStage.closedLost).length;
-
-    // Pipeline counts
-    Map<DealStage, int> pipeline = {};
-    for (var stage in DealStage.values) {
-      pipeline[stage] = deals.where((d) => d.stage == stage).length;
-    }
-
-    final currentPeriodActiveDeals = deals.where((d) => 
-      d.createdAt.isAfter(period.startDate) &&
-      d.stage != DealStage.closedWon && d.stage != DealStage.closedLost
-    ).length;
-
-    final previousPeriodActiveDeals = deals.where((d) => 
-      d.createdAt.isAfter(period.previousPeriodStartDate) &&
-      d.createdAt.isBefore(period.previousPeriodEndDate) &&
-      d.stage != DealStage.closedWon && d.stage != DealStage.closedLost
-    ).length;
-    final activeDealsTrend = calculateTrend(currentPeriodActiveDeals, previousPeriodActiveDeals);
-
-    final currentPeriodRevenueWon = deals.where((d) => 
-      d.createdAt.isAfter(period.startDate) && d.stage == DealStage.closedWon
-    ).fold(0.0, (sum, d) => sum + d.value);
-
-    final previousPeriodRevenueWon = deals.where((d) => 
-      d.createdAt.isAfter(period.previousPeriodStartDate) &&
-      d.createdAt.isBefore(period.previousPeriodEndDate) &&
-      d.stage == DealStage.closedWon
-    ).fold(0.0, (sum, d) => sum + d.value);
-    
-    // Calculate double trend using the same function since it works for doubles implicitly converted assuming int wouldn't affect the string but calculateTrend takes int
-    double rvChange = 0.0;
-    bool rvIsUp = true;
-    if (previousPeriodRevenueWon == 0) {
-      if (currentPeriodRevenueWon > 0) {
-        rvChange = 100.0;
-      }
-    } else {
-      rvChange = ((currentPeriodRevenueWon - previousPeriodRevenueWon) / previousPeriodRevenueWon) * 100;
-    }
-
-    return {
-      'totalCount': totalDeals,
-      'totalValue': totalRevenue,
-      'revenueWon': revenueWon,
-      'revenueWonTrendPercentage': rvChange.abs(),
-      'revenueWonIsUpTrend': rvChange >= 0,
-      'activeCount': activeDeals,
-      'activeCountTrendPercentage': activeDealsTrend['trend'],
-      'activeCountIsUpTrend': activeDealsTrend['isUp'],
-      'pipeline': pipeline,
-    };
-  });
-});

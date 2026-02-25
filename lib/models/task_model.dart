@@ -124,10 +124,12 @@ class TaskModel {
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
-      id: json['id'],
-      title: json['title'],
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
       description: json['description'] ?? '',
-      dueDate: DateTime.parse(json['due_date']),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'])
+          : DateTime.now(),
       status: TaskStatus.values.firstWhere(
         (e) => e.name == (json['status'] ?? 'pending'),
         orElse: () => TaskStatus.pending,
@@ -139,8 +141,10 @@ class TaskModel {
       assignedTo: json['assigned_to'] ?? '',
       relatedEntityId: json['related_entity_id'],
       relatedEntityType: json['related_entity_type'],
-      relatedEntityName: json['related_entity_name'], // Assuming denormalized
-      createdAt: DateTime.parse(json['created_at']),
+      relatedEntityName: json['related_entity_name'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
     );
   }
 
@@ -151,11 +155,9 @@ class TaskModel {
       'due_date': dueDate.toIso8601String(),
       'status': status.name,
       'priority': priority.name,
-      'assigned_to': assignedTo,
+      'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'related_entity_id': relatedEntityId,
       'related_entity_type': relatedEntityType,
-      'related_entity_name': relatedEntityName, // If we decide to store it
-      'created_at': createdAt.toIso8601String(),
     };
   }
 }

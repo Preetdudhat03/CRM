@@ -12,11 +12,36 @@ import 'task_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
 
-class TasksScreen extends ConsumerWidget {
+class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TasksScreen> createState() => _TasksScreenState();
+}
+
+class _TasksScreenState extends ConsumerState<TasksScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      ref.read(tasksProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tasksAsync = ref.watch(filteredTasksProvider);
     final user = ref.watch(currentUserProvider);
     final canCreate = PermissionService.canCreateTasks(user);
@@ -59,7 +84,7 @@ class TasksScreen extends ConsumerWidget {
       ),
       body: tasksAsync.when(
         data: (tasks) => RefreshIndicator(
-          onRefresh: () => ref.read(tasksProvider.notifier).getTasks(),
+          onRefresh: () => ref.read(tasksProvider.notifier).refresh(),
           child: tasks.isEmpty
               ? SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -81,9 +106,31 @@ class TasksScreen extends ConsumerWidget {
                   ),
                 )
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: tasks.length,
+                  itemCount: tasks.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == tasks.length) {
+                      final notifier = ref.read(tasksProvider.notifier);
+                      if (notifier.isLoadingMore) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (!notifier.hasMore && tasks.isNotEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('No more tasks'),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }
+
                     final task = tasks[index];
                     return TaskCard(
                       task: task,
@@ -124,7 +171,7 @@ class TasksScreen extends ConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(
-          onRefresh: () => ref.read(tasksProvider.notifier).getTasks(),
+          onRefresh: () => ref.read(tasksProvider.notifier).refresh(),
           child: SingleChildScrollView(
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(

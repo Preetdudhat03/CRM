@@ -4,18 +4,21 @@ import '../models/deal_model.dart';
 class DealService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<DealModel>> getDeals() async {
+  Future<List<DealModel>> getDeals({int page = 0, int pageSize = 20}) async {
+    final start = page * pageSize;
+    final end = start + pageSize - 1;
+
     final response = await _supabase
         .from('deals')
-        .select('*, contacts(name, company)');
+        .select('*, contacts(name, company)')
+        .order('created_at', ascending: false)
+        .range(start, end);
     
     final List<dynamic> data = response as List<dynamic>;
     return data.map((json) {
-      // Flatten the nested contacts object
       final contact = json['contacts'];
       if (contact != null) {
         json['contact_name'] = contact['name'];
-        // If company_name is null in deal, fall back to contact's company
         if (json['company_name'] == null) {
           json['company_name'] = contact['company'];
         }

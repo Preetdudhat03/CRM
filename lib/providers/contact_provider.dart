@@ -1,6 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/contact_model.dart';
+import '../models/role_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
 import 'dashboard_provider.dart';
@@ -17,23 +18,60 @@ final contactRepositoryProvider = Provider<ContactRepository>((ref) {
 // State Provider for Search Query
 final contactSearchQueryProvider = StateProvider<String>((ref) => '');
 
-// State Notifier for Contact List management
 class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   final ContactRepository _repository;
   final Ref _ref;
 
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
   ContactNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
-    getContacts();
+    loadInitial();
   }
 
-  Future<void> getContacts() async {
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
+  Future<void> loadInitial() async {
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final contacts = await _repository.getContacts();
+      final contacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      if (contacts.length < _pageSize) {
+        _hasMore = false;
+      }
       state = AsyncValue.data(contacts);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state is AsyncLoading) return;
+
+    _isLoadingMore = true;
+    try {
+      _currentPage++;
+      final newContacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      if (newContacts.length < _pageSize) {
+        _hasMore = false;
+      }
+      state.whenData((currentContacts) {
+        state = AsyncValue.data([...currentContacts, ...newContacts]);
+      });
+    } catch (e) {
+      _currentPage--; // Revert
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
+  Future<void> refresh() async {
+    return loadInitial();
   }
 
   Future<void> addContact(ContactModel contact) async {
@@ -45,11 +83,13 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
+      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Contact Created',
         '$userName added a new contact: ${newContact.name}',
         relatedEntityId: newContact.id,
         relatedEntityType: 'contact',
+        targetRoles: getUpperRanks(role),
       );
     } catch (e) {
       // Handle or propagate error

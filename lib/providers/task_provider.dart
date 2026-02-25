@@ -1,6 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task_model.dart';
+import '../models/role_model.dart';
 import '../repositories/task_repository.dart';
 import '../services/task_service.dart';
 import 'auth_provider.dart';
@@ -23,14 +24,26 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
   final TaskRepository _repository;
   final Ref _ref;
 
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
   TaskNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
-    getTasks();
+    loadInitial();
   }
 
-  Future<void> getTasks() async {
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
+  Future<void> loadInitial() async {
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final tasks = await _repository.getTasks();
+      final tasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      if (tasks.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(tasks);
 
       // Check for Task Due Reminders
@@ -51,6 +64,28 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
     }
   }
 
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state is AsyncLoading) return;
+
+    _isLoadingMore = true;
+    try {
+      _currentPage++;
+      final newTasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      if (newTasks.length < _pageSize) _hasMore = false;
+      state.whenData((currentTasks) {
+        state = AsyncValue.data([...currentTasks, ...newTasks]);
+      });
+    } catch (e) {
+      _currentPage--;
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
+  Future<void> refresh() async {
+    return loadInitial();
+  }
+
   Future<void> addTask(TaskModel task) async {
     try {
       final newTask = await _repository.addTask(task);
@@ -60,11 +95,13 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
+      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Task Created',
         '$userName added a new task: ${newTask.title}',
         relatedEntityId: newTask.id,
         relatedEntityType: 'task',
+        targetRoles: getUpperRanks(role),
       );
     } catch (e) {
       rethrow;
@@ -85,11 +122,13 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         if (existingTask.status != task.status) {
           final currentUser = _ref.read(currentUserProvider);
           final userName = currentUser?.name ?? 'Someone';
+          final role = currentUser?.role ?? Role.viewer;
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Task Status Updated',
             '$userName marked the task ${task.title} as ${task.status.name}',
             relatedEntityId: task.id,
             relatedEntityType: 'task',
+            targetRoles: getUpperRanks(role),
           );
         }
       });

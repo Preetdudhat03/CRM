@@ -12,11 +12,36 @@ import 'deal_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
 
-class DealsScreen extends ConsumerWidget {
+class DealsScreen extends ConsumerStatefulWidget {
   const DealsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DealsScreen> createState() => _DealsScreenState();
+}
+
+class _DealsScreenState extends ConsumerState<DealsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      ref.read(dealsProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dealsAsync = ref.watch(filteredDealsProvider);
     final user = ref.watch(currentUserProvider);
     final canCreate = PermissionService.canCreateDeals(user);
@@ -51,7 +76,7 @@ class DealsScreen extends ConsumerWidget {
       ),
       body: dealsAsync.when(
         data: (deals) => RefreshIndicator(
-          onRefresh: () => ref.read(dealsProvider.notifier).getDeals(),
+          onRefresh: () => ref.read(dealsProvider.notifier).refresh(),
           child: deals.isEmpty
               ? SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -73,9 +98,31 @@ class DealsScreen extends ConsumerWidget {
                   ),
                 )
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: deals.length,
+                  itemCount: deals.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == deals.length) {
+                      final notifier = ref.read(dealsProvider.notifier);
+                      if (notifier.isLoadingMore) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (!notifier.hasMore && deals.isNotEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('No more deals'),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }
+
                     final deal = deals[index];
                     return DealCard(
                       deal: deal,
@@ -110,7 +157,7 @@ class DealsScreen extends ConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(
-          onRefresh: () => ref.read(dealsProvider.notifier).getDeals(),
+          onRefresh: () => ref.read(dealsProvider.notifier).refresh(),
           child: SingleChildScrollView(
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(

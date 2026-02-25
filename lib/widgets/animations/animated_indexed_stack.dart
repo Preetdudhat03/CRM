@@ -21,10 +21,14 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
   late Animation<double> _animation;
   late int _currentIndex;
 
+  // Track which tabs have been visited — only build those
+  late final Set<int> _visitedIndices;
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.index;
+    _visitedIndices = {widget.index}; // Only the initial tab is visited
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 150));
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -37,7 +41,10 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
     if (widget.index != _currentIndex) {
       _controller.reverse().then((_) {
         if (mounted) {
-          setState(() => _currentIndex = widget.index);
+          setState(() {
+            _currentIndex = widget.index;
+            _visitedIndices.add(widget.index); // Mark as visited on first switch
+          });
           _controller.forward();
         }
       });
@@ -57,7 +64,13 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
       opacity: _animation,
       child: IndexedStack(
         index: _currentIndex,
-        children: widget.children,
+        children: [
+          for (int i = 0; i < widget.children.length; i++)
+            // Only build child if the tab has been visited; otherwise use empty placeholder
+            _visitedIndices.contains(i)
+                ? widget.children[i]
+                : const SizedBox.shrink(),
+        ],
       ),
     );
   }

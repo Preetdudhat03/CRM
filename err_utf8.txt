@@ -1,0 +1,2 @@
+ERROR|COMPILE_TIME_ERROR|MISSING_REQUIRED_ARGUMENT|P:\\projects\\CRM\\lib\\services\\local_notification_service.dart|23|32|10|The named parameter 'settings' is required, but there's no corresponding argument.
+ERROR|COMPILE_TIME_ERROR|EXTRA_POSITIONAL_ARGUMENTS_COULD_BE_NAMED|P:\\projects\\CRM\\lib\\services\\local_notification_service.dart|24|7|22|Too many positional arguments: 0 expected, but 1 found.

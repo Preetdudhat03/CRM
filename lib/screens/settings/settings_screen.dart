@@ -9,7 +9,7 @@ import 'user_management/user_management_screen.dart';
 import 'profile_screen.dart';
 import 'roles_permissions_screen.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/notification_settings_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../core/services/permission_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -199,7 +199,7 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: Switch(
                   value: notificationsEnabled,
                   onChanged: (val) {
-                    ref.read(notificationSettingsProvider.notifier).setEnabled(val);
+                    ref.read(notificationSettingsProvider.notifier).toggle(val);
                   },
                 ),
               ),

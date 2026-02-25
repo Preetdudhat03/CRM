@@ -6,8 +6,8 @@ class TaskRepository {
 
   TaskRepository(this._service);
 
-  Future<List<TaskModel>> getTasks() async {
-    return _service.getTasks();
+  Future<List<TaskModel>> getTasks({int page = 0, int pageSize = 20}) async {
+    return _service.getTasks(page: page, pageSize: pageSize);
   }
 
   Future<TaskModel> addTask(TaskModel task) async {

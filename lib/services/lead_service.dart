@@ -4,66 +4,22 @@ import '../models/lead_model.dart';
 class LeadService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<LeadModel>> getLeads() async {
-    // 1. Fetch from 'leads' table
+  Future<List<LeadModel>> getLeads({int page = 0, int pageSize = 20}) async {
+    final start = page * pageSize;
+    final end = start + pageSize - 1;
+
+    // 1. Fetch from 'leads' table with limits
     final leadsResponse = await _supabase
         .from('leads')
         .select()
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(start, end);
     
     final List<LeadModel> leads = (leadsResponse as List)
         .map((json) => LeadModel.fromJson(json))
         .toList();
 
-    // 2. Fetch from 'contacts' table where status is 'lead'
-    final contactsResponse = await _supabase
-        .from('contacts')
-        .select()
-        .eq('status', 'lead')
-        .order('created_at', ascending: false);
-
-    final List<LeadModel> contactLeads = (contactsResponse as List).map((json) {
-      // Map Contact JSON to LeadModel
-      return LeadModel(
-        id: json['id'],
-        name: json['name'],
-        email: json['email'] ?? '',
-        phone: json['phone'] ?? '',
-        source: 'Contact List', // Indicate it came from contacts
-        status: LeadStatus.newLead, // Default status mapping
-        assignedTo: '', // Unknown
-        createdAt: DateTime.parse(json['created_at']),
-        estimatedValue: 0,
-      );
-    }).toList();
-
-    // 3. Deduplicate: Prioritize 'leads' records over 'contact' records
-    // Create sets for fast lookup of existing real leads
-    final Set<String> leadIds = leads.map((l) => l.id).toSet();
-    final Set<String> leadEmails = leads
-        .map((l) => l.email.trim().toLowerCase())
-        .where((e) => e.isNotEmpty)
-        .toSet();
-
-    // Filter contact leads that are already present as real leads
-    final filteredContactLeads = contactLeads.where((c) {
-      // If a real lead has this ID, exclude the contact version
-      if (leadIds.contains(c.id)) return false;
-      
-      // If a real lead has this Email, exclude the contact version (avoids duplicates with different IDs)
-      final email = c.email.trim().toLowerCase();
-      if (email.isNotEmpty && leadEmails.contains(email)) return false;
-      
-      return true;
-    }).toList();
-
-    // Merge: Real leads + Non-duplicated contact leads
-    final allLeads = [...leads, ...filteredContactLeads];
-    
-    // Final robust sort
-    allLeads.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
-    return allLeads;
+    return leads;
   }
 
   Future<LeadModel> addLead(LeadModel lead) async {

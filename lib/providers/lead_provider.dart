@@ -1,6 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/lead_model.dart';
+import '../models/role_model.dart';
 import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
 import 'auth_provider.dart';
@@ -23,18 +24,52 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   final LeadRepository _repository;
   final Ref _ref;
 
+  int _currentPage = 0;
+  final int _pageSize = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
   LeadNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
-    getLeads();
+    loadInitial();
   }
 
-  Future<void> getLeads() async {
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
+  Future<void> loadInitial() async {
+    _currentPage = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final leads = await _repository.getLeads();
+      final leads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      if (leads.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(leads);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state is AsyncLoading) return;
+
+    _isLoadingMore = true;
+    try {
+      _currentPage++;
+      final newLeads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      if (newLeads.length < _pageSize) _hasMore = false;
+      state.whenData((currentLeads) {
+        state = AsyncValue.data([...currentLeads, ...newLeads]);
+      });
+    } catch (e) {
+      _currentPage--;
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
+  Future<void> refresh() async {
+    return loadInitial();
   }
 
   Future<void> addLead(LeadModel lead) async {
@@ -46,11 +81,13 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
+      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Lead Added',
         '$userName added a new lead: ${newLead.name}',
         relatedEntityId: newLead.id,
         relatedEntityType: 'lead',
+        targetRoles: getUpperRanks(role),
       );
     } catch (e) {
       rethrow;
@@ -75,11 +112,13 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         if (existingLead.assignedTo != lead.assignedTo && isAssigned) {
           final currentUser = _ref.read(currentUserProvider);
           final userName = currentUser?.name ?? 'Someone';
+          final role = currentUser?.role ?? Role.viewer;
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Lead Assigned',
             '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
+            targetRoles: getUpperRanks(role),
           );
         }
       });
@@ -124,32 +163,3 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
   });
 });
 
-// Dashboard Stats Provider
-final leadStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
-  final leadsAsync = ref.watch(leadsProvider);
-  final period = ref.watch(dashboardPeriodProvider);
-
-  return leadsAsync.whenData((leads) {
-    int total = leads.length;
-    int newLeads = leads.where((l) => l.status == LeadStatus.newLead).length;
-    int interested = leads.where((l) => l.status == LeadStatus.interested).length;
-    int qualified = leads.where((l) => l.status == LeadStatus.qualified).length;
-    
-    final currentPeriodLeads = leads.where((l) => l.createdAt.isAfter(period.startDate)).length;
-    final previousPeriodLeads = leads.where((l) => 
-      l.createdAt.isAfter(period.previousPeriodStartDate) && 
-      l.createdAt.isBefore(period.previousPeriodEndDate)
-    ).length;
-    
-    final trendData = calculateTrend(currentPeriodLeads, previousPeriodLeads);
-
-    return {
-      'total': total,
-      'new': newLeads,
-      'interested': interested,
-      'qualified': qualified,
-      'trendPercentage': trendData['trend'],
-      'isUpTrend': trendData['isUp'],
-    };
-  });
-});

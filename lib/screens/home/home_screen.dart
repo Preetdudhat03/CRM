@@ -35,9 +35,7 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final canViewAnalytics = PermissionService.canViewAnalytics(user);
 
-    final contactStats = ref.watch(contactStatsProvider);
-    final dealStats = ref.watch(dealStatsProvider);
-    final leadStats = ref.watch(leadStatsProvider);
+    final dashboardMetrics = ref.watch(dashboardMetricsProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final currentPeriod = ref.watch(dashboardPeriodProvider);
 
@@ -127,11 +125,7 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await Future.wait([
-            ref.read(contactsProvider.notifier).getContacts(),
-            ref.read(leadsProvider.notifier).getLeads(),
-            ref.read(dealsProvider.notifier).getDeals(),
-          ]);
+          ref.invalidate(dashboardMetricsProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -192,13 +186,11 @@ class HomeScreen extends ConsumerWidget {
                       FadeInSlide(
                         delay: 0.1,
                         child: _buildStatCard(
-                          contactStats,
+                          dashboardMetrics,
                           title: 'Total Contacts',
                           icon: Icons.people_outline,
                           color: Colors.blue,
-                          valueKey: 'total',
-                          trendKey: 'trendPercentage',
-                          isUpTrendKey: 'isUpTrend',
+                          valueKey: 'totalContacts',
                           onTap: () {
                             ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
                           },
@@ -207,13 +199,11 @@ class HomeScreen extends ConsumerWidget {
                       FadeInSlide(
                         delay: 0.2,
                         child: _buildStatCard(
-                          leadStats, // Using correct Leads Provider
+                          dashboardMetrics,
                           title: 'Total Leads',
                           icon: Icons.leaderboard_outlined,
                           color: Colors.orange,
-                          valueKey: 'total', // Using 'total' key for leads
-                          trendKey: 'trendPercentage',
-                          isUpTrendKey: 'isUpTrend',
+                          valueKey: 'totalLeads',
                           onTap: () {
                             ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
                           },
@@ -222,11 +212,9 @@ class HomeScreen extends ConsumerWidget {
                       FadeInSlide(
                         delay: 0.3,
                         child: _buildStatCard(
-                          dealStats,
+                          dashboardMetrics,
                           title: 'Active Deals',
-                          valueKey: 'activeCount',
-                          trendKey: 'activeCountTrendPercentage',
-                          isUpTrendKey: 'activeCountIsUpTrend',
+                          valueKey: 'totalDeals',
                           icon: Icons.handshake_outlined,
                           color: Colors.purple,
                           onTap: () {
@@ -239,16 +227,13 @@ class HomeScreen extends ConsumerWidget {
                         FadeInSlide(
                           delay: 0.4,
                           child: _buildStatCard(
-                            dealStats,
+                            dashboardMetrics,
                             title: 'Revenue (Won)',
                             valueKey: 'revenueWon',
-                            trendKey: 'revenueWonTrendPercentage',
-                            isUpTrendKey: 'revenueWonIsUpTrend',
                             icon: Icons.attach_money,
                             color: Colors.green,
                             isCurrency: true,
                             onTap: () {
-                              // Navigate to Analytics/Deals or show breakdown
                               ref.read(bottomNavIndexProvider.notifier).state = 3;
                             },
                           ),
@@ -290,10 +275,22 @@ class HomeScreen extends ConsumerWidget {
               // Deal Pipeline Horizontal Snapshot
               FadeInSlide(
                 delay: 0.45,
-                child: dealStats.when(
+                child: dashboardMetrics.when(
                   data: (stats) {
-                    final Map<DealStage, int>? pipeline = stats['pipeline'];
-                    if (pipeline == null || pipeline.isEmpty) return const SizedBox();
+                    final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
+                    if (rawPipeline.isEmpty) return const SizedBox();
+                    
+                    final Map<DealStage, int> pipeline = {};
+                    for (var stage in DealStage.values) {
+                      // Check both camelCase (e.g. closedWon) and snake_case (closed_won)
+                      final snakeName = stage.name.replaceAllMapped(
+                        RegExp(r'[A-Z]'),
+                        (m) => '_${m.group(0)!.toLowerCase()}',
+                      );
+                      pipeline[stage] = (rawPipeline[stage.name] ?? 0) + (rawPipeline[snakeName] ?? 0);
+                    }
+
+                    if (pipeline.values.every((val) => val == 0)) return const SizedBox();
                     
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/dashboard_service.dart';
 
 enum DashboardPeriod {
   thisWeek,
@@ -47,6 +48,7 @@ extension DashboardPeriodExtension on DashboardPeriod {
   }
 }
 
+
 final dashboardPeriodProvider = StateProvider<DashboardPeriod>((ref) => DashboardPeriod.thisMonth);
 
 // Helper function to calculate trend
@@ -62,3 +64,11 @@ Map<String, dynamic> calculateTrend(int current, int previous) {
     'isUp': change >= 0,
   };
 }
+
+// Dashboard Provider
+final dashboardServiceProvider = Provider<DashboardService>((ref) => DashboardService());
+
+final dashboardMetricsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final service = ref.watch(dashboardServiceProvider);
+  return await service.fetchDashboardMetrics();
+});

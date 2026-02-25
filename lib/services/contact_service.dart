@@ -4,11 +4,15 @@ import '../models/contact_model.dart';
 class ContactService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<ContactModel>> getContacts() async {
+  Future<List<ContactModel>> getContacts({int page = 0, int pageSize = 20}) async {
+    final start = page * pageSize;
+    final end = start + pageSize - 1;
+
     final response = await _supabase
         .from('contacts')
         .select()
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(start, end);
     
     final List<dynamic> data = response as List<dynamic>;
     return data.map((json) => ContactModel.fromJson(json)).toList();

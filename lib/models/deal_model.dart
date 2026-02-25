@@ -105,38 +105,51 @@ class DealModel {
     );
   }
   factory DealModel.fromJson(Map<String, dynamic> json) {
+    // Convert snake_case stage to camelCase for enum matching
+    final rawStage = (json['stage'] ?? 'qualification') as String;
+    final stageName = rawStage.replaceAllMapped(
+      RegExp(r'_([a-z])'),
+      (m) => m.group(1)!.toUpperCase(),
+    );
     return DealModel(
       id: json['id'],
-      title: json['title'],
-      contactId: json['contact_id'],
-      contactName: json['contact_name'] ?? '', // Assuming we store this denormalized, or fetched via join (requires updated query in service)
-      companyName: json['company_name'] ?? '', 
-      value: (json['value'] as num).toDouble(),
+      title: json['title'] ?? '',
+      contactId: json['contact_id'] ?? '',
+      contactName: json['contact_name'] ?? '',
+      companyName: json['company_name'] ?? '',
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
       stage: DealStage.values.firstWhere(
-        (e) => e.name == (json['stage'] ?? 'qualification'),
+        (e) => e.name == stageName,
         orElse: () => DealStage.qualification,
       ),
       assignedTo: json['assigned_to'] ?? '',
-      expectedCloseDate: DateTime.parse(json['expected_close_date']),
+      expectedCloseDate: json['expected_close_date'] != null
+          ? DateTime.parse(json['expected_close_date'])
+          : DateTime.now().add(const Duration(days: 30)),
       notes: json['notes'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
+    // Convert camelCase stage to snake_case for DB
+    final stageSnake = stage.name.replaceAllMapped(
+      RegExp(r'[A-Z]'),
+      (m) => '_${m.group(0)!.toLowerCase()}',
+    );
     return {
       'title': title,
-      'contact_id': contactId,
-      'contact_name': contactName,
+      'contact_id': contactId.isEmpty ? null : contactId,
       'company_name': companyName,
       'value': value,
-      'stage': stage.name,
-      'assigned_to': assignedTo,
+      'stage': stageSnake,
+      'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'expected_close_date': expectedCloseDate.toIso8601String(),
-      'notes': notes,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
     };
   }
 }

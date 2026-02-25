@@ -41,11 +41,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       final auth = ref.read(authServiceProvider);
-      // We'll expose a simple connectivity check method in AuthService 
-      // or just try to fetch a public resource. 
-      // For now, let's just use Supabase client directly via a test query
-      // Since we don't have direct access here easily without importing Supabase,
-      // let's add a test method to AuthService.
       final isConnected = await auth.checkConnection();
       
       if (!mounted) return;
@@ -54,21 +49,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
            const SnackBar(
              content: Text('✅ Connected to Supabase!'),
              backgroundColor: Colors.green,
-             duration: Duration(seconds: 2),
+             duration: Duration(seconds: 3),
            ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('❌ Connection Failed! Check internet & project URL.'),
+           SnackBar(
+             content: const Text('❌ Connection Failed!\nCheck debug console for details.'),
              backgroundColor: Colors.red,
+             duration: const Duration(seconds: 5),
            ),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 5),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

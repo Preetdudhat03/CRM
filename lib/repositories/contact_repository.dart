@@ -6,8 +6,8 @@ class ContactRepository {
 
   ContactRepository(this._service);
 
-  Future<List<ContactModel>> getContacts() async {
-    return _service.getContacts();
+  Future<List<ContactModel>> getContacts({int page = 0, int pageSize = 20}) async {
+    return _service.getContacts(page: page, pageSize: pageSize);
   }
 
   Future<ContactModel> addContact(ContactModel contact) async {

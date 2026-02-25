@@ -173,30 +173,24 @@ class AuthService {
   // Check connectivity by making a lightweight request
   Future<bool> checkConnection() async {
     try {
-      // We can query the health endpoint or a public table.
-      // Easiest is to try and fetch 1 row from a table, even if empty.
-      // Or just check if client is initialized.
-      // But user specifically wants to ensure "connected to database".
-      
-      // Let's try to fetch user session or just a simple rpc call if available.
-      // Since we enabled RLS, unauthenticated select might fail.
-      // But we just want to see if we can reach Supabase.
-      
-      // Checking health by just accessing the client is usually enough to know if config is valid.
-      // But to test network:
-      await _supabase.from('roles').select().limit(1).maybeSingle();
-      // If table 'roles' doesn't exist, it might throw, but it means we reached the DB.
-      // Better:
-      // Just return true if no network exception.
+      // Don't query a table — RLS blocks unauthenticated queries.
+      // Instead, try the auth settings endpoint which is always public.
+      await _supabase.auth.getUser().timeout(const Duration(seconds: 8));
+      // If this returns without network error, we're connected
       return true;
     } catch (e) {
-      // If table doesn't exist, we still connected.
-      // We only care about network errors.
-      if (e.toString().contains('SocketException') || e.toString().contains('Network')) {
-        return false;
+      print('[Connection Check] Error: $e');
+      print('[Connection Check] Error type: ${e.runtimeType}');
+      final errorStr = e.toString();
+      // AuthException means we reached the server (just not authenticated)
+      if (e is AuthException ||
+          errorStr.contains('not authenticated') ||
+          errorStr.contains('invalid') ||
+          errorStr.contains('session_not_found') ||
+          errorStr.contains('JWT')) {
+        return true; // Server IS reachable
       }
-      // If we got a Postgres error, we ARE connected!
-      return true;
+      return false;
     }
   }
 }

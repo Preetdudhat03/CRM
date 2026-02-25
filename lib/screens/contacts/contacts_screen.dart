@@ -12,11 +12,36 @@ import 'contact_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
 
-class ContactsScreen extends ConsumerWidget {
+class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ContactsScreen> createState() => _ContactsScreenState();
+}
+
+class _ContactsScreenState extends ConsumerState<ContactsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      ref.read(contactsProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final contactsAsync = ref.watch(filteredContactsProvider);
     final user = ref.watch(currentUserProvider);
     final canCreate = PermissionService.canCreateContacts(user);
@@ -51,7 +76,7 @@ class ContactsScreen extends ConsumerWidget {
       ),
       body: contactsAsync.when(
         data: (contacts) => RefreshIndicator(
-          onRefresh: () => ref.read(contactsProvider.notifier).getContacts(),
+          onRefresh: () => ref.read(contactsProvider.notifier).refresh(),
           child: contacts.isEmpty
               ? SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -73,9 +98,31 @@ class ContactsScreen extends ConsumerWidget {
                   ),
                 )
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: contacts.length,
+                  itemCount: contacts.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == contacts.length) {
+                      final notifier = ref.read(contactsProvider.notifier);
+                      if (notifier.isLoadingMore) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (!notifier.hasMore && contacts.isNotEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('No more contacts'),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }
+
                     final contact = contacts[index];
                     return Center(
                       child: ConstrainedBox(
@@ -115,7 +162,7 @@ class ContactsScreen extends ConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(
-          onRefresh: () => ref.read(contactsProvider.notifier).getContacts(),
+          onRefresh: () => ref.read(contactsProvider.notifier).refresh(),
           child: SingleChildScrollView(
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(

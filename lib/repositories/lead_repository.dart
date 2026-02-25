@@ -6,8 +6,8 @@ class LeadRepository {
 
   LeadRepository(this._service);
 
-  Future<List<LeadModel>> getLeads() async {
-    return _service.getLeads();
+  Future<List<LeadModel>> getLeads({int page = 0, int pageSize = 20}) async {
+    return _service.getLeads(page: page, pageSize: pageSize);
   }
 
   Future<LeadModel> addLead(LeadModel lead) async {

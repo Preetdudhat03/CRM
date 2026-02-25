@@ -12,11 +12,36 @@ import 'lead_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
 
-class LeadsScreen extends ConsumerWidget {
+class LeadsScreen extends ConsumerStatefulWidget {
   const LeadsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LeadsScreen> createState() => _LeadsScreenState();
+}
+
+class _LeadsScreenState extends ConsumerState<LeadsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      ref.read(leadsProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final leadsAsync = ref.watch(filteredLeadsProvider);
     final user = ref.watch(currentUserProvider);
     final canCreate = PermissionService.canCreateLeads(user);
@@ -51,7 +76,7 @@ class LeadsScreen extends ConsumerWidget {
       ),
       body: leadsAsync.when(
         data: (leads) => RefreshIndicator(
-          onRefresh: () => ref.read(leadsProvider.notifier).getLeads(),
+          onRefresh: () => ref.read(leadsProvider.notifier).refresh(),
           child: leads.isEmpty
               ? SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -73,9 +98,31 @@ class LeadsScreen extends ConsumerWidget {
                   ),
                 )
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: leads.length,
+                  itemCount: leads.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == leads.length) {
+                      final notifier = ref.read(leadsProvider.notifier);
+                      if (notifier.isLoadingMore) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (!notifier.hasMore && leads.isNotEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('No more leads'),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }
+
                     final lead = leads[index];
                     return Center(
                       child: ConstrainedBox(
@@ -115,7 +162,7 @@ class LeadsScreen extends ConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => RefreshIndicator(
-          onRefresh: () => ref.read(leadsProvider.notifier).getLeads(),
+          onRefresh: () => ref.read(leadsProvider.notifier).refresh(),
           child: SingleChildScrollView(
              physics: const AlwaysScrollableScrollPhysics(),
              child: SizedBox(

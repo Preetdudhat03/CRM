@@ -1,0 +1,115 @@
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\main.dart|7|8|33|Unused import: 'screens/main_layout_screen.dart'.
+WARNING|STATIC_WARNING|UNUSED_LOCAL_VARIABLE|P:\\projects\\CRM\\lib\\providers\\deal_provider.dart|175|10|6|The value of the local variable 'rvIsUp' isn't used.
+WARNING|STATIC_WARNING|UNNECESSARY_NON_NULL_ASSERTION|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|55|52|1|The '!' will have no effect because the receiver can't be null.
+WARNING|STATIC_WARNING|UNNECESSARY_NON_NULL_ASSERTION|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|68|83|1|The '!' will have no effect because the receiver can't be null.
+WARNING|STATIC_WARNING|UNNECESSARY_NON_NULL_ASSERTION|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|144|43|1|The '!' will have no effect because the receiver can't be null.
+WARNING|STATIC_WARNING|UNNECESSARY_NON_NULL_ASSERTION|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|145|69|1|The '!' will have no effect because the receiver can't be null.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\repositories\\auth_repository.dart|3|8|27|Unused import: '../models/role_model.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\contacts\\contacts_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|DEAD_CODE|P:\\projects\\CRM\\lib\\screens\\contacts\\contacts_screen.dart|123|83|5|Dead code.
+WARNING|STATIC_WARNING|DEAD_NULL_AWARE_EXPRESSION|P:\\projects\\CRM\\lib\\screens\\contacts\\contacts_screen.dart|123|86|2|The left operand can't be null, so the right operand is never executed.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\deals\\deals_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|DEAD_CODE|P:\\projects\\CRM\\lib\\screens\\deals\\deals_screen.dart|118|83|5|Dead code.
+WARNING|STATIC_WARNING|DEAD_NULL_AWARE_EXPRESSION|P:\\projects\\CRM\\lib\\screens\\deals\\deals_screen.dart|118|86|2|The left operand can't be null, so the right operand is never executed.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|6|8|30|Unused import: '../../models/user_model.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|9|8|28|Unused import: '../../theme/app_theme.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\pipeline_widget.dart|3|8|48|Unused import: '../../../widgets/animations/fade_in_slide.dart'.
+WARNING|STATIC_WARNING|DUPLICATE_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\recent_activity_widget.dart|3|8|48|Duplicate import.
+WARNING|STATIC_WARNING|UNUSED_ELEMENT|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\recent_activity_widget.dart|98|7|13|The declaration '_ActivityItem' isn't referenced.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|7|8|51|Unused import: '../../../../widgets/animations/fade_in_slide.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|6|8|51|Unused import: '../../../../widgets/animations/fade_in_slide.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\leads\\leads_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|DEAD_CODE|P:\\projects\\CRM\\lib\\screens\\leads\\leads_screen.dart|123|83|5|Dead code.
+WARNING|STATIC_WARNING|DEAD_NULL_AWARE_EXPRESSION|P:\\projects\\CRM\\lib\\screens\\leads\\leads_screen.dart|123|86|2|The left operand can't be null, so the right operand is never executed.
+WARNING|STATIC_WARNING|UNUSED_FIELD|P:\\projects\\CRM\\lib\\screens\\settings\\profile_screen.dart|28|11|16|The value of the field '_confirmPassword' isn't used.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\settings\\roles_permissions_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|6|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|UNUSED_LOCAL_VARIABLE|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|23|11|9|The value of the local variable 'themeMode' isn't used.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|6|8|33|Unused import: '../../../models/user_model.dart'.
+WARNING|STATIC_WARNING|DEAD_CODE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|147|83|5|Dead code.
+WARNING|STATIC_WARNING|DEAD_NULL_AWARE_EXPRESSION|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|147|86|2|The left operand can't be null, so the right operand is never executed.
+WARNING|STATIC_WARNING|UNUSED_IMPORT|P:\\projects\\CRM\\lib\\screens\\tasks\\tasks_screen.dart|4|8|36|Unused import: '../../models/permission_model.dart'.
+WARNING|STATIC_WARNING|DEAD_CODE|P:\\projects\\CRM\\lib\\screens\\tasks\\tasks_screen.dart|132|83|5|Dead code.
+WARNING|STATIC_WARNING|DEAD_NULL_AWARE_EXPRESSION|P:\\projects\\CRM\\lib\\screens\\tasks\\tasks_screen.dart|132|86|2|The left operand can't be null, so the right operand is never executed.
+INFO|LINT|DEPEND_ON_REFERENCED_PACKAGES|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|10|8|24|The imported package 'uuid' isn't a dependency of the importing package.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|86|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|104|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\providers\\notification_provider.dart|117|7|5|Don't invoke 'print' in production code.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\auth\\register_screen.dart|139|21|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\contacts\\add_edit_contact_screen.dart|358|21|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\contacts\\contact_detail_screen.dart|119|62|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\contacts\\widgets\\contact_card.dart|41|59|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\contacts\\widgets\\contact_card.dart|68|56|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\deals\\add_edit_deal_screen.dart|119|23|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\deals\\add_edit_deal_screen.dart|155|88|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\deals\\add_edit_deal_screen.dart|227|21|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\deals\\deal_detail_screen.dart|26|49|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\deals\\widgets\\deal_card.dart|49|47|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|337|15|58|Use 'const' with the constructor to improve performance.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|393|22|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\home_screen.dart|483|30|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\dashboard_card.dart|31|64|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\dashboard_card.dart|48|36|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\dashboard_card.dart|57|58|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\dashboard_card.dart|57|88|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\pipeline_widget.dart|27|66|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\pipeline_widget.dart|30|33|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\pipeline_widget.dart|88|34|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\pipeline_widget.dart|124|26|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\recent_activity_widget.dart|40|60|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|21|66|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|24|33|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|90|65|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|97|36|53|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|97|59|29|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|98|34|53|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|98|57|29|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|146|34|21|Use 'const' with the constructor to improve performance.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\revenue_trend_chart_widget.dart|149|47|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|21|66|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|24|33|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|78|88|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|108|55|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|108|88|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\home\\widgets\\tasks_due_today_widget.dart|159|84|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\leads\\add_edit_lead_screen.dart|236|21|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\leads\\widgets\\lead_card.dart|66|59|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\notifications\\notifications_screen.dart|39|37|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\notifications\\notifications_screen.dart|40|56|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\profile_screen.dart|235|88|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\roles_permissions_screen.dart|24|41|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\roles_permissions_screen.dart|28|57|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\roles_permissions_screen.dart|38|59|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\roles_permissions_screen.dart|81|73|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|45|43|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|51|59|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|60|65|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|110|36|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\settings\\settings_screen.dart|212|22|190|Use 'const' with the constructor to improve performance.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\add_edit_user_screen.dart|144|63|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\add_edit_user_screen.dart|195|21|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|28|28|84|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|29|30|22|Use 'const' with the constructor to improve performance.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|43|51|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|47|67|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\settings\\user_management\\user_management_screen.dart|83|89|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\add_edit_task_screen.dart|176|27|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\add_edit_task_screen.dart|197|27|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\add_edit_task_screen.dart|230|27|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\add_edit_task_screen.dart|255|35|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\add_edit_task_screen.dart|280|39|5|'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\task_detail_screen.dart|28|54|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\task_detail_screen.dart|37|56|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\tasks\\tasks_screen.dart|222|17|39|Use 'const' with the constructor to improve performance.
+INFO|LINT|PREFER_CONST_CONSTRUCTORS|P:\\projects\\CRM\\lib\\screens\\tasks\\tasks_screen.dart|222|35|20|Use 'const' with the constructor to improve performance.
+INFO|HINT|DEPRECATED_MEMBER_USE|P:\\projects\\CRM\\lib\\screens\\tasks\\widgets\\task_card.dart|79|52|11|'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss.
+INFO|LINT|DEPEND_ON_REFERENCED_PACKAGES|P:\\projects\\CRM\\lib\\services\\notification_service.dart|5|8|24|The imported package 'uuid' isn't a dependency of the importing package.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\notification_service.dart|29|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\notification_service.dart|46|8|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\notification_service.dart|64|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\notification_service.dart|82|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\notification_service.dart|97|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\storage_service.dart|21|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\storage_service.dart|74|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|P:\\projects\\CRM\\lib\\services\\user_service.dart|34|7|5|Don't invoke 'print' in production code.

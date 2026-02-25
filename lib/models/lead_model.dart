@@ -76,6 +76,12 @@ class LeadModel {
 
 
   factory LeadModel.fromJson(Map<String, dynamic> json) {
+    // Schema stores status as snake_case (e.g. 'new_lead'), enum is camelCase (newLead)
+    final rawStatus = (json['status'] ?? 'new_lead') as String;
+    final statusName = rawStatus.replaceAllMapped(
+      RegExp(r'_([a-z])'),
+      (m) => m.group(1)!.toUpperCase(),
+    );
     return LeadModel(
       id: json['id'],
       name: json['name'],
@@ -83,7 +89,7 @@ class LeadModel {
       phone: json['phone'] ?? '',
       source: json['source'] ?? '',
       status: LeadStatus.values.firstWhere(
-        (e) => e.name == (json['status'] ?? 'newLead'),
+        (e) => e.name == statusName,
         orElse: () => LeadStatus.newLead,
       ),
       assignedTo: json['assigned_to'] ?? '',
@@ -93,14 +99,18 @@ class LeadModel {
   }
 
   Map<String, dynamic> toJson() {
+    // Convert camelCase enum name back to snake_case for DB
+    final statusSnake = status.name.replaceAllMapped(
+      RegExp(r'[A-Z]'),
+      (m) => '_${m.group(0)!.toLowerCase()}',
+    );
     return {
       'name': name,
       'email': email,
       'phone': phone,
       'source': source,
-      'status': status.name,
+      'status': statusSnake,
       'assigned_to': assignedTo.isEmpty ? null : assignedTo,
-      'created_at': createdAt.toIso8601String(),
       'estimated_value': estimatedValue,
     };
   }

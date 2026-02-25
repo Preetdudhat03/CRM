@@ -6,8 +6,8 @@ class DealRepository {
 
   DealRepository(this._service);
 
-  Future<List<DealModel>> getDeals() async {
-    return _service.getDeals();
+  Future<List<DealModel>> getDeals({int page = 0, int pageSize = 20}) async {
+    return _service.getDeals(page: page, pageSize: pageSize);
   }
 
   Future<DealModel> addDeal(DealModel deal) async {

@@ -18,7 +18,7 @@ Future<void> main() async {
     // Initialize Supabase
     await Supabase.initialize(
       url: 'https://iyylebbrcawebwsqxzup.supabase.co',
-      anonKey: 'sb_publishable_Ek1PWmFz6ZR13fgSg2u4rg_DZi_FRrS',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eWxlYmJyY2F3ZWJ3c3F4enVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMzMwMzksImV4cCI6MjA4NjcwOTAzOX0.KvcQj5CYblv708lgKzBQPbnd6oDiiH4AC1cMhwMnRjY',
     );
   } catch (e) {
     runApp(MaterialApp(home: Scaffold(body: Center(child: Text('Failed to initialize: $e')))));
