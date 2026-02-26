@@ -157,6 +157,22 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       // Handle error
     }
   }
+
+  Future<void> convertLead(String id) async {
+    try {
+      await _repository.convertLead(id);
+      // Change status to converted locally
+      state.whenData((leads) {
+        state = AsyncValue.data([
+          for (final l in leads)
+            if (l.id == id) l.copyWith(status: LeadStatus.converted) else l
+        ]);
+      });
+      ActivityService.log(title: 'Converted lead to contact', type: 'lead', relatedEntityId: id);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 // Leads List Provider
@@ -171,8 +187,11 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
   final query = ref.watch(leadSearchQueryProvider).toLowerCase();
 
   return leadsAsync.whenData((leads) {
-    if (query.isEmpty) return leads;
-    return leads.where((lead) {
+    // Filter out converted leads from default view
+    var activeLeads = leads.where((lead) => lead.status != LeadStatus.converted).toList();
+
+    if (query.isEmpty) return activeLeads;
+    return activeLeads.where((lead) {
       return lead.name.toLowerCase().contains(query) ||
           lead.email.toLowerCase().contains(query) ||
           lead.source.toLowerCase().contains(query);

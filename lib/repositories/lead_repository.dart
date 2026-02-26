@@ -21,4 +21,8 @@ class LeadRepository {
   Future<void> deleteLead(String id) async {
     return _service.deleteLead(id);
   }
+
+  Future<String> convertLead(String id) async {
+    return _service.convertLead(id);
+  }
 }
