@@ -5,7 +5,6 @@ import '../services/notification_service.dart';
 import '../models/notification_model.dart';
 import '../models/user_model.dart';
 import '../models/role_model.dart';
-import '../models/role_model.dart';
 import '../services/local_notification_service.dart';
 import '../services/push_notification_service.dart';
 import 'auth_provider.dart';
