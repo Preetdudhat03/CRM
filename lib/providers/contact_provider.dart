@@ -104,6 +104,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
         relatedEntityId: newContact.id,
         relatedEntityType: 'contact',
         targetRoles: getUpperRanks(role),
+        showOnDevice: false,
       );
     } catch (e) {
       rethrow;

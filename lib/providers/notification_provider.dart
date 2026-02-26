@@ -118,7 +118,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     }
   }
 
-  void pushNotificationLocally(String title, String message, {String? relatedEntityId, String? relatedEntityType, bool deduplicate = false, List<String>? targetRoles}) async {
+  void pushNotificationLocally(String title, String message, {String? relatedEntityId, String? relatedEntityType, bool deduplicate = false, List<String>? targetRoles, bool showOnDevice = true}) async {
     if (deduplicate) {
       bool exists = false;
       state.whenData((notifications) {
@@ -147,7 +147,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       }
     }
 
-    if (!shouldShowDevice) return;
+    if (!shouldShowDevice || !showOnDevice) return;
 
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('notifications_enabled') ?? true;
@@ -177,12 +177,5 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
 });
 
 List<String> getUpperRanks(Role role) {
-  if (role == Role.employee) {
-    return [Role.manager.name, Role.admin.name, Role.superAdmin.name];
-  } else if (role == Role.manager) {
-    return [Role.admin.name, Role.superAdmin.name];
-  } else if (role == Role.admin) {
-    return [Role.superAdmin.name];
-  }
-  return [Role.manager.name, Role.admin.name, Role.superAdmin.name];
+  return Role.values.map((e) => e.name).toList();
 }

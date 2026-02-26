@@ -118,6 +118,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         relatedEntityId: newTask.id,
         relatedEntityType: 'task',
         targetRoles: getUpperRanks(role),
+        showOnDevice: false,
       );
     } catch (e) {
       rethrow;
@@ -145,6 +146,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
             relatedEntityId: task.id,
             relatedEntityType: 'task',
             targetRoles: getUpperRanks(role),
+            showOnDevice: false,
           );
         }
       });

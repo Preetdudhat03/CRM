@@ -26,7 +26,10 @@ serve(async (req) => {
             }
         }
 
+        console.log(`[Push FCM] Record ID: ${record.id}, Target roles:`, targetRoles);
+
         if (targetRoles.length === 0) {
+            console.log('[Push FCM] No target roles, skipping push.');
             return new Response('No target roles, skipping push.', { status: 200 })
         }
 
@@ -37,10 +40,12 @@ serve(async (req) => {
             .in('role', targetRoles)
 
         if (profileError || !profiles || profiles.length === 0) {
+            console.log('[Push FCM] No users found with these target roles. Profile Error:', profileError);
             return new Response('No users found for target roles', { status: 200 })
         }
 
         const targetUserIds = profiles.map(p => p.id)
+        console.log(`[Push FCM] Found ${profiles.length} users with matching roles.`);
 
         // 3. Get FCM Tokens for those users
         const { data: tokensData, error: tokenError } = await supabase
@@ -49,10 +54,12 @@ serve(async (req) => {
             .in('user_id', targetUserIds)
 
         if (tokenError || !tokensData || tokensData.length === 0) {
+            console.log('[Push FCM] No device tokens found for target users. Token Error:', tokenError);
             return new Response('No device tokens found for target users', { status: 200 })
         }
 
         const tokens = tokensData.map(t => t.token)
+        console.log(`[Push FCM] Found ${tokens.length} FCM tokens to send to.`);
 
         // 4. Authenticate with Google / Firebase
         // NOTE: You must add SERVICE_ACCOUNT_JSON to your Supabase Edge Function secrets
@@ -104,6 +111,7 @@ serve(async (req) => {
         })
 
         const results = await Promise.all(sendPromises)
+        console.log('[Push FCM] Send results:', JSON.stringify(results));
 
         return new Response(JSON.stringify({ success: true, results }), {
             headers: { 'Content-Type': 'application/json' },

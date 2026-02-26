@@ -26,9 +26,11 @@ class LocalNotificationService {
         // Handle notification tapped logic here
       },
     );
+  }
 
+  static Future<void> requestPermissions() async {
     // Request permissions for Android 13+
-    _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
+    await _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
   }
 
   static Future<void> showNotification({

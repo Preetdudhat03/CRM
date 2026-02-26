@@ -15,15 +15,17 @@ class PushNotificationService {
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  /// Initialize FCM + local notifications + store token
-  static Future<void> init() async {
-    // Request permission
+  static Future<void> requestPermissions() async {
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-    print('[FCM] Permission: ${settings.authorizationStatus}');
+    print('[FCM] Permission status: ${settings.authorizationStatus}');
+  }
+
+  /// Initialize FCM + local notifications + store token
+  static Future<void> init() async {
 
     // Set up background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -110,6 +112,7 @@ class PushNotificationService {
 
   /// Call this after login to register the device
   static Future<void> registerAfterLogin() async {
+    await requestPermissions();
     await _saveToken();
   }
 }

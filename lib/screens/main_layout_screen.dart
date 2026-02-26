@@ -9,16 +9,31 @@ import 'leads/leads_screen.dart';
 import 'settings/settings_screen.dart';
 import 'tasks/tasks_screen.dart';
 
+import '../services/push_notification_service.dart';
 import '../widgets/animations/animated_indexed_stack.dart';
 
 // State provider for the current bottom nav index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
 
-class MainLayoutScreen extends ConsumerWidget {
+class MainLayoutScreen extends ConsumerStatefulWidget {
   const MainLayoutScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainLayoutScreen> createState() => _MainLayoutScreenState();
+}
+
+class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Request permissions after layout is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PushNotificationService.registerAfterLogin();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentIndex = ref.watch(bottomNavIndexProvider);
 
     final List<Widget> screens = [

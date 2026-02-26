@@ -102,6 +102,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         relatedEntityId: newDeal.id,
         relatedEntityType: 'deal',
         targetRoles: getUpperRanks(role),
+        showOnDevice: false,
       );
     } catch (e) {
       rethrow;
@@ -129,6 +130,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
             relatedEntityId: deal.id,
             relatedEntityType: 'deal',
             targetRoles: getUpperRanks(role),
+            showOnDevice: false,
           );
         }
       });

@@ -102,6 +102,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         relatedEntityId: newLead.id,
         relatedEntityType: 'lead',
         targetRoles: getUpperRanks(role),
+        showOnDevice: false,
       );
     } catch (e) {
       rethrow;
@@ -133,6 +134,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
             targetRoles: getUpperRanks(role),
+            showOnDevice: false,
           );
         }
       });
