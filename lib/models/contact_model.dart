@@ -84,17 +84,14 @@ class ContactModel {
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
       id: json['id'],
-      name: json['name'],
+      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim(),
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
-      company: json['company'] ?? '',
+      company: json['company_name'] ?? '',
       position: json['position'] ?? '',
       address: json['address'],
       notes: json['notes'],
-      status: ContactStatus.values.firstWhere(
-        (e) => e.name == (json['status'] ?? 'lead'),
-        orElse: () => ContactStatus.lead,
-      ),
+      status: (json['is_customer'] == true) ? ContactStatus.customer : ContactStatus.lead,
       createdAt: DateTime.parse(json['created_at']),
       lastContacted: json['last_contacted'] != null
           ? DateTime.parse(json['last_contacted'])
@@ -105,15 +102,20 @@ class ContactModel {
   }
 
   Map<String, dynamic> toJson() {
+    final nameParts = name.trim().split(' ');
+    final firstName = nameParts.first;
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+    
     return {
-      'name': name,
+      'first_name': firstName,
+      'last_name': lastName,
       'email': email,
       'phone': phone,
-      'company': company,
+      'company_name': company,
       'position': position,
       'address': address,
       'notes': notes,
-      'status': status.name,
+      'is_customer': status == ContactStatus.customer || status == ContactStatus.churned,
       'created_at': createdAt.toIso8601String(),
       'last_contacted': lastContacted.toIso8601String(),
       'avatar_url': avatarUrl,

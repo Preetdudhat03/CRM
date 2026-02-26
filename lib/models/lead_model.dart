@@ -84,10 +84,10 @@ class LeadModel {
     );
     return LeadModel(
       id: json['id'],
-      name: json['name'],
+      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim(),
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
-      source: json['source'] ?? '',
+      source: json['lead_source'] ?? '',
       status: LeadStatus.values.firstWhere(
         (e) => e.name == statusName,
         orElse: () => LeadStatus.newLead,
@@ -104,11 +104,16 @@ class LeadModel {
       RegExp(r'[A-Z]'),
       (m) => '_${m.group(0)!.toLowerCase()}',
     );
+    final nameParts = name.trim().split(' ');
+    final firstName = nameParts.first;
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+    
     return {
-      'name': name,
+      'first_name': firstName,
+      'last_name': lastName,
       'email': email,
       'phone': phone,
-      'source': source,
+      'lead_source': source,
       'status': statusSnake,
       'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'estimated_value': estimatedValue,
