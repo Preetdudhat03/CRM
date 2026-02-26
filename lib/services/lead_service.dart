@@ -36,59 +36,28 @@ class LeadService {
   }
 
   Future<LeadModel> updateLead(LeadModel lead) async {
-    try {
-      final response = await _supabase
-          .from('leads')
-          .update(lead.toJson())
-          .eq('id', lead.id)
-          .select()
-          .single();
+    final response = await _supabase
+        .from('leads')
+        .update(lead.toJson())
+        .eq('id', lead.id)
+        .select()
+        .single();
 
-      return LeadModel.fromJson(response);
-    } catch (e) {
-      // If update fails on 'leads' table (e.g., ID not found), it likely originated from 'contacts'.
-      // PROMOTE it to a real Lead by inserting into the 'leads' table with the same ID.
-      try {
-        // Use upsert to handle potential race conditions or existing ID
-        // Note: This effectively "forks" the contact data into a Lead record.
-        // Future updates will hit the 'leads' table.
-        final json = lead.toJson();
-        json['id'] = lead.id; // IMPORTANT: Force use of same ID to prevent duplication
-        
-        final response = await _supabase
-            .from('leads')
-            .upsert(json)
-            .select()
-            .single();
-
-        return LeadModel.fromJson(response);
-      } catch (e2) {
-        // As a fallback, try updating the contact details at least
-        try {
-           final contactResponse = await _supabase
-            .from('contacts')
-            .update({
-              'name': lead.name,
-              'email': lead.email,
-              'phone': lead.phone,
-            })
-            .eq('id', lead.id)
-            .select()
-            .single();
-            
-           return lead.copyWith(
-              name: contactResponse['name'],
-              email: contactResponse['email'],
-              phone: contactResponse['phone'],
-           );
-        } catch (e3) {
-           throw e; // Throw original error if all fails
-        }
-      }
-    }
+    return LeadModel.fromJson(response);
   }
 
   Future<void> deleteLead(String id) async {
+    await _supabase.from('leads').delete().eq('id', id);
+  }
+
+  /// Converts a Lead to a Contact using the Supabase RPC function.
+  Future<String> convertLead(String leadId) async {
+    final response = await _supabase.rpc('convert_lead', params: {
+      'lead_uuid': leadId,
+    });
+    // The RPC returns the new contact UUID as a string
+    return response as String;
+  }
     await _supabase.from('leads').delete().eq('id', id);
   }
 }
