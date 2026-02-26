@@ -46,7 +46,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
     _position = widget.contact?.position ?? '';
     _address = widget.contact?.address ?? '';
     _notes = widget.contact?.notes ?? '';
-    _status = widget.contact?.status ?? ContactStatus.lead;
+    // Prevent manual entry of leads in contact page (must use conversion)
+    _status = widget.contact?.status == ContactStatus.lead ? ContactStatus.customer : (widget.contact?.status ?? ContactStatus.customer);
     _avatarUrl = widget.contact?.avatarUrl;
   }
 
@@ -362,7 +363,9 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
-                    items: ContactStatus.values.map((status) {
+                    items: ContactStatus.values
+                        .where((s) => s != ContactStatus.lead)
+                        .map((status) {
                       return DropdownMenuItem(
                         value: status,
                         child: Text(status.label),
