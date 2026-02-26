@@ -58,6 +58,4 @@ class LeadService {
     // The RPC returns the new contact UUID as a string
     return response as String;
   }
-    await _supabase.from('leads').delete().eq('id', id);
-  }
 }
