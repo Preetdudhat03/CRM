@@ -5,7 +5,9 @@ import '../services/notification_service.dart';
 import '../models/notification_model.dart';
 import '../models/user_model.dart';
 import '../models/role_model.dart';
+import '../models/role_model.dart';
 import '../services/local_notification_service.dart';
+import '../services/push_notification_service.dart';
 import 'auth_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -136,6 +138,10 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       relatedEntityType: relatedEntityType,
       targetRoles: targetRoles,
     );
+
+    if (!showOnDevice) {
+      PushNotificationService.ignoreNotificationId(notification.id);
+    }
 
     await addNotification(notification);
     
