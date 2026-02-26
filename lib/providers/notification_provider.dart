@@ -51,8 +51,9 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       final notifications = await _repository.getNotifications();
       
       final filtered = notifications.where((n) {
-        if (n.targetRoles == null || n.targetRoles!.isEmpty) return true;
         if (_currentUser == null) return false;
+        if (n.senderId != null && n.senderId == _currentUser!.id) return false;
+        if (n.targetRoles == null || n.targetRoles!.isEmpty) return true;
         return n.targetRoles!.contains(_currentUser!.role.name);
       }).toList();
 
@@ -65,7 +66,9 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   Future<void> addNotification(NotificationModel notification) async {
     // Optimistically update local state so the feeds work real-time even if Supabase isn't synced yet
     bool shouldShow = true;
-    if (notification.targetRoles != null && notification.targetRoles!.isNotEmpty) {
+    if (_currentUser != null && notification.senderId == _currentUser!.id) {
+       shouldShow = false;
+    } else if (notification.targetRoles != null && notification.targetRoles!.isNotEmpty) {
       if (_currentUser == null || !notification.targetRoles!.contains(_currentUser!.role.name)) {
         shouldShow = false;
       }
@@ -136,6 +139,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       relatedEntityId: relatedEntityId,
       relatedEntityType: relatedEntityType,
       targetRoles: targetRoles,
+      senderId: _currentUser?.id,
     );
 
     if (!showOnDevice) {
