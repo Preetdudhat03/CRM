@@ -16,13 +16,26 @@ serve(async (req) => {
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         const supabase = createClient(supabaseUrl, supabaseKey)
 
-        // 1. Extract target roles from related_entity_type (e.g. "task||roles:manager,admin")
+        // 1. Extract target roles and sender from related_entity_type (e.g. "task||roles:manager,admin||sender:123")
         let targetRoles: string[] = []
-        const rawType = record.related_entity_type;
-        if (rawType && rawType.includes('||roles:')) {
-            const parts = rawType.split('||roles:');
-            if (parts.length > 1) {
-                targetRoles = parts[1].split(',');
+        let senderId: string | null = null;
+        let rawType = record.related_entity_type;
+
+        if (rawType) {
+            // Extract sender
+            if (rawType.includes('||sender:')) {
+                const parts = rawType.split('||sender:');
+                senderId = parts[1];
+                rawType = parts[0];
+            }
+
+            // Extract roles
+            if (rawType.includes('||roles:')) {
+                const parts = rawType.split('||roles:');
+                if (parts.length > 1) {
+                    targetRoles = parts[1].split(',');
+                }
+                rawType = parts[0];
             }
         }
 
@@ -44,8 +57,18 @@ serve(async (req) => {
             return new Response('No users found for target roles', { status: 200 })
         }
 
-        const targetUserIds = profiles.map(p => p.id)
-        console.log(`[Push FCM] Found ${profiles.length} users with matching roles.`);
+        let targetUserIds = profiles.map((p: any) => p.id)
+
+        if (senderId) {
+            targetUserIds = targetUserIds.filter((id: string) => id !== senderId);
+        }
+
+        if (targetUserIds.length === 0) {
+            console.log('[Push FCM] No users to notify after filtering out the sender.');
+            return new Response('No matching users after filtering sender', { status: 200 })
+        }
+
+        console.log(`[Push FCM] Found ${targetUserIds.length} users with matching roles.`);
 
         // 3. Get FCM Tokens for those users
         const { data: tokensData, error: tokenError } = await supabase
