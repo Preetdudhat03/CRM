@@ -7,6 +7,7 @@ class NotificationModel {
   final String? relatedEntityId;
   final String? relatedEntityType; // 'task', 'deal', 'lead'
   final List<String>? targetRoles;
+  final String? senderId;
 
   const NotificationModel({
     required this.id,
@@ -17,6 +18,7 @@ class NotificationModel {
     this.relatedEntityId,
     this.relatedEntityType,
     this.targetRoles,
+    this.senderId,
   });
 
   NotificationModel copyWith({
@@ -28,6 +30,7 @@ class NotificationModel {
     String? relatedEntityId,
     String? relatedEntityType,
     List<String>? targetRoles,
+    String? senderId,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -38,6 +41,7 @@ class NotificationModel {
       relatedEntityId: relatedEntityId ?? this.relatedEntityId,
       relatedEntityType: relatedEntityType ?? this.relatedEntityType,
       targetRoles: targetRoles ?? this.targetRoles,
+      senderId: senderId ?? this.senderId,
     );
   }
 
@@ -45,12 +49,26 @@ class NotificationModel {
     String? rawType = json['related_entity_type'];
     String? type;
     List<String>? roles;
-    if (rawType != null && rawType.contains('||roles:')) {
-      final parts = rawType.split('||roles:');
-      type = parts[0] == 'none' ? null : parts[0];
-      roles = parts[1].split(',');
-    } else {
-      type = rawType;
+    String? sender;
+
+    if (rawType != null) {
+      String remaining = rawType;
+      
+      // Extract sender
+      if (remaining.contains('||sender:')) {
+        final parts = remaining.split('||sender:');
+        sender = parts[1];
+        remaining = parts[0];
+      }
+      
+      // Extract roles
+      if (remaining.contains('||roles:')) {
+        final parts = remaining.split('||roles:');
+        roles = parts[1].split(',');
+        remaining = parts[0];
+      }
+      
+      type = (remaining == 'none' || remaining.isEmpty) ? null : remaining;
     }
 
     return NotificationModel(
@@ -62,15 +80,19 @@ class NotificationModel {
       relatedEntityId: json['related_entity_id'],
       relatedEntityType: type,
       targetRoles: roles,
+      senderId: sender,
     );
   }
 
   Map<String, dynamic> toJson() {
     String? rawType = relatedEntityType;
-    if (rawType != null && targetRoles != null && targetRoles!.isNotEmpty) {
-      rawType = '$rawType||roles:${targetRoles!.join(',')}';
-    } else if (rawType == null && targetRoles != null && targetRoles!.isNotEmpty) {
-      rawType = 'none||roles:${targetRoles!.join(',')}';
+    String rolesStr = targetRoles != null && targetRoles!.isNotEmpty ? '||roles:${targetRoles!.join(',')}' : '';
+    String senderStr = senderId != null ? '||sender:$senderId' : '';
+    
+    if (rawType == null && (rolesStr.isNotEmpty || senderStr.isNotEmpty)) {
+      rawType = 'none$rolesStr$senderStr';
+    } else if (rawType != null) {
+      rawType = '$rawType$rolesStr$senderStr';
     }
 
     return {
