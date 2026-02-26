@@ -5,6 +5,7 @@ import '../../models/task_model.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/task_provider.dart';
+import '../../providers/user_management_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditTaskScreen extends ConsumerStatefulWidget {
@@ -78,6 +79,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
   Widget build(BuildContext context) {
     final contactsAsync = ref.watch(contactsProvider);
     final dealsAsync = ref.watch(dealsProvider);
+    final usersAsync = ref.watch(userManagementProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -154,16 +156,48 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.3,
-                  child: TextFormField(
-                    initialValue: _assignedTo,
-                    decoration: const InputDecoration(
-                      labelText: 'Assigned To',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                    ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please assign a user' : null,
-                    onSaved: (value) => _assignedTo = value!,
+                  child: usersAsync.when(
+                    data: (users) {
+                      String? selectedValue;
+                      if (_assignedTo.isNotEmpty && users.any((u) => u.name == _assignedTo)) {
+                        selectedValue = _assignedTo;
+                      } else if (_assignedTo.isNotEmpty) {
+                         // Keep the old value mapped if not found to prevent crash, or add it to the list dynamically
+                         selectedValue = _assignedTo;
+                      }
+                      
+                      final allItems = users.map((u) => u.name).toList();
+                      if (selectedValue != null && !allItems.contains(selectedValue)) {
+                         allItems.add(selectedValue);
+                      }
+
+                      return DropdownButtonFormField<String>(
+                        value: selectedValue,
+                        decoration: const InputDecoration(
+                          labelText: 'Assigned To',
+                          prefixIcon: Icon(Icons.person_outline),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        ),
+                        items: allItems.map((uName) {
+                          return DropdownMenuItem<String>(
+                            value: uName,
+                            child: Text(uName),
+                          );
+                        }).toList(),
+                        validator: (value) => (value == null || value.isEmpty) ? 'Please assign a user' : null,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value != null) _assignedTo = value;
+                          });
+                        },
+                        onSaved: (value) {
+                          if (value != null) _assignedTo = value;
+                        },
+                      );
+                    },
+                    loading: () => const LinearProgressIndicator(),
+                    error: (_, __) => const Text('Error loading users'),
                   ),
                 ),
                 const SizedBox(height: 16),
