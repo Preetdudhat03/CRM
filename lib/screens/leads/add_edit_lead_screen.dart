@@ -23,6 +23,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
   late String _email;
   late String _phone;
   late String _source;
+  final List<String> _sourceOptions = ['website', 'instagram', 'referral', 'cold_call', 'other'];
   late String _assignedTo;
   late double? _estimatedValue;
   late LeadStatus _status;
@@ -34,7 +35,14 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
     _name = widget.lead?.name ?? '';
     _email = widget.lead?.email ?? '';
     _phone = widget.lead?.phone ?? '';
-    _source = widget.lead?.source ?? '';
+    _source = widget.lead?.source ?? 'website';
+    if (_source.isEmpty || !_sourceOptions.contains(_source)) {
+      if (_source.isNotEmpty) {
+        _sourceOptions.add(_source); // Add if it is a custom existing one
+      } else {
+        _source = 'website';
+      }
+    }
     _assignedTo = widget.lead?.assignedTo ?? '';
     _estimatedValue = widget.lead?.estimatedValue;
     _status = widget.lead?.status ?? LeadStatus.newLead;
@@ -192,14 +200,20 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.3,
-                  child: TextFormField(
-                    initialValue: _source,
+                  child: DropdownButtonFormField<String>(
+                    value: _source,
                     decoration: const InputDecoration(
                       labelText: 'Lead Source',
                       prefixIcon: Icon(Icons.source_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
-                    onSaved: (value) => _source = value!,
+                    items: _sourceOptions.map((source) {
+                      return DropdownMenuItem(
+                        value: source,
+                        child: Text(source[0].toUpperCase() + source.substring(1).replaceAll('_', ' ')),
+                      );
+                    }).toList(),
+                    onChanged: (value) => setState(() => _source = value!),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -240,7 +254,9 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
-                    items: LeadStatus.values.map((status) {
+                    items: LeadStatus.values
+                        .where((s) => s != LeadStatus.converted)
+                        .map((status) {
                       return DropdownMenuItem(
                         value: status,
                         child: Text(status.label),
