@@ -96,7 +96,9 @@ class LeadModel {
     );
     return LeadModel(
       id: json['id'],
-      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim(),
+      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim().isNotEmpty 
+          ? '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim() 
+          : (json['name'] ?? ''),
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
       source: json['lead_source'] ?? '',
