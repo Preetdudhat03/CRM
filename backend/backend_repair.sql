@@ -27,7 +27,11 @@ BEGIN
     END IF;
 END $$;
 
--- 3. Temporarily disable Row Level Security (RLS) on contacts and leads in case assigned_to NULLs are blocking updates
+-- 3. Ensure 'updated_at' column exists for contacts and leads.
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- 4. Temporarily disable Row Level Security (RLS) on contacts and leads in case assigned_to NULLs are blocking updates
 ALTER TABLE contacts DISABLE ROW LEVEL SECURITY;
 ALTER TABLE leads DISABLE ROW LEVEL SECURITY;
 
