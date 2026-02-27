@@ -13,10 +13,12 @@ class NotificationService {
     try {
       final userId = _currentUserId;
 
-      // Fetch ALL notifications, ordered by newest first
+      // Fetch only UNREAD notifications, ordered by newest first
+      // This ensures that "Read" notifications are treated as "Cleared"
       final response = await _supabase
           .from('notifications')
           .select()
+          .eq('is_read', false)
           .order('created_at', ascending: false)
           .limit(50);
       
@@ -82,10 +84,14 @@ class NotificationService {
 
   Future<void> markAsRead(String id) async {
     try {
+      final userId = _currentUserId;
+      if (userId == null) return;
+
       await _supabase
           .from('notifications')
           .update({'is_read': true})
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', userId);
     } catch (e) {
       print('[NotificationService] Error marking read: $e');
     }
@@ -93,10 +99,14 @@ class NotificationService {
 
   Future<void> markAllAsRead() async {
     try {
-      // Mark all unread as read
+      final userId = _currentUserId;
+      if (userId == null) return;
+
+      // Mark only CURRENT user's unread notifications as read
       await _supabase
           .from('notifications')
           .update({'is_read': true})
+          .eq('user_id', userId)
           .eq('is_read', false);
     } catch (e) {
       print('[NotificationService] Error marking all read: $e');

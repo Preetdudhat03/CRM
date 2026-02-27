@@ -122,11 +122,9 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     try {
       await _repository.markAsRead(id);
       state.whenData((notifications) {
+        // Remove the notification from the state so it "vanishes" immediately
         state = AsyncValue.data(
-          notifications.map((n) {
-            if (n.id == id) return n.copyWith(isRead: true);
-            return n;
-          }).toList()
+          notifications.where((n) => n.id != id).toList()
         );
       });
     } catch (e) {
