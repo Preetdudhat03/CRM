@@ -97,6 +97,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
           notes: _notes,
           status: _status,
           createdAt: widget.contact?.createdAt ?? DateTime.now(),
+          lastContacted: widget.contact?.lastContacted ?? DateTime.now(),
           avatarUrl: newAvatarUrl,
           isFavorite: widget.contact?.isFavorite ?? false,
           assignedTo: _assignedTo.isNotEmpty ? _assignedTo : null,
