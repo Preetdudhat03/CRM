@@ -146,19 +146,15 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                 FadeInSlide(
                   delay: 0.2,
                   child: TextFormField(
-                    key: ValueKey(_companyName), // Force rebuild to show update
+                    key: ValueKey(_companyName), // Force rebuild to show update from contact selection
                     initialValue: _companyName,
-                    readOnly: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Company',
-                      prefixIcon: const Icon(Icons.business),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        borderSide: BorderSide.none,
-                      ),
+                      prefixIcon: Icon(Icons.business),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
+                    onChanged: (value) => _companyName = value,
+                    onSaved: (value) => _companyName = value ?? '',
                   ),
                 ),
                 const SizedBox(height: 16),
