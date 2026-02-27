@@ -36,7 +36,16 @@ ALTER TABLE notifications ADD COLUMN IF NOT EXISTS sender_id UUID;
 ALTER TABLE contacts DISABLE ROW LEVEL SECURITY;
 ALTER TABLE leads DISABLE ROW LEVEL SECURITY;
 
--- 4. In case the old 'users' / 'profiles' fk constraint is throwing errors, let's gracefully recreate it
+-- 5. Enable Supabase Realtime for the notifications table so updates reach flutter devices instantly
+begin;
+  -- remove the supabase_realtime publication
+  drop publication if exists supabase_realtime;
+  -- re-create the supabase_realtime publication with no tables
+  create publication supabase_realtime;
+commit;
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+
+-- 6. In case the old 'users' / 'profiles' fk constraint is throwing errors, let's gracefully recreate it
 ALTER TABLE contacts DROP CONSTRAINT IF EXISTS contacts_assigned_to_fkey;
 ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_assigned_to_fkey;
 
