@@ -135,7 +135,7 @@ class ContactModel {
       'last_contacted': lastContacted.toIso8601String(),
       'avatar_url': avatarUrl,
       'is_favorite': isFavorite,
-      'assigned_to': assignedTo,
+      'assigned_to': assignedTo == null || assignedTo!.isEmpty ? null : assignedTo,
     };
   }
 }
