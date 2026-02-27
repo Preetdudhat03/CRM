@@ -29,7 +29,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
   late String _position;
   late String _address;
   late String _notes;
-  late String _status;
+  late ContactStatus _status;
   String _countryCode = '+1'; // Default
   late String _assignedTo;
   
