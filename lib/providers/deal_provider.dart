@@ -100,7 +100,6 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         '$userName added a new deal: ${newDeal.title}',
         relatedEntityId: newDeal.id,
         relatedEntityType: 'deal',
-        showOnDevice: false,
       );
     } catch (e) {
       rethrow;
