@@ -130,6 +130,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       );
     } catch (e) {
       // Handle error
+      rethrow;
     }
   }
 
