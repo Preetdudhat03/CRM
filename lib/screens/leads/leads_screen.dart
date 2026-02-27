@@ -171,7 +171,7 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(110),
+          preferredSize: const Size.fromHeight(130),
           child: Column(
             children: [
                Padding(
