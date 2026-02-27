@@ -161,7 +161,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                                _countryCode = country.dialCode ?? '+1';
                              });
                           },
-                          initialSelection: _phone.isNotEmpty ? _phone : 'US',
+                          initialSelection: _phone.startsWith('+') ? _phone.split(' ')[0] : 'US',
                           favorite: const ['+1', 'US', 'IN', 'GB'],
                           showCountryOnly: false,
                           showOnlyCountryWhenClosed: false,

@@ -277,8 +277,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                                _countryCode = country.dialCode ?? '+1';
                              });
                           },
-                          // Try to set initial selection based on existing phone or default to US
-                          initialSelection: _phone.isNotEmpty ? _phone : 'US',
+                          // Extract valid dial code or fallback to 'US' to prevent crashes
+                          initialSelection: _phone.startsWith('+') ? _phone.split(' ')[0] : 'US',
                           favorite: const ['+1', 'US', 'IN', 'GB'],
                           showCountryOnly: false,
                           showOnlyCountryWhenClosed: false,
