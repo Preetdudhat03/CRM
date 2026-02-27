@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/contact_provider.dart';
+import '../../providers/user_management_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditDealScreen extends ConsumerStatefulWidget {
@@ -180,17 +181,37 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.4,
-                  child: TextFormField(
-                    initialValue: _assignedTo,
-                    decoration: const InputDecoration(
-                      labelText: 'Assigned To',
-                      prefixIcon: Icon(Icons.person_pin_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                    ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please assign a user' : null,
-                    onSaved: (value) => _assignedTo = value!,
-                  ),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final usersAsync = ref.watch(userManagementProvider);
+                      return usersAsync.when(
+                        data: (users) {
+                          final validIds = users.map((u) => u.id).toList();
+                          final currentValue = validIds.contains(_assignedTo) ? _assignedTo : '';
+                          return DropdownButtonFormField<String>(
+                            value: currentValue.isEmpty ? null : currentValue,
+                            decoration: const InputDecoration(
+                              labelText: 'Assigned To',
+                              prefixIcon: Icon(Icons.person_pin_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            ),
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
+                              ...users.map((user) => DropdownMenuItem(
+                                value: user.id,
+                                child: Text(user.name),
+                              )),
+                            ],
+                            onChanged: (value) => setState(() => _assignedTo = value ?? ''),
+                            onSaved: (value) => _assignedTo = value ?? '',
+                            validator: (value) => value == null || value.isEmpty ? 'Please assign a user' : null,
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Text('Failed to load users'),
+                      );
+                    },
+                   ),
                 ),
                  const SizedBox(height: 16),
                  FadeInSlide(
