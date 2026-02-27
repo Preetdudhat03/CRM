@@ -10,6 +10,22 @@ class LeadRepository {
     return _service.getLeads(page: page, pageSize: pageSize);
   }
 
+  Future<LeadModel> getLeadById(String id) async {
+    return _service.getLeadById(id);
+  }
+
+  Future<List<LeadModel>> searchLeads(String query, {int page = 0, int pageSize = 20}) async {
+    return _service.searchLeads(query, page: page, pageSize: pageSize);
+  }
+
+  Future<List<LeadModel>> getLeadsByStatus(String status, {int page = 0, int pageSize = 20}) async {
+    return _service.getLeadsByStatus(status, page: page, pageSize: pageSize);
+  }
+
+  Future<List<LeadModel>> getLeadsByAssignee(String userId, {int page = 0, int pageSize = 20}) async {
+    return _service.getLeadsByAssignee(userId, page: page, pageSize: pageSize);
+  }
+
   Future<LeadModel> addLead(LeadModel lead) async {
     return _service.addLead(lead);
   }
@@ -24,5 +40,9 @@ class LeadRepository {
 
   Future<String> convertLead(String id) async {
     return _service.convertLead(id);
+  }
+
+  Future<Map<String, dynamic>> getStats() async {
+    return _service.getStats();
   }
 }

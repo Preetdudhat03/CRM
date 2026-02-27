@@ -193,19 +193,17 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                     children: [
                       // Convert Button
                       if (canEdit && !isConverted && !isLost)
-                        SizedBox(
-                          height: 32,
-                          child: OutlinedButton(
-                            onPressed: _isConverting ? null : _convertLead,
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              side: BorderSide(color: Theme.of(context).primaryColor),
-                            ),
-                            child: _isConverting
-                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                                : Text('Convert', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+                        OutlinedButton(
+                          onPressed: _isConverting ? null : _convertLead,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 32),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            side: BorderSide(color: Theme.of(context).primaryColor),
                           ),
+                          child: _isConverting
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                              : Text('Convert', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
                         )
                       else if (isConverted)
                         Container(

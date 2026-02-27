@@ -37,6 +37,9 @@ class LeadModel {
   final String assignedTo;
   final DateTime createdAt;
   final double? estimatedValue;
+  final String? notes;
+  final String? convertedContactId;
+  final DateTime? convertedAt;
 
   const LeadModel({
     required this.id,
@@ -48,6 +51,9 @@ class LeadModel {
     required this.assignedTo,
     required this.createdAt,
     this.estimatedValue,
+    this.notes,
+    this.convertedContactId,
+    this.convertedAt,
   });
 
   LeadModel copyWith({
@@ -60,6 +66,9 @@ class LeadModel {
     String? assignedTo,
     DateTime? createdAt,
     double? estimatedValue,
+    String? notes,
+    String? convertedContactId,
+    DateTime? convertedAt,
   }) {
     return LeadModel(
       id: id ?? this.id,
@@ -71,6 +80,9 @@ class LeadModel {
       assignedTo: assignedTo ?? this.assignedTo,
       createdAt: createdAt ?? this.createdAt,
       estimatedValue: estimatedValue ?? this.estimatedValue,
+      notes: notes ?? this.notes,
+      convertedContactId: convertedContactId ?? this.convertedContactId,
+      convertedAt: convertedAt ?? this.convertedAt,
     );
   }
 
@@ -95,6 +107,9 @@ class LeadModel {
       assignedTo: json['assigned_to'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
       estimatedValue: (json['estimated_value'] as num?)?.toDouble(),
+      notes: json['notes'] as String?,
+      convertedContactId: json['converted_contact_id'] as String?,
+      convertedAt: json['converted_at'] != null ? DateTime.tryParse(json['converted_at']) : null,
     );
   }
 
@@ -117,6 +132,7 @@ class LeadModel {
       'status': statusSnake,
       'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'estimated_value': estimatedValue,
+      'notes': notes,
     };
   }
 }

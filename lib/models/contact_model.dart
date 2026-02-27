@@ -32,6 +32,9 @@ class ContactModel {
   final DateTime lastContacted;
   final String? avatarUrl;
   final bool isFavorite;
+  final String? assignedTo;
+  final bool? createdFromLead;
+  final String? sourceLeadId;
 
   const ContactModel({
     required this.id,
@@ -47,6 +50,9 @@ class ContactModel {
     required this.lastContacted,
     this.avatarUrl,
     this.isFavorite = false,
+    this.assignedTo,
+    this.createdFromLead,
+    this.sourceLeadId,
   });
 
   ContactModel copyWith({
@@ -63,6 +69,9 @@ class ContactModel {
     DateTime? lastContacted,
     String? avatarUrl,
     bool? isFavorite,
+    String? assignedTo,
+    bool? createdFromLead,
+    String? sourceLeadId,
   }) {
     return ContactModel(
       id: id ?? this.id,
@@ -78,6 +87,9 @@ class ContactModel {
       lastContacted: lastContacted ?? this.lastContacted,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       isFavorite: isFavorite ?? this.isFavorite,
+      assignedTo: assignedTo ?? this.assignedTo,
+      createdFromLead: createdFromLead ?? this.createdFromLead,
+      sourceLeadId: sourceLeadId ?? this.sourceLeadId,
     );
   }
 
@@ -98,6 +110,9 @@ class ContactModel {
           : DateTime.now(),
       avatarUrl: json['avatar_url'],
       isFavorite: json['is_favorite'] ?? false,
+      assignedTo: json['assigned_to'],
+      createdFromLead: json['created_from_lead'],
+      sourceLeadId: json['source_lead_id'],
     );
   }
 
@@ -120,6 +135,7 @@ class ContactModel {
       'last_contacted': lastContacted.toIso8601String(),
       'avatar_url': avatarUrl,
       'is_favorite': isFavorite,
+      'assigned_to': assignedTo,
     };
   }
 }
