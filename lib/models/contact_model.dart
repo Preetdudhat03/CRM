@@ -105,9 +105,9 @@ class ContactModel {
       position: json['position'] ?? '',
       address: json['address'],
       notes: json['notes'],
-      status: (json['is_customer'] == true || json['is_customer'] == null || json['is_customer'] == false) 
-          ? ContactStatus.customer // Assume it's a customer by default if data is messy, users can manually set to lead if needed, but it fixes the "all are leads" bug
-          : ContactStatus.lead,
+      status: (json['is_customer'] == false) 
+          ? ContactStatus.lead
+          : ContactStatus.customer, // Assume it's a customer by default if null or true
       createdAt: DateTime.parse(json['created_at']),
       lastContacted: json['last_contacted'] != null
           ? DateTime.parse(json['last_contacted'])
