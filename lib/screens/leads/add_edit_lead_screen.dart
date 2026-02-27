@@ -219,14 +219,40 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.4,
-                  child: TextFormField(
-                    initialValue: _assignedTo,
-                    decoration: const InputDecoration(
-                      labelText: 'Assigned To',
-                      prefixIcon: Icon(Icons.assignment_ind_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                    ),
-                    onSaved: (value) => _assignedTo = value!,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final usersAsync = ref.watch(userManagementProvider);
+                      return usersAsync.when(
+                        data: (users) {
+                          // Validate if current _assignedTo exists in the users list.
+                          final validIds = users.map((u) => u.id).toList();
+                          final currentValue = validIds.contains(_assignedTo) ? _assignedTo : '';
+
+                          return DropdownButtonFormField<String>(
+                            value: currentValue.isEmpty ? null : currentValue,
+                            decoration: const InputDecoration(
+                              labelText: 'Assigned To',
+                              prefixIcon: Icon(Icons.assignment_ind_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            ),
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
+                              ...users.map((user) => DropdownMenuItem(
+                                value: user.id,
+                                child: Text(user.name),
+                              )),
+                            ],
+                            onChanged: (value) => setState(() => _assignedTo = value ?? ''),
+                            onSaved: (value) => _assignedTo = value ?? '',
+                          );
+                        },
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (_, __) => const Text('Failed to load users'),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
