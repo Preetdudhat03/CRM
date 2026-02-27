@@ -164,6 +164,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         );
       },
     );
+  }
+
   Widget _buildStatusIndicator(List<ContactModel> allContacts) {
     final statuses = [
       null, // All

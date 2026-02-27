@@ -27,9 +27,10 @@ BEGIN
     END IF;
 END $$;
 
--- 3. Ensure 'updated_at' column exists for contacts and leads.
+-- 3. Ensure columns exist for tracking
 ALTER TABLE contacts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS sender_id UUID;
 
 -- 4. Temporarily disable Row Level Security (RLS) on contacts and leads in case assigned_to NULLs are blocking updates
 ALTER TABLE contacts DISABLE ROW LEVEL SECURITY;

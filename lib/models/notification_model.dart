@@ -59,13 +59,11 @@ class NotificationModel {
       'title': title,
       'message': message,
       'is_read': isRead,
-      'type': relatedEntityType ?? 'general_notification',
-      'priority': 'MEDIUM',
     };
 
     // Only include non-null optional fields to avoid DB type errors
-    if (relatedEntityId != null) json['related_id'] = relatedEntityId;
-    if (relatedEntityType != null) json['related_type'] = relatedEntityType;
+    if (relatedEntityId != null) json['related_entity_id'] = relatedEntityId;
+    if (relatedEntityType != null) json['related_entity_type'] = relatedEntityType;
     if (senderId != null) json['sender_id'] = senderId;
     
     // Don't send 'id' — let the DB auto-generate with gen_random_uuid()
