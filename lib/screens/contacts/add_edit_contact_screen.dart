@@ -8,7 +8,7 @@ import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import '../../services/storage_service.dart';
 import '../../utils/error_handler.dart';
-
+import '../../providers/user_management_provider.dart';
 class AddEditContactScreen extends ConsumerStatefulWidget {
   final ContactModel? contact;
 
@@ -29,8 +29,9 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
   late String _position;
   late String _address;
   late String _notes;
-  late ContactStatus _status;
+  late String _status;
   String _countryCode = '+1'; // Default
+  late String _assignedTo;
   
   File? _imageFile;
   String? _avatarUrl;
@@ -48,6 +49,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
     _notes = widget.contact?.notes ?? '';
     // Prevent manual entry of leads in contact page (must use conversion)
     _status = widget.contact?.status == ContactStatus.lead ? ContactStatus.customer : (widget.contact?.status ?? ContactStatus.customer);
+    _assignedTo = widget.contact?.assignedTo ?? '';
     _avatarUrl = widget.contact?.avatarUrl;
   }
 
@@ -149,7 +151,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            child: Center(
+            child: Align(
+              alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Column(
@@ -349,8 +352,43 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
                     onSaved: (value) => _address = value!,
+                    onChanged: (val) => _address = val,
                     maxLines: 2,
                   ),
+                 ),
+                const SizedBox(height: 16),
+                 FadeInSlide(
+                   delay: 0.55,
+                   child: Consumer(
+                    builder: (context, ref, child) {
+                      final usersAsync = ref.watch(userManagementProvider);
+                      return usersAsync.when(
+                        data: (users) {
+                          final validIds = users.map((u) => u.id).toList();
+                          final currentValue = validIds.contains(_assignedTo) ? _assignedTo : '';
+                          return DropdownButtonFormField<String>(
+                            value: currentValue.isEmpty ? null : currentValue,
+                            decoration: const InputDecoration(
+                              labelText: 'Assigned To',
+                              prefixIcon: Icon(Icons.assignment_ind_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            ),
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
+                              ...users.map((user) => DropdownMenuItem(
+                                value: user.id,
+                                child: Text(user.name),
+                              )),
+                            ],
+                            onChanged: (value) => setState(() => _assignedTo = value ?? ''),
+                            onSaved: (value) => _assignedTo = value ?? '',
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Text('Failed to load users'),
+                      );
+                    },
+                   ),
                  ),
                 const SizedBox(height: 16),
                  FadeInSlide(
