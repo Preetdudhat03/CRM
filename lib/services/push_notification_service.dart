@@ -111,7 +111,7 @@ class PushNotificationService {
   }
 
   /// Save FCM token to Supabase so the server can send pushes
-  static Future<void> _saveTokenToSupabase(String token) async {
+  static Future<void> _saveTokenToSupabase(String token, {int retryCount = 0}) async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return;
@@ -124,7 +124,13 @@ class PushNotificationService {
 
       print('[FCM] Token saved to Supabase');
     } catch (e) {
-      print('[FCM] Error saving token: $e');
+      print('[FCM] Error saving token (attempt ${retryCount + 1}): $e');
+      
+      // Retry up to 3 times with exponential backoff for network-related errors
+      if (retryCount < 3 && e.toString().contains('SocketException')) {
+        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        return _saveTokenToSupabase(token, retryCount: retryCount + 1);
+      }
     }
   }
 

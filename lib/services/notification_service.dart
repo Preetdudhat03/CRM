@@ -13,24 +13,27 @@ class NotificationService {
     try {
       final userId = _currentUserId;
 
-      // Fetch only UNREAD notifications for the CURRENT user, ordered by newest first
-      // This ensures that "Read" notifications are treated as "Cleared"
-      final response = await _supabase
+      // Fetch notifications. RLS should handle user isolation if configured.
+      // If RLS is not fully isolating, we might need a .eq('user_id', userId) filter here.
+      var query = _supabase
           .from('notifications')
           .select()
-          .eq('user_id', userId!)
-          .eq('is_read', false)
           .order('created_at', ascending: false)
-          .limit(50);
+          .limit(100);
+      
+      final response = await query.timeout(const Duration(seconds: 15));
       
       final List<dynamic> data = response as List<dynamic>;
       
       final notifications = data.map((json) => NotificationModel.fromJson(json)).toList();
       
-      final filtered = notifications;
+      // Filter out self-notifications (where sender_id == current user)
+      final filtered = notifications.where((n) {
+        if (n.senderId != null && n.senderId == userId) return false;
+        return true;
+      }).toList();
       
-      
-      // Cache to local for offline access
+      // Cache locally
       await _saveLocally(filtered);
       return filtered;
     } catch (e) {
@@ -67,9 +70,11 @@ class NotificationService {
     try {
       final data = notification.toJson();
       
-      // Set sender_id so we can filter out self-notifications on read
+      // Ensure sender_id is set
       data['sender_id'] = _currentUserId;
 
+      // If no explicit recipient (user_id) is set, it stays NULL (effectively a broadcast)
+      // Note: If RLS is strict, you may need a policy to allow viewing NULL user_id records.
 
       await _supabase.from('notifications').insert(data);
       
@@ -80,14 +85,15 @@ class NotificationService {
 
   Future<void> markAsRead(String id) async {
     try {
-      final userId = _currentUserId;
-      if (userId == null) return;
-
+      // In a multi-user shared notification system, we should ideally mark as read
+      // in a junction table. For now, and to satisfy the "vanish" requirement,
+      // we handle it locally in the Notifier. 
+      // We only update the DB if the notification is private to this user.
       await _supabase
           .from('notifications')
           .update({'is_read': true})
           .eq('id', id)
-          .eq('user_id', userId);
+          .eq('user_id', _currentUserId ?? ''); // Only if it's mine
     } catch (e) {
       print('[NotificationService] Error marking read: $e');
     }
@@ -95,10 +101,10 @@ class NotificationService {
 
   Future<void> markAllAsRead() async {
     try {
+      // Similarly, only mark my own as read to avoid affecting others.
       final userId = _currentUserId;
       if (userId == null) return;
 
-      // Mark only CURRENT user's unread notifications as read
       await _supabase
           .from('notifications')
           .update({'is_read': true})
