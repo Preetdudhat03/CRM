@@ -48,8 +48,8 @@ class NotificationModel {
       message: json['message'] ?? '',
       date: json['created_at'] != null ? DateTime.parse(json['created_at']).toLocal() : DateTime.now(),
       isRead: json['is_read'] ?? false,
-      relatedEntityId: json['related_id']?.toString(),
-      relatedEntityType: json['related_type'],
+      relatedEntityId: json['related_entity_id']?.toString(),
+      relatedEntityType: json['related_entity_type'],
       senderId: json['sender_id']?.toString(),
     );
   }
