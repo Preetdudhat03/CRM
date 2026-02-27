@@ -13,11 +13,12 @@ class NotificationService {
     try {
       final userId = _currentUserId;
 
-      // Fetch only UNREAD notifications, ordered by newest first
+      // Fetch only UNREAD notifications for the CURRENT user, ordered by newest first
       // This ensures that "Read" notifications are treated as "Cleared"
       final response = await _supabase
           .from('notifications')
           .select()
+          .eq('user_id', userId!)
           .eq('is_read', false)
           .order('created_at', ascending: false)
           .limit(50);
