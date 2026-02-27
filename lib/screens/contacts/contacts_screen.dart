@@ -164,6 +164,92 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         );
       },
     );
+  Widget _buildStatusIndicator(List<ContactModel> allContacts) {
+    final statuses = [
+      null, // All
+      ContactStatus.customer,
+      ContactStatus.lead,
+      ContactStatus.churned,
+    ];
+
+    return SizedBox(
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: statuses.length,
+        itemBuilder: (context, index) {
+          final status = statuses[index];
+          final count = status == null 
+              ? allContacts.length 
+              : allContacts.where((c) => c.status == status).length;
+          final isSelected = _statusFilter == status;
+
+          Color getBaseColor(ContactStatus? s) {
+            if (s == null) return Colors.blueGrey;
+            switch (s) {
+              case ContactStatus.customer: return Colors.green;
+              case ContactStatus.lead: return Colors.orange;
+              case ContactStatus.churned: return Colors.red;
+            }
+          }
+          final baseColor = getBaseColor(status);
+          final label = status == null ? 'All' : status.label;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _statusFilter = status;
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? baseColor : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isSelected ? baseColor : Colors.grey.shade300),
+                  boxShadow: isSelected ? [
+                    BoxShadow(color: baseColor.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
+                  ] : null,
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: isSelected ? Colors.white : Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -181,65 +267,83 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(72),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search contacts...',
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+          preferredSize: const Size.fromHeight(130),
+          child: Column(
+            children: [
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search contacts...',
+                          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                          prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        ),
+                        onChanged: (value) {
+                          ref.read(contactSearchQueryProvider.notifier).state = value;
+                        },
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade200),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
-                    onChanged: (value) {
-                      ref.read(contactSearchQueryProvider.notifier).state = value;
-                    },
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: _sortOption,
+                            icon: Icon(Icons.sort, color: Colors.grey.shade600),
+                            style: TextStyle(color: Colors.grey.shade800, fontSize: 13, fontWeight: FontWeight.w500),
+                            items: ['Recently Added', 'Name', 'Company'].map((sort) {
+                              return DropdownMenuItem(
+                                value: sort,
+                                child: Text(sort, overflow: TextOverflow.ellipsis),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() {
+                                  _sortOption = val;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: _showFilterBottomSheet,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                          ? Theme.of(context).primaryColor.withOpacity(0.1) 
-                          : Colors.grey.shade50,
-                      border: Border.all(
-                        color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                            ? Theme.of(context).primaryColor 
-                            : Colors.grey.shade200
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.tune, 
-                      color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                          ? Theme.of(context).primaryColor 
-                          : Colors.grey.shade700
-                    ),
-                  ),
-                )
-              ],
-            ),
+              ),
+              contactsAsync.maybeWhen(
+                data: (allContacts) => _buildStatusIndicator(allContacts),
+                orElse: () => const SizedBox(height: 60),
+              ),
+            ],
           ),
         ),
       ),
