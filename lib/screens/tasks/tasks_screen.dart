@@ -133,39 +133,44 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     }
 
                     final task = tasks[index];
-                    return TaskCard(
-                      task: task,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                TaskDetailScreen(task: task),
-                          ),
-                        );
-                      },
-                      onStatusChanged: (value) {
-                        final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
-                        ref.read(tasksProvider.notifier).updateTask(
-                          task.copyWith(status: newStatus)
-                        );
-                      },
-                      onEdit: canEdit
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditTaskScreen(task: task),
-                                ),
-                              );
-                            }
-                          : null,
-                      onDelete: canDelete
-                          ? () {
-                              _showDeleteConfirmation(context, ref, task);
-                            }
-                          : null,
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 800),
+                        child: TaskCard(
+                          task: task,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TaskDetailScreen(task: task),
+                              ),
+                            );
+                          },
+                          onStatusChanged: (value) {
+                            final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
+                            ref.read(tasksProvider.notifier).updateTask(
+                              task.copyWith(status: newStatus)
+                            );
+                          },
+                          onEdit: canEdit
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddEditTaskScreen(task: task),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          onDelete: canDelete
+                              ? () {
+                                  _showDeleteConfirmation(context, ref, task);
+                                }
+                              : null,
+                        ),
+                      ),
                     );
                   },
                 ),

@@ -274,12 +274,12 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                         CountryCodePicker(
                           onChanged: (country) {
                              setState(() {
-                               _countryCode = country.dialCode ?? '+1';
+                               _countryCode = country.dialCode ?? '+91';
                              });
                           },
                           // Extract valid dial code or fallback to 'US' to prevent crashes
-                          initialSelection: _phone.startsWith('+') ? _phone.split(' ')[0] : 'US',
-                          favorite: const ['+1', 'US', 'IN', 'GB'],
+                          initialSelection: _phone.startsWith('+') ? _phone.split(' ')[0] : 'IN',
+                          favorite: const ['+91', 'IN', 'US', 'GB'],
                           showCountryOnly: false,
                           showOnlyCountryWhenClosed: false,
                           alignLeft: false,
@@ -293,14 +293,14 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                               counterText: "", // Hide character counter
                             ),
                             keyboardType: TextInputType.phone,
-                            maxLength: 15, // Limit length to 15 digits (E.164 standard)
+                            maxLength: 10, // Limit length to 15 digits (E.164 standard)
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             validator: (value) {
                               if (value == null || value.isEmpty) return 'Enter phone number';
                               // Basic length check (min 7 digits)
-                              if (value.length < 7) return 'Too short';
+                              if (value.length < 10) return 'Too short';
                               return null;
                             },
                             onSaved: (value) {
@@ -377,8 +377,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                               border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                             ),
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
-                              ...users.map((user) => DropdownMenuItem(
+                              const DropdownMenuItem<String>(value: null, child: Text('Unassigned')),
+                              ...users.map((user) => DropdownMenuItem<String>(
                                 value: user.id,
                                 child: Text(user.name),
                               )),

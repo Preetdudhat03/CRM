@@ -137,11 +137,9 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   Future<void> markAllAsRead() async {
     try {
       await _repository.markAllAsRead();
-      state.whenData((notifications) {
-        state = AsyncValue.data(
-          notifications.map((n) => n.copyWith(isRead: true)).toList()
-        );
-      });
+      // After marking all as read, we set the state to an empty list
+      // This makes them "vanish" from the current user's screen
+      state = const AsyncValue.data([]);
     } catch (e) {
       print('Failed to mark all as read: $e');
     }

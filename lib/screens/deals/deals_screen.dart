@@ -124,33 +124,38 @@ class _DealsScreenState extends ConsumerState<DealsScreen> {
                     }
 
                     final deal = deals[index];
-                    return DealCard(
-                      deal: deal,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                DealDetailScreen(deal: deal),
-                          ),
-                        );
-                      },
-                      onEdit: canEdit
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditDealScreen(deal: deal),
-                                ),
-                              );
-                            }
-                          : null,
-                      onDelete: canDelete
-                          ? () {
-                              _showDeleteConfirmation(context, ref, deal);
-                            }
-                          : null,
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 800),
+                        child: DealCard(
+                          deal: deal,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DealDetailScreen(deal: deal),
+                              ),
+                            );
+                          },
+                          onEdit: canEdit
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddEditDealScreen(deal: deal),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          onDelete: canDelete
+                              ? () {
+                                  _showDeleteConfirmation(context, ref, deal);
+                                }
+                              : null,
+                        ),
+                      ),
                     );
                   },
                 ),

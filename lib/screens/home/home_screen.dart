@@ -132,214 +132,219 @@ class HomeScreen extends ConsumerWidget {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeInSlide(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Dashboard Overview',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    DropdownButton<DashboardPeriod>(
-                      value: currentPeriod,
-                      underline: const SizedBox(),
-                      icon: const Icon(Icons.arrow_drop_down),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      items: DashboardPeriod.values.map((period) {
-                        return DropdownMenuItem(
-                          value: period,
-                          child: Text(period.label),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref.read(dashboardPeriodProvider.notifier).state = value;
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = 2;
-                  if (constraints.maxWidth > 1200) {
-                    crossAxisCount = 4;
-                  } else if (constraints.maxWidth > 800) {
-                    crossAxisCount = 3;
-                  }
-
-                  return GridView.count(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 1.3, // Adjust aspect ratio for better look on wide screens
-                    children: [
-                      // Dynamic Stats Cards
-                      FadeInSlide(
-                        delay: 0.1,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Total Contacts',
-                          icon: Icons.people_outline,
-                          color: Colors.blue,
-                          valueKey: 'totalContacts',
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
-                          },
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeInSlide(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Dashboard Overview',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                      ),
-                      FadeInSlide(
-                        delay: 0.2,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Total Leads',
-                          icon: Icons.leaderboard_outlined,
-                          color: Colors.orange,
-                          valueKey: 'totalLeads',
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
-                          },
-                        ),
-                      ),
-                      FadeInSlide(
-                        delay: 0.3,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Active Deals',
-                          valueKey: 'totalDeals',
-                          icon: Icons.handshake_outlined,
-                          color: Colors.purple,
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
-                          },
-                        ),
-                      ),
-                      // Revenue Card - Restricted Access
-                      if (canViewAnalytics)
-                        FadeInSlide(
-                          delay: 0.4,
-                          child: _buildStatCard(
-                            dashboardMetrics,
-                            title: 'Revenue (Won)',
-                            valueKey: 'revenueWon',
-                            icon: Icons.attach_money,
-                            color: Colors.green,
-                            isCurrency: true,
-                            onTap: () {
-                              ref.read(bottomNavIndexProvider.notifier).state = 3;
-                            },
+                        DropdownButton<DashboardPeriod>(
+                          value: currentPeriod,
+                          underline: const SizedBox(),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
                           ),
-                        )
-                      else
-                        FadeInSlide(
-                          delay: 0.4,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Theme.of(context).dividerColor),
+                          items: DashboardPeriod.values.map((period) {
+                            return DropdownMenuItem(
+                              value: period,
+                              child: Text(period.label),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              ref.read(dashboardPeriodProvider.notifier).state = value;
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      int crossAxisCount = 2;
+                      if (constraints.maxWidth > 1200) {
+                        crossAxisCount = 4;
+                      } else if (constraints.maxWidth > 800) {
+                        crossAxisCount = 3;
+                      }
+    
+                      return GridView.count(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        childAspectRatio: 1.1, // Adjusted for better fit on various screens
+                        children: [
+                          // Dynamic Stats Cards
+                          FadeInSlide(
+                            delay: 0.1,
+                            child: _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Total Contacts',
+                              icon: Icons.people_outline,
+                              color: Colors.blue,
+                              valueKey: 'totalContacts',
+                              onTap: () {
+                                ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
+                              },
                             ),
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.lock_outline, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text('Access Restricted'),
-                                ],
+                          ),
+                          FadeInSlide(
+                            delay: 0.2,
+                            child: _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Total Leads',
+                              icon: Icons.leaderboard_outlined,
+                              color: Colors.orange,
+                              valueKey: 'totalLeads',
+                              onTap: () {
+                                ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
+                              },
+                            ),
+                          ),
+                          FadeInSlide(
+                            delay: 0.3,
+                            child: _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Active Deals',
+                              valueKey: 'totalDeals',
+                              icon: Icons.handshake_outlined,
+                              color: Colors.purple,
+                              onTap: () {
+                                ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
+                              },
+                            ),
+                          ),
+                          // Revenue Card - Restricted Access
+                          if (canViewAnalytics)
+                            FadeInSlide(
+                              delay: 0.4,
+                              child: _buildStatCard(
+                                dashboardMetrics,
+                                title: 'Revenue (Won)',
+                                valueKey: 'revenueWon',
+                                icon: Icons.attach_money,
+                                color: Colors.green,
+                                isCurrency: true,
+                                onTap: () {
+                                  ref.read(bottomNavIndexProvider.notifier).state = 3;
+                                },
+                              ),
+                            )
+                          else
+                            FadeInSlide(
+                              delay: 0.4,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Theme.of(context).dividerColor),
+                                ),
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.lock_outline, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text('Access Restricted'),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
-              
-              // Tasks Due Today Snapshot
-              const FadeInSlide(
-                delay: 0.4,
-                child: TasksDueTodayWidget(),
-              ),
-              const SizedBox(height: 32),
-              
-              // Deal Pipeline Horizontal Snapshot
-              FadeInSlide(
-                delay: 0.45,
-                child: dashboardMetrics.when(
-                  data: (stats) {
-                    final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
-                    if (rawPipeline.isEmpty) return const SizedBox();
-                    
-                    final Map<DealStage, int> pipeline = {};
-                    for (var stage in DealStage.values) {
-                      // Check both camelCase (e.g. closedWon) and snake_case (closed_won)
-                      final snakeName = stage.name.replaceAllMapped(
-                        RegExp(r'[A-Z]'),
-                        (m) => '_${m.group(0)!.toLowerCase()}',
+                        ],
                       );
-                      pipeline[stage] = (rawPipeline[stage.name] ?? 0) + (rawPipeline[snakeName] ?? 0);
-                    }
-
-                    if (pipeline.values.every((val) => val == 0)) return const SizedBox();
-                    
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PipelineWidget(pipelineData: pipeline),
-                        const SizedBox(height: 32),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, __) => Text('Error loading pipeline: $error'),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Revenue Trend Chart (only if user has analytics permission)
-              if (canViewAnalytics)
-                const FadeInSlide(
-                  delay: 0.48,
-                  child: RevenueTrendChart(),
-                ),
-              if (canViewAnalytics) const SizedBox(height: 32),
-
-              FadeInSlide(
-                delay: 0.5,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Recent Activity',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const AllActivitiesScreen()),
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Tasks Due Today Snapshot
+                  const FadeInSlide(
+                    delay: 0.4,
+                    child: TasksDueTodayWidget(),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Deal Pipeline Horizontal Snapshot
+                  FadeInSlide(
+                    delay: 0.45,
+                    child: dashboardMetrics.when(
+                      data: (stats) {
+                        final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
+                        if (rawPipeline.isEmpty) return const SizedBox();
+                        
+                        final Map<DealStage, int> pipeline = {};
+                        for (var stage in DealStage.values) {
+                          // Check both camelCase (e.g. closedWon) and snake_case (closed_won)
+                          final snakeName = stage.name.replaceAllMapped(
+                            RegExp(r'[A-Z]'),
+                            (m) => '_${m.group(0)!.toLowerCase()}',
+                          );
+                          pipeline[stage] = (rawPipeline[stage.name] ?? 0) + (rawPipeline[snakeName] ?? 0);
+                        }
+    
+                        if (pipeline.values.every((val) => val == 0)) return const SizedBox();
+                        
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PipelineWidget(pipelineData: pipeline),
+                            const SizedBox(height: 32),
+                          ],
                         );
                       },
-                      child: const Text('View All'),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (error, __) => Text('Error loading pipeline: $error'),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 32),
+    
+                  // Revenue Trend Chart (only if user has analytics permission)
+                  if (canViewAnalytics)
+                    const FadeInSlide(
+                      delay: 0.48,
+                      child: RevenueTrendChart(),
+                    ),
+                  if (canViewAnalytics) const SizedBox(height: 32),
+    
+                  FadeInSlide(
+                    delay: 0.5,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Recent Activity',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AllActivitiesScreen()),
+                            );
+                          },
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FadeInSlide(delay: 0.6, child: const RecentActivityList()),
+                ],
               ),
-              const SizedBox(height: 8),
-              FadeInSlide(delay: 0.6, child: const RecentActivityList()),
-            ],
+            ),
           ),
         ),
       ),

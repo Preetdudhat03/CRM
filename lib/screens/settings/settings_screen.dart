@@ -29,213 +29,218 @@ class SettingsScreen extends ConsumerWidget {
         onRefresh: () async {
           await ref.read(currentUserProvider.notifier).refreshUser();
         },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            _buildAnimatedItem(
-              delay: 0,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor.withOpacity(0.1),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).primaryColor.withOpacity(0.2),
-                          width: 3,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                _buildAnimatedItem(
+                  delay: 0,
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
+                      ],
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor.withOpacity(0.1),
                       ),
-                      child: CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
-                            ? NetworkImage(user.avatarUrl!)
-                            : null,
-                        child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
-                            ? Text(
-                                (user?.name ?? 'G').substring(0, 1).toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Theme.of(context).primaryColor.withOpacity(0.2),
+                              width: 3,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                                ? NetworkImage(user.avatarUrl!)
+                                : null,
+                            child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                                ? Text(
+                                    (user?.name ?? 'G').substring(0, 1).toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user?.name ?? 'Guest User',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
-                              )
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user?.name ?? 'Guest User',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            user?.email ?? 'No Email Linked',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).hintColor,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              user?.role.displayName ?? 'Viewer',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
                               ),
-                            ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user?.email ?? 'No Email Linked',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  user?.role.displayName ?? 'Viewer',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-            
-            _buildAnimatedItem(
-              delay: 0.1,
-              child: ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Edit Profile'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                  );
-                },
-              ),
-            ),
-            
-            if (canManageUsers)
-              _buildAnimatedItem(
-                delay: 0.2,
-                child: ListTile(
-                  leading: const Icon(Icons.group),
-                  title: const Text('User Management'),
-                  subtitle: const Text('Manage users and roles'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const UserManagementScreen()),
-                    );
-                  },
-                ),
-              ),
-
-            _buildAnimatedItem(
-              delay: 0.3,
-              child: ListTile(
-                leading: const Icon(Icons.security),
-                title: const Text('Roles & Permissions'),
-                subtitle: Text(user?.role.displayName ?? 'None'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RolesPermissionsScreen()),
-                  );
-                },
-              ),
-            ),
-            
-            const Divider(),
-            
-            _buildAnimatedItem(
-              delay: 0.4,
-              child: ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Dark Mode'),
-                trailing: Switch(
-                  value: Theme.of(context).brightness == Brightness.dark,
-                  onChanged: (val) {
-                    ref.read(themeModeProvider.notifier).setTheme(val ? ThemeMode.dark : ThemeMode.light);
-                  },
-                ),
-              ),
-            ),
-            
-            _buildAnimatedItem(
-              delay: 0.5,
-              child: ListTile(
-                leading: const Icon(Icons.notifications_outlined),
-                title: const Text('Notifications'),
-                trailing: Switch(
-                  value: notificationsEnabled,
-                  onChanged: (val) {
-                    ref.read(notificationSettingsProvider.notifier).toggle(val);
-                  },
-                ),
-              ),
-            ),
-
-            const Divider(),
-
-            _buildAnimatedItem(
-              delay: 0.6,
-              child: ListTile(
-                leading: const Icon(Icons.info_outlined),
-                title: const Text('About App'),
-                subtitle: const Text('Version 1.0.0'),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-            
-            _buildAnimatedItem(
-              delay: 0.7,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onPressed: () {
-                    ref.read(currentUserProvider.notifier).logout();
-                  },
                 ),
-              ),
+                
+                _buildAnimatedItem(
+                  delay: 0.1,
+                  child: ListTile(
+                    leading: const Icon(Icons.person),
+                    title: const Text('Edit Profile'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                      );
+                    },
+                  ),
+                ),
+                
+                if (canManageUsers)
+                  _buildAnimatedItem(
+                    delay: 0.2,
+                    child: ListTile(
+                      leading: const Icon(Icons.group),
+                      title: const Text('User Management'),
+                      subtitle: const Text('Manage users and roles'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const UserManagementScreen()),
+                        );
+                      },
+                    ),
+                  ),
+
+                _buildAnimatedItem(
+                  delay: 0.3,
+                  child: ListTile(
+                    leading: const Icon(Icons.security),
+                    title: const Text('Roles & Permissions'),
+                    subtitle: Text(user?.role.displayName ?? 'None'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RolesPermissionsScreen()),
+                      );
+                    },
+                  ),
+                ),
+                
+                const Divider(),
+                
+                _buildAnimatedItem(
+                  delay: 0.4,
+                  child: ListTile(
+                    leading: const Icon(Icons.color_lens_outlined),
+                    title: const Text('Dark Mode'),
+                    trailing: Switch(
+                      value: Theme.of(context).brightness == Brightness.dark,
+                      onChanged: (val) {
+                        ref.read(themeModeProvider.notifier).setTheme(val ? ThemeMode.dark : ThemeMode.light);
+                      },
+                    ),
+                  ),
+                ),
+                
+                _buildAnimatedItem(
+                  delay: 0.5,
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: const Text('Notifications'),
+                    trailing: Switch(
+                      value: notificationsEnabled,
+                      onChanged: (val) {
+                        ref.read(notificationSettingsProvider.notifier).toggle(val);
+                      },
+                    ),
+                  ),
+                ),
+
+                const Divider(),
+
+                _buildAnimatedItem(
+                  delay: 0.6,
+                  child: ListTile(
+                    leading: const Icon(Icons.info_outlined),
+                    title: const Text('About App'),
+                    subtitle: const Text('Version 1.0.0'),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                
+                _buildAnimatedItem(
+                  delay: 0.7,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.logout, color: Colors.red),
+                      label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        ref.read(currentUserProvider.notifier).logout();
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

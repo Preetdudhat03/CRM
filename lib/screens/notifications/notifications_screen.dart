@@ -40,58 +40,63 @@ class NotificationsScreen extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () => ref.read(notificationsProvider.notifier).getNotifications(),
-            child: ListView.builder(
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return ListTile(
-                  isThreeLine: true,
-                  leading: CircleAvatar(
-                    backgroundColor: notification.isRead 
-                        ? Colors.grey.withOpacity(0.2) 
-                        : Theme.of(context).primaryColor.withOpacity(0.2),
-                    child: Icon(
-                      _getIconForType(notification.relatedEntityType),
-                      color: notification.isRead 
-                          ? Colors.grey 
-                          : Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  title: Text(
-                    notification.title,
-                    style: TextStyle(
-                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        notification.message,
-                        maxLines: 2,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return ListTile(
+                      isThreeLine: true,
+                      leading: CircleAvatar(
+                        backgroundColor: notification.isRead 
+                            ? Colors.grey.withOpacity(0.2) 
+                            : Theme.of(context).primaryColor.withOpacity(0.2),
+                        child: Icon(
+                          _getIconForType(notification.relatedEntityType),
+                          color: notification.isRead 
+                              ? Colors.grey 
+                              : Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      title: Text(
+                        notification.title,
+                        style: TextStyle(
+                          fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                        ),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        timeago.format(notification.date),
-                        style: Theme.of(context).textTheme.bodySmall,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            notification.message,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            timeago.format(notification.date),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  trailing: !notification.isRead 
-                      ? const Icon(Icons.circle, color: Colors.blue, size: 12)
-                      : null,
-                  onTap: () {
-                    if (!notification.isRead) {
-                      ref.read(notificationsProvider.notifier).markAsRead(notification.id);
-                    }
-                    // Optionally navigate based on relatedEntityType and ID
+                      trailing: !notification.isRead 
+                          ? const Icon(Icons.circle, color: Colors.blue, size: 12)
+                          : null,
+                      onTap: () {
+                        if (!notification.isRead) {
+                          ref.read(notificationsProvider.notifier).markAsRead(notification.id);
+                        }
+                        // Optionally navigate based on relatedEntityType and ID
+                      },
+                    );
                   },
-                );
-              },
+                ),
+              ),
             ),
           );
         },

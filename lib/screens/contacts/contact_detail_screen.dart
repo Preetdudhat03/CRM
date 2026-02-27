@@ -66,15 +66,20 @@ class ContactDetailScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-             _buildHeader(context),
-             const SizedBox(height: 20),
-             _buildInfoSection(context),
-             const SizedBox(height: 20),
-             if (contact.notes != null && contact.notes!.isNotEmpty)
-              _buildNotesSection(context),
-          ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
+              children: [
+                 _buildHeader(context),
+                 const SizedBox(height: 20),
+                 _buildInfoSection(context),
+                 const SizedBox(height: 20),
+                 if (contact.notes != null && contact.notes!.isNotEmpty)
+                  _buildNotesSection(context),
+              ],
+            ),
+          ),
         ),
       ),
     );

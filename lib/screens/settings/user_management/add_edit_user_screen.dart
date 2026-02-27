@@ -127,176 +127,179 @@ class _AddEditUserScreenState extends ConsumerState<AddEditUserScreen> {
       appBar: AppBar(
         title: Text(widget.user == null ? 'Add User' : 'Edit User'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                FadeInSlide(
-                  delay: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        widget.user == null ? Icons.person_add_outlined : Icons.edit_outlined,
-                        size: 48,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                
-                FadeInSlide(
-                  delay: 0.1,
-                  child: TextFormField(
-                    initialValue: _name,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FadeInSlide(
+                      delay: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.user == null ? Icons.person_add_outlined : Icons.edit_outlined,
+                            size: 48,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
                       ),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Please enter name' : null,
-                    onSaved: (value) => _name = value!,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                FadeInSlide(
-                  delay: 0.2,
-                  child: TextFormField(
-                    initialValue: _email,
-                    decoration: const InputDecoration(
-                      labelText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                         borderRadius: BorderRadius.all(Radius.circular(12)),
+                    const SizedBox(height: 32),
+                    
+                    FadeInSlide(
+                      delay: 0.1,
+                      child: TextFormField(
+                        initialValue: _name,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          prefixIcon: Icon(Icons.person_outline),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                        validator: (value) => value!.isEmpty ? 'Please enter name' : null,
+                        onSaved: (value) => _name = value!,
                       ),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Please enter email' : null,
-                    onSaved: (value) => _email = value!,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                FadeInSlide(
-                  delay: 0.3,
-                  child: DropdownButtonFormField<Role>(
-                    value: _role,
-                    decoration: const InputDecoration(
-                      labelText: 'Role',
-                      prefixIcon: Icon(Icons.admin_panel_settings_outlined),
-                      border: OutlineInputBorder(
-                         borderRadius: BorderRadius.all(Radius.circular(12)),
+                    const SizedBox(height: 16),
+                    
+                    FadeInSlide(
+                      delay: 0.2,
+                      child: TextFormField(
+                        initialValue: _email,
+                        decoration: const InputDecoration(
+                          labelText: 'Email Address',
+                          prefixIcon: Icon(Icons.email_outlined),
+                          border: OutlineInputBorder(
+                             borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                        validator: (value) => value!.isEmpty ? 'Please enter email' : null,
+                        onSaved: (value) => _email = value!,
+                        keyboardType: TextInputType.emailAddress,
                       ),
                     ),
-                    items: Role.values.map((role) {
-                      return DropdownMenuItem(
-                        value: role,
-                        child: Text(role.displayName),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                         _role = value!;
-                         _updatePermissionsFromRole();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                const Divider(),
-                
-                FadeInSlide(
-                  delay: 0.4,
-                  child: SwitchListTile(
-                    title: const Text('Custom Permissions'),
-                    subtitle: const Text('Override default role permissions'),
-                    value: _useCustomPermissions,
-                    onChanged: (value) {
-                      setState(() {
-                        _useCustomPermissions = value;
-                        if (!value) {
-                          _updatePermissionsFromRole();
-                        }
-                      });
-                    },
-                  ),
-                ),
+                    const SizedBox(height: 16),
+                    
+                    FadeInSlide(
+                      delay: 0.3,
+                      child: DropdownButtonFormField<Role>(
+                        value: _role,
+                        decoration: const InputDecoration(
+                          labelText: 'Role',
+                          prefixIcon: Icon(Icons.admin_panel_settings_outlined),
+                          border: OutlineInputBorder(
+                             borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                        items: Role.values.map((role) {
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(role.displayName),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                             _role = value!;
+                             _updatePermissionsFromRole();
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    const Divider(),
+                    
+                    FadeInSlide(
+                      delay: 0.4,
+                      child: SwitchListTile(
+                        title: const Text('Custom Permissions'),
+                        subtitle: const Text('Override default role permissions'),
+                        value: _useCustomPermissions,
+                        onChanged: (value) {
+                          setState(() {
+                            _useCustomPermissions = value;
+                            if (!value) {
+                              _updatePermissionsFromRole();
+                            }
+                          });
+                        },
+                      ),
+                    ),
 
-                if (_useCustomPermissions)
-                   FadeInSlide(
-                      delay: 0.5,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                            Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Theme.of(context).dividerColor),
-                                    borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: Permission.values.length,
-                                itemBuilder: (context, index) {
-                                  final permission = Permission.values[index];
-                                  final isSelected = _selectedPermissions.contains(permission);
-                                  return CheckboxListTile(
-                                    title: Text(permission.name.replaceAll(RegExp(r'(?=[A-Z])'), ' ')),
-                                    value: isSelected,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        if (value == true) {
-                                          _selectedPermissions.add(permission);
-                                        } else {
-                                          _selectedPermissions.remove(permission);
-                                        }
-                                      });
+                    if (_useCustomPermissions)
+                       FadeInSlide(
+                          delay: 0.5,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+                                Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Theme.of(context).dividerColor),
+                                        borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: Permission.values.length,
+                                    itemBuilder: (context, index) {
+                                      final permission = Permission.values[index];
+                                      final isSelected = _selectedPermissions.contains(permission);
+                                      return CheckboxListTile(
+                                        title: Text(permission.name.replaceAll(RegExp(r'(?=[A-Z])'), ' ')),
+                                        value: isSelected,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value == true) {
+                                              _selectedPermissions.add(permission);
+                                            } else {
+                                              _selectedPermissions.remove(permission);
+                                            }
+                                          });
+                                        },
+                                        dense: true,
+                                      );
                                     },
-                                    dense: true,
-                                  );
-                                },
-                              ),
-                            ),
-                         ],
-                      ),
-                   ),
+                                  ),
+                                ),
+                             ],
+                          ),
+                       ),
 
-                const SizedBox(height: 32),
-                
-                FadeInSlide(
-                  delay: 0.6,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 32),
+                    
+                    FadeInSlide(
+                      delay: 0.6,
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          widget.user == null ? 'Create User' : 'Update User',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      widget.user == null ? 'Create User' : 'Update User',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
     );
   }
 }

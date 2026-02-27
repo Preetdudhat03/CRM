@@ -103,12 +103,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(title: const Text('Edit Profile')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                 FadeInSlide(
                   child: Center(
                     child: Stack(
@@ -344,7 +347,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                   ),
                 ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
