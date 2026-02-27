@@ -97,13 +97,11 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Contact Created',
         '$userName added a new contact: ${newContact.name}',
         relatedEntityId: newContact.id,
         relatedEntityType: 'contact',
-        targetRoles: getUpperRanks(role),
         showOnDevice: false,
       );
     } catch (e) {
@@ -121,6 +119,15 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
         ]);
       });
       ActivityService.log(title: 'Updated contact: ${contact.name}', type: 'contact', relatedEntityId: contact.id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Contact Updated',
+        '$userName updated contact: ${contact.name}',
+        relatedEntityId: contact.id,
+        relatedEntityType: 'contact',
+      );
     } catch (e) {
       // Handle error
     }
@@ -136,6 +143,14 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
         ]);
       });
       ActivityService.log(title: 'Deleted a contact', type: 'contact', relatedEntityId: id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Contact Deleted',
+        '$userName deleted a contact',
+        relatedEntityType: 'contact',
+      );
     } catch (e) {
       // Handle error
     }

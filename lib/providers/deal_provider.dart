@@ -95,13 +95,11 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Deal Created',
         '$userName added a new deal: ${newDeal.title}',
         relatedEntityId: newDeal.id,
         relatedEntityType: 'deal',
-        targetRoles: getUpperRanks(role),
         showOnDevice: false,
       );
     } catch (e) {
@@ -120,17 +118,22 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
             if (d.id == deal.id) updatedDeal else d
         ]);
 
+        final currentUser = _ref.read(currentUserProvider);
+        final userName = currentUser?.name ?? 'Someone';
+
         if (existingDeal.stage != deal.stage) {
-          final currentUser = _ref.read(currentUserProvider);
-          final userName = currentUser?.name ?? 'Someone';
-          final role = currentUser?.role ?? Role.viewer;
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Deal Stage Updated',
-            '$userName moved the deal ${deal.title} to ${deal.stage.label}',
+            '$userName moved deal ${deal.title} to ${deal.stage.label}',
             relatedEntityId: deal.id,
             relatedEntityType: 'deal',
-            targetRoles: getUpperRanks(role),
-            showOnDevice: false,
+          );
+        } else {
+          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+            'Deal Updated',
+            '$userName updated deal: ${deal.title}',
+            relatedEntityId: deal.id,
+            relatedEntityType: 'deal',
           );
         }
       });
@@ -149,6 +152,14 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         ]);
       });
       ActivityService.log(title: 'Deleted a deal', type: 'deal', relatedEntityId: id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Deal Deleted',
+        '$userName deleted a deal',
+        relatedEntityType: 'deal',
+      );
     } catch (e) {
       // Handle error
     }

@@ -2,30 +2,41 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/notification_model.dart';
-import 'package:uuid/uuid.dart';
 
 class NotificationService {
   final SupabaseClient _supabase = Supabase.instance.client;
-  final _uuid = const Uuid();
+
+  /// Get current user's ID from Supabase auth session
+  String? get _currentUserId => _supabase.auth.currentUser?.id;
 
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      // Always try Supabase first — this gets notifications from ALL users
+      final userId = _currentUserId;
+
+      // Fetch ALL notifications, ordered by newest first
       final response = await _supabase
           .from('notifications')
           .select()
-          .order('date', ascending: false)
+          .order('created_at', ascending: false)
           .limit(50);
       
       final List<dynamic> data = response as List<dynamic>;
+      
       final notifications = data.map((json) => NotificationModel.fromJson(json)).toList();
       
+      // Filter out self-notifications (where sender_id == current user)
+      final filtered = notifications.where((n) {
+        // Don't show notifications created by the current user
+        if (n.senderId != null && n.senderId == userId) return false;
+        return true;
+      }).toList();
+      
+      
       // Cache to local for offline access
-      await _saveLocally(notifications);
-      return notifications;
+      await _saveLocally(filtered);
+      return filtered;
     } catch (e) {
-      print('Error fetching notifications from Supabase, falling back to local: $e');
-      // Fallback to local cache if Supabase is unreachable
+      print('[NotificationService] ERROR fetching: $e');
       return _getLocalNotifications();
     }
   }
@@ -39,7 +50,7 @@ class NotificationService {
         return decoded.map((json) => NotificationModel.fromJson(json)).toList();
       }
     } catch (e) {
-      print('Error reading local notifications: $e');
+      print('[NotificationService] Error reading local: $e');
     }
     return [];
   }
@@ -50,30 +61,22 @@ class NotificationService {
        final encoded = jsonEncode(notifications.map((n) => n.toJson()).toList());
        await prefs.setString('local_notifications', encoded);
      } catch(e) {
-       print('Error saving local notifications: $e');
+       print('[NotificationService] Error saving local: $e');
      }
   }
 
   Future<void> addNotification(NotificationModel notification) async {
     try {
       final data = notification.toJson();
-      if (data['id'] == null || data['id'].isEmpty) {
-        data['id'] = _uuid.v4();
-      }
+      
+      // Set sender_id so we can filter out self-notifications on read
+      data['sender_id'] = _currentUserId;
 
-      // Save to Supabase first — this makes it visible to ALL users
+
       await _supabase.from('notifications').insert(data);
       
-      // Also update local cache
-      final current = await _getLocalNotifications();
-      current.insert(0, notification);
-      await _saveLocally(current);
     } catch (e) {
-      print('Error adding notification: $e');
-      // Still save locally even if Supabase fails
-      final current = await _getLocalNotifications();
-      current.insert(0, notification);
-      await _saveLocally(current);
+      print('[NotificationService] INSERT ERROR: $e');
     }
   }
 
@@ -83,31 +86,20 @@ class NotificationService {
           .from('notifications')
           .update({'is_read': true})
           .eq('id', id);
-
-      // Update local cache too
-      final current = await _getLocalNotifications();
-      final updated = current.map((n) {
-          if (n.id == id) return n.copyWith(isRead: true);
-          return n;
-      }).toList();
-      await _saveLocally(updated);
     } catch (e) {
-      print('Error marking notification read: $e');
+      print('[NotificationService] Error marking read: $e');
     }
   }
 
   Future<void> markAllAsRead() async {
     try {
+      // Mark all unread as read
       await _supabase
           .from('notifications')
           .update({'is_read': true})
           .eq('is_read', false);
-
-      final current = await _getLocalNotifications();
-      final updated = current.map((n) => n.copyWith(isRead: true)).toList();
-      await _saveLocally(updated);
     } catch (e) {
-      print('Error marking all notifications read: $e');
+      print('[NotificationService] Error marking all read: $e');
     }
   }
 }

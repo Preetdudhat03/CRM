@@ -12,6 +12,9 @@ app.listen(PORT, async () => {
         const res = await db.query('SELECT NOW()');
         console.log('Database connected successfully:', res.rows[0]);
     } catch (err) {
-        console.error('Database connection failed!', err);
+        console.error('Database connection failed!', err.message);
     }
 });
+
+// Initialize background worker
+require('./src/workers/notificationWorker');

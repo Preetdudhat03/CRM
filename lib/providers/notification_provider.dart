@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repositories/notification_repository.dart';
 import '../services/notification_service.dart';
 import '../models/notification_model.dart';
 import '../models/user_model.dart';
 import '../models/role_model.dart';
 import '../services/local_notification_service.dart';
-import '../services/push_notification_service.dart';
 import 'auth_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,52 +40,79 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationModel>>> {
   final NotificationRepository _repository;
   final UserModel? _currentUser;
+  RealtimeChannel? _realtimeChannel;
 
   NotificationNotifier(this._repository, this._currentUser) : super(const AsyncValue.loading()) {
     getNotifications();
+    _subscribeToRealtime();
+  }
+
+  /// Subscribe to Supabase Realtime to get push notifications from OTHER users
+  void _subscribeToRealtime() {
+    final supabase = Supabase.instance.client;
+    final currentUserId = _currentUser?.id;
+    
+    _realtimeChannel = supabase
+        .channel('notifications_realtime')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'notifications',
+          callback: (payload) {
+            final newRecord = payload.newRecord;
+            final senderId = newRecord['sender_id']?.toString();
+            
+            // Only show push notification if it's from ANOTHER user
+            if (senderId != null && senderId != currentUserId) {
+              final title = newRecord['title'] ?? 'New Notification';
+              final message = newRecord['message'] ?? '';
+              
+              // Show local push notification on this phone
+              _showPushNotification(title, message);
+              
+              // Refresh the in-app notification list
+              getNotifications();
+            }
+          },
+        )
+        .subscribe();
+  }
+
+  Future<void> _showPushNotification(String title, String body) async {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('notifications_enabled') ?? true;
+    
+    if (enabled) {
+      LocalNotificationService.showNotification(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        title: title,
+        body: body,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
   }
 
   Future<void> getNotifications() async {
     try {
       state = const AsyncValue.loading();
       final notifications = await _repository.getNotifications();
-      
-      final filtered = notifications.where((n) {
-        if (_currentUser == null) return false;
-        if (n.senderId != null && n.senderId == _currentUser!.id) return false;
-        if (n.targetRoles == null || n.targetRoles!.isEmpty) return true;
-        return n.targetRoles!.contains(_currentUser!.role.name);
-      }).toList();
-
-      state = AsyncValue.data(filtered);
+      state = AsyncValue.data(notifications);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
   }
 
   Future<void> addNotification(NotificationModel notification) async {
-    // Optimistically update local state so the feeds work real-time even if Supabase isn't synced yet
-    bool shouldShow = true;
-    if (_currentUser != null && notification.senderId == _currentUser!.id) {
-       shouldShow = false;
-    } else if (notification.targetRoles != null && notification.targetRoles!.isNotEmpty) {
-      if (_currentUser == null || !notification.targetRoles!.contains(_currentUser!.role.name)) {
-        shouldShow = false;
-      }
-    }
-
-    if (shouldShow) {
-      if (state.hasValue) {
-        state.whenData((notifications) {
-          state = AsyncValue.data([notification, ...notifications]);
-        });
-      } else {
-        state = AsyncValue.data([notification]);
-      }
-    }
-
     try {
       await _repository.addNotification(notification);
+      // Realtime will auto-refresh for other users
+      // But we still refresh our own list (to not show self-notifications)
+      await getNotifications();
     } catch (e) {
       print('Failed to add notification: $e');
     }
@@ -97,9 +124,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       state.whenData((notifications) {
         state = AsyncValue.data(
           notifications.map((n) {
-            if (n.id == id) {
-              return n.copyWith(isRead: true);
-            }
+            if (n.id == id) return n.copyWith(isRead: true);
             return n;
           }).toList()
         );
@@ -122,13 +147,19 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     }
   }
 
-  void pushNotificationLocally(String title, String message, {String? relatedEntityId, String? relatedEntityType, bool deduplicate = false, List<String>? targetRoles, bool showOnDevice = true}) async {
+  /// Create and broadcast a notification (saved to Supabase, Realtime pushes to others)
+  void pushNotificationLocally(String title, String message, {
+    String? relatedEntityId, 
+    String? relatedEntityType, 
+    bool deduplicate = false,
+    bool showOnDevice = false,
+  }) async {
     if (deduplicate) {
       bool exists = false;
       state.whenData((notifications) {
         exists = notifications.any((n) => n.title == title && n.relatedEntityId == relatedEntityId);
       });
-      if (exists) return; // Don't add duplicate
+      if (exists) return;
     }
     
     final notification = NotificationModel(
@@ -138,37 +169,11 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       date: DateTime.now(),
       relatedEntityId: relatedEntityId,
       relatedEntityType: relatedEntityType,
-      targetRoles: targetRoles,
       senderId: _currentUser?.id,
     );
 
-    if (!showOnDevice) {
-      PushNotificationService.ignoreNotificationId(notification.id);
-    }
-
+    // Insert into Supabase — Realtime will push to OTHER users' phones
     await addNotification(notification);
-    
-    // Check if meant for this user before pushing to device
-    bool shouldShowDevice = true;
-    if (targetRoles != null && targetRoles!.isNotEmpty) {
-      if (_currentUser == null || !targetRoles.contains(_currentUser!.role.name)) {
-        shouldShowDevice = false;
-      }
-    }
-
-    if (!shouldShowDevice || !showOnDevice) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool('notifications_enabled') ?? true;
-    
-    if (enabled) {
-      // Trigger actual device push notification
-      LocalNotificationService.showNotification(
-         id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
-         title: title,
-         body: message,
-      );
-    }
   }
 }
 

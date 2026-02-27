@@ -89,12 +89,12 @@ class ContactDetailScreen extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundImage: contact.avatarUrl != null
+            backgroundImage: contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
                 ? NetworkImage(contact.avatarUrl!)
                 : null,
-            child: contact.avatarUrl == null
+            child: (contact.avatarUrl == null || contact.avatarUrl!.isEmpty)
                 ? Text(
-                    contact.name.substring(0, 1).toUpperCase(),
+                    contact.name.isNotEmpty ? contact.name.substring(0, 1).toUpperCase() : 'C',
                     style: const TextStyle(fontSize: 40),
                   )
                 : null,

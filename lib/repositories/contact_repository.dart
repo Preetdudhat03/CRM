@@ -10,6 +10,14 @@ class ContactRepository {
     return _service.getContacts(page: page, pageSize: pageSize);
   }
 
+  Future<ContactModel> getContactById(String id) async {
+    return _service.getContactById(id);
+  }
+
+  Future<List<ContactModel>> searchContacts(String query, {int page = 0, int pageSize = 20}) async {
+    return _service.searchContacts(query, page: page, pageSize: pageSize);
+  }
+
   Future<ContactModel> addContact(ContactModel contact) async {
     return _service.addContact(contact);
   }
@@ -24,5 +32,9 @@ class ContactRepository {
 
   Future<void> toggleFavorite(String id, bool currentStatus) async {
     return _service.toggleFavorite(id, currentStatus);
+  }
+
+  Future<Map<String, dynamic>> getStats() async {
+    return _service.getStats();
   }
 }

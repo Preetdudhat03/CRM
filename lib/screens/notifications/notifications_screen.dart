@@ -26,53 +26,73 @@ class NotificationsScreen extends ConsumerWidget {
       body: notificationsAsync.when(
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const Center(child: Text('No notifications right now.'));
+            return RefreshIndicator(
+              onRefresh: () => ref.read(notificationsProvider.notifier).getNotifications(),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 200),
+                  Center(child: Text('No notifications right now.')),
+                  Center(child: Text('Pull down to refresh', style: TextStyle(color: Colors.grey))),
+                ],
+              ),
+            );
           }
 
-          return ListView.builder(
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              final notification = notifications[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: notification.isRead 
-                      ? Colors.grey.withOpacity(0.2) 
-                      : Theme.of(context).primaryColor.withOpacity(0.2),
-                  child: Icon(
-                    _getIconForType(notification.relatedEntityType),
-                    color: notification.isRead 
-                        ? Colors.grey 
-                        : Theme.of(context).primaryColor,
-                  ),
-                ),
-                title: Text(
-                  notification.title,
-                  style: TextStyle(
-                    fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(notification.message),
-                    const SizedBox(height: 4),
-                    Text(
-                      timeago.format(notification.date),
-                      style: Theme.of(context).textTheme.bodySmall,
+          return RefreshIndicator(
+            onRefresh: () => ref.read(notificationsProvider.notifier).getNotifications(),
+            child: ListView.builder(
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final notification = notifications[index];
+                return ListTile(
+                  isThreeLine: true,
+                  leading: CircleAvatar(
+                    backgroundColor: notification.isRead 
+                        ? Colors.grey.withOpacity(0.2) 
+                        : Theme.of(context).primaryColor.withOpacity(0.2),
+                    child: Icon(
+                      _getIconForType(notification.relatedEntityType),
+                      color: notification.isRead 
+                          ? Colors.grey 
+                          : Theme.of(context).primaryColor,
                     ),
-                  ],
-                ),
-                trailing: !notification.isRead 
-                    ? const Icon(Icons.circle, color: Colors.blue, size: 12)
-                    : null,
-                onTap: () {
-                  if (!notification.isRead) {
-                    ref.read(notificationsProvider.notifier).markAsRead(notification.id);
-                  }
-                  // Optionally navigate based on relatedEntityType and ID
-                },
-              );
-            },
+                  ),
+                  title: Text(
+                    notification.title,
+                    style: TextStyle(
+                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        notification.message,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        timeago.format(notification.date),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  trailing: !notification.isRead 
+                      ? const Icon(Icons.circle, color: Colors.blue, size: 12)
+                      : null,
+                  onTap: () {
+                    if (!notification.isRead) {
+                      ref.read(notificationsProvider.notifier).markAsRead(notification.id);
+                    }
+                    // Optionally navigate based on relatedEntityType and ID
+                  },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

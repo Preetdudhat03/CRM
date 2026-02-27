@@ -119,6 +119,7 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'home_fab',
         onPressed: () {
           _showQuickAddMenu(context);
         },

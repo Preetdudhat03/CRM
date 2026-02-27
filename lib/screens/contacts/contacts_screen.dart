@@ -386,6 +386,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton(
+              heroTag: 'contacts_fab',
               onPressed: () {
                 Navigator.push(
                   context,

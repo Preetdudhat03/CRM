@@ -150,6 +150,7 @@ class UserManagementScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'users_fab',
         onPressed: () {
           Navigator.push(
             context,

@@ -11,7 +11,15 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to CRM Backend API' });
 });
 
-// Routes will be added here later
+// Routes
+const notificationRoutes = require('./routes/notification.routes');
+const contactRoutes = require('./routes/contact.routes');
+const leadRoutes = require('./routes/lead.routes');
+
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/leads', leadRoutes);
+
 // const authRoutes = require('./routes/auth.routes');
 // app.use('/api/auth', authRoutes);
 

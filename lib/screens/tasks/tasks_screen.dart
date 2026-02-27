@@ -107,6 +107,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 )
               : ListView.builder(
                   controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 80),
                   itemCount: tasks.length + 1,
                   itemBuilder: (context, index) {
@@ -183,6 +184,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(
+              heroTag: 'tasks_fab',
               onPressed: () {
                 Navigator.push(
                   context,

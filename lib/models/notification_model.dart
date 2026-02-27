@@ -5,8 +5,7 @@ class NotificationModel {
   final DateTime date;
   final bool isRead;
   final String? relatedEntityId;
-  final String? relatedEntityType; // 'task', 'deal', 'lead'
-  final List<String>? targetRoles;
+  final String? relatedEntityType; 
   final String? senderId;
 
   const NotificationModel({
@@ -17,7 +16,6 @@ class NotificationModel {
     this.isRead = false,
     this.relatedEntityId,
     this.relatedEntityType,
-    this.targetRoles,
     this.senderId,
   });
 
@@ -29,7 +27,6 @@ class NotificationModel {
     bool? isRead,
     String? relatedEntityId,
     String? relatedEntityType,
-    List<String>? targetRoles,
     String? senderId,
   }) {
     return NotificationModel(
@@ -40,69 +37,40 @@ class NotificationModel {
       isRead: isRead ?? this.isRead,
       relatedEntityId: relatedEntityId ?? this.relatedEntityId,
       relatedEntityType: relatedEntityType ?? this.relatedEntityType,
-      targetRoles: targetRoles ?? this.targetRoles,
       senderId: senderId ?? this.senderId,
     );
   }
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
-    String? rawType = json['related_entity_type'];
-    String? type;
-    List<String>? roles;
-    String? sender;
-
-    if (rawType != null) {
-      String remaining = rawType;
-      
-      // Extract sender
-      if (remaining.contains('||sender:')) {
-        final parts = remaining.split('||sender:');
-        sender = parts[1];
-        remaining = parts[0];
-      }
-      
-      // Extract roles
-      if (remaining.contains('||roles:')) {
-        final parts = remaining.split('||roles:');
-        roles = parts[1].split(',');
-        remaining = parts[0];
-      }
-      
-      type = (remaining == 'none' || remaining.isEmpty) ? null : remaining;
-    }
-
     return NotificationModel(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
       message: json['message'] ?? '',
-      date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
+      date: json['created_at'] != null ? DateTime.parse(json['created_at']).toLocal() : DateTime.now(),
       isRead: json['is_read'] ?? false,
-      relatedEntityId: json['related_entity_id'],
-      relatedEntityType: type,
-      targetRoles: roles,
-      senderId: sender,
+      relatedEntityId: json['related_id']?.toString(),
+      relatedEntityType: json['related_type'],
+      senderId: json['sender_id']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
-    String? rawType = relatedEntityType;
-    String rolesStr = targetRoles != null && targetRoles!.isNotEmpty ? '||roles:${targetRoles!.join(',')}' : '';
-    String senderStr = senderId != null ? '||sender:$senderId' : '';
-    
-    if (rawType == null && (rolesStr.isNotEmpty || senderStr.isNotEmpty)) {
-      rawType = 'none$rolesStr$senderStr';
-    } else if (rawType != null) {
-      rawType = '$rawType$rolesStr$senderStr';
-    }
-
-    return {
-      'id': id,
+    final json = <String, dynamic>{
       'title': title,
       'message': message,
-      'date': date.toIso8601String(),
       'is_read': isRead,
-      'related_entity_id': relatedEntityId,
-      'related_entity_type': rawType,
+      'type': relatedEntityType ?? 'general_notification',
+      'priority': 'MEDIUM',
     };
+
+    // Only include non-null optional fields to avoid DB type errors
+    if (relatedEntityId != null) json['related_id'] = relatedEntityId;
+    if (relatedEntityType != null) json['related_type'] = relatedEntityType;
+    if (senderId != null) json['sender_id'] = senderId;
+    
+    // Don't send 'id' — let the DB auto-generate with gen_random_uuid()
+    // Don't send 'created_at' — let the DB use DEFAULT NOW()
+
+    return json;
   }
 }

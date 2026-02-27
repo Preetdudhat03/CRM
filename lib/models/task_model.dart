@@ -128,7 +128,7 @@ class TaskModel {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       dueDate: json['due_date'] != null
-          ? DateTime.parse(json['due_date'])
+          ? DateTime.parse(json['due_date']).toLocal()
           : DateTime.now(),
       status: TaskStatus.values.firstWhere(
         (e) => e.name == (json['status'] ?? 'pending'),
@@ -143,7 +143,7 @@ class TaskModel {
       relatedEntityType: json['related_entity_type'],
       relatedEntityName: json['related_entity_name'],
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
+          ? DateTime.parse(json['created_at']).toLocal()
           : DateTime.now(),
     );
   }

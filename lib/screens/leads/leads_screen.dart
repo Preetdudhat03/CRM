@@ -386,6 +386,7 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton(
+              heroTag: 'leads_fab',
               onPressed: () {
                 Navigator.push(
                   context,

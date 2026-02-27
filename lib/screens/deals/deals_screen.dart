@@ -169,6 +169,7 @@ class _DealsScreenState extends ConsumerState<DealsScreen> {
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(
+              heroTag: 'deals_fab',
               onPressed: () {
                 Navigator.push(
                   context,

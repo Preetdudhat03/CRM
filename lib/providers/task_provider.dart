@@ -111,13 +111,11 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Task Created',
         '$userName added a new task: ${newTask.title}',
         relatedEntityId: newTask.id,
         relatedEntityType: 'task',
-        targetRoles: getUpperRanks(role),
         showOnDevice: false,
       );
     } catch (e) {
@@ -139,13 +137,11 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         if (existingTask.status != task.status) {
           final currentUser = _ref.read(currentUserProvider);
           final userName = currentUser?.name ?? 'Someone';
-          final role = currentUser?.role ?? Role.viewer;
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Task Status Updated',
             '$userName marked the task ${task.title} as ${task.status.name}',
             relatedEntityId: task.id,
             relatedEntityType: 'task',
-            targetRoles: getUpperRanks(role),
             showOnDevice: false,
           );
         }
@@ -165,6 +161,14 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         ]);
       });
       ActivityService.log(title: 'Deleted a task', type: 'task', relatedEntityId: id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Task Deleted',
+        '$userName deleted a task',
+        relatedEntityType: 'task',
+      );
     } catch (e) {
       // Handle error
     }

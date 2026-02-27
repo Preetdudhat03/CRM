@@ -95,13 +95,11 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      final role = currentUser?.role ?? Role.viewer;
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Lead Added',
         '$userName added a new lead: ${newLead.name}',
         relatedEntityId: newLead.id,
         relatedEntityType: 'lead',
-        targetRoles: getUpperRanks(role),
         showOnDevice: false,
       );
     } catch (e) {
@@ -113,9 +111,6 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
     try {
       await _repository.updateLead(lead);
       
-      // Determine if assignedTo changed, or just a general update
-      bool isAssigned = lead.assignedTo.isNotEmpty;
-
       state.whenData((leads) {
         final existingLead = leads.firstWhere((l) => l.id == lead.id, orElse: () => lead);
         
@@ -124,17 +119,29 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
             if (l.id == lead.id) lead else l
         ]);
 
-        if (existingLead.assignedTo != lead.assignedTo && isAssigned) {
-          final currentUser = _ref.read(currentUserProvider);
-          final userName = currentUser?.name ?? 'Someone';
-          final role = currentUser?.role ?? Role.viewer;
+        final currentUser = _ref.read(currentUserProvider);
+        final userName = currentUser?.name ?? 'Someone';
+
+        if (existingLead.assignedTo != lead.assignedTo && lead.assignedTo.isNotEmpty) {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Lead Assigned',
             '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
-            targetRoles: getUpperRanks(role),
-            showOnDevice: false,
+          );
+        } else if (existingLead.status != lead.status) {
+          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+            'Lead Status Updated',
+            '$userName changed lead ${lead.name} status to ${lead.status.label}',
+            relatedEntityId: lead.id,
+            relatedEntityType: 'lead',
+          );
+        } else {
+          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+            'Lead Updated',
+            '$userName updated lead: ${lead.name}',
+            relatedEntityId: lead.id,
+            relatedEntityType: 'lead',
           );
         }
       });
@@ -153,6 +160,14 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         ]);
       });
       ActivityService.log(title: 'Deleted a lead', type: 'lead', relatedEntityId: id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Lead Deleted',
+        '$userName deleted a lead',
+        relatedEntityType: 'lead',
+      );
     } catch (e) {
       // Handle error
     }
@@ -161,7 +176,6 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   Future<void> convertLead(String id) async {
     try {
       await _repository.convertLead(id);
-      // Change status to converted locally
       state.whenData((leads) {
         state = AsyncValue.data([
           for (final l in leads)
@@ -169,6 +183,15 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         ]);
       });
       ActivityService.log(title: 'Converted lead to contact', type: 'lead', relatedEntityId: id);
+
+      final currentUser = _ref.read(currentUserProvider);
+      final userName = currentUser?.name ?? 'Someone';
+      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
+        'Lead Converted',
+        '$userName converted a lead to contact',
+        relatedEntityId: id,
+        relatedEntityType: 'lead',
+      );
     } catch (e) {
       rethrow;
     }
