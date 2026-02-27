@@ -27,12 +27,7 @@ class NotificationService {
       
       final notifications = data.map((json) => NotificationModel.fromJson(json)).toList();
       
-      // Filter out self-notifications (where sender_id == current user)
-      final filtered = notifications.where((n) {
-        // Don't show notifications created by the current user
-        if (n.senderId != null && n.senderId == userId) return false;
-        return true;
-      }).toList();
+      final filtered = notifications;
       
       
       // Cache to local for offline access
