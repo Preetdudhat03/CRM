@@ -1,33 +1,32 @@
 
-import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class StorageService {
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _picker = ImagePicker();
 
   /// Picks an image from the gallery
-  Future<File?> pickImage() async {
+  Future<XFile?> pickImage() async {
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 70, // Resize/compress to avoid huge uploads
         maxWidth: 1024,
       );
-      if (image == null) return null;
-      return File(image.path);
+      return image;
     } catch (e) {
-      print('Error picking image: $e');
+      debugPrint('Error picking image: $e');
       return null;
     }
   }
 
   /// Uploads an avatar image to Supabase Storage
   /// Returns the public URL of the uploaded image
-  /// - [file]: The image file to upload
+  /// - [file]: The image file to upload (XFile for cross-platform support)
   /// - [path]: The storage path (e.g. 'users/user_id_123.jpg' or 'contacts/contact_id_456.jpg')
-  Future<String?> uploadAvatar(File file, String path) async {
+  Future<String?> uploadAvatar(XFile file, String path) async {
     try {
       final fileExt = file.path.split('.').last.toLowerCase();
       // Ensure valid extension
@@ -53,10 +52,12 @@ class StorageService {
           mimeType = 'application/octet-stream';
       }
 
+      final bytes = await file.readAsBytes();
+
       // Upload file (upsert: true overwrites existing file at same path)
-      await _supabase.storage.from('avatars').upload(
+      await _supabase.storage.from('avatars').uploadBinary(
             storagePath,
-            file,
+            bytes,
             fileOptions: FileOptions(
               cacheControl: '3600',
               upsert: true,
@@ -67,11 +68,9 @@ class StorageService {
       // Get public URL
       final publicUrl = _supabase.storage.from('avatars').getPublicUrl(storagePath);
       
-      // Add timestamp to foil caching if needed, though getPublicUrl usually returns clean URL.
-      // For immediate refresh, UI might need to handle cache busting.
       return '$publicUrl?t=${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
-      print('Error uploading avatar: $e');
+      debugPrint('Error uploading avatar: $e');
       rethrow;
     }
   }

@@ -6,8 +6,8 @@ class NotificationModel {
   final bool isRead;
   final String? relatedEntityId;
   final String? relatedEntityType; 
+  final String type;
   final String? senderId;
-  final String? recipientId;
 
   const NotificationModel({
     required this.id,
@@ -15,10 +15,10 @@ class NotificationModel {
     required this.message,
     required this.date,
     this.isRead = false,
+    this.type = 'general',
     this.relatedEntityId,
     this.relatedEntityType,
     this.senderId,
-    this.recipientId,
   });
 
   NotificationModel copyWith({
@@ -27,10 +27,9 @@ class NotificationModel {
     String? message,
     DateTime? date,
     bool? isRead,
-    String? relatedEntityId,
     String? relatedEntityType,
+    String? type,
     String? senderId,
-    String? recipientId,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -40,8 +39,8 @@ class NotificationModel {
       isRead: isRead ?? this.isRead,
       relatedEntityId: relatedEntityId ?? this.relatedEntityId,
       relatedEntityType: relatedEntityType ?? this.relatedEntityType,
+      type: type ?? this.type,
       senderId: senderId ?? this.senderId,
-      recipientId: recipientId ?? this.recipientId,
     );
   }
 
@@ -52,10 +51,10 @@ class NotificationModel {
       message: json['message'] ?? '',
       date: json['created_at'] != null ? DateTime.parse(json['created_at']).toLocal() : DateTime.now(),
       isRead: json['is_read'] ?? false,
-      relatedEntityId: json['related_id']?.toString(), // Match schema: related_id
-      relatedEntityType: json['related_type'],         // Match schema: related_type
+      type: json['type'] ?? 'general',
+      relatedEntityId: (json['related_id'] ?? json['related_entity_id'])?.toString(),
+      relatedEntityType: json['related_type'] ?? json['related_entity_type'],
       senderId: json['sender_id']?.toString(),
-      recipientId: json['user_id']?.toString(),
     );
   }
 
@@ -64,18 +63,19 @@ class NotificationModel {
       'title': title,
       'message': message,
       'is_read': isRead,
-      'type': relatedEntityType ?? 'general', // Schema requires 'type' NOT NULL
+      'type': type,
     };
 
-    // Only include non-null optional fields to avoid DB type errors
-    if (relatedEntityId != null) json['related_id'] = relatedEntityId; // Match schema: related_id
-    if (relatedEntityType != null) json['related_type'] = relatedEntityType; // Match schema: related_type
+    if (relatedEntityId != null) {
+      json['related_id'] = relatedEntityId;
+      json['related_entity_id'] = relatedEntityId;
+    }
+    if (relatedEntityType != null) {
+      json['related_type'] = relatedEntityType;
+      json['related_entity_type'] = relatedEntityType;
+    }
     if (senderId != null) json['sender_id'] = senderId;
-    if (recipientId != null) json['user_id'] = recipientId;
     
-    // Don't send 'id' — let the DB auto-generate with gen_random_uuid()
-    // Don't send 'created_at' — let the DB use DEFAULT NOW()
-
     return json;
   }
 }

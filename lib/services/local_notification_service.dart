@@ -41,7 +41,7 @@ class LocalNotificationService {
     try {
       const AndroidNotificationDetails androidNotificationDetails =
           AndroidNotificationDetails(
-        'crm_channel',
+        'crm_notifications',
         'CRM Notifications',
         channelDescription: 'Main channel for CRM app notifications',
         importance: Importance.max,

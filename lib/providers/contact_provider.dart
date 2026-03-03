@@ -1,7 +1,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/contact_model.dart';
-import '../models/role_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
 import '../services/activity_service.dart';
@@ -22,6 +22,7 @@ final contactSearchQueryProvider = StateProvider<String>((ref) => '');
 class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   final ContactRepository _repository;
   final Ref _ref;
+  RealtimeChannel? _realtimeChannel;
 
   int _currentPage = 0;
   final int _pageSize = 20;
@@ -30,6 +31,29 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   ContactNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadInitial();
+    _subscribeToRealtime();
+  }
+
+  void _subscribeToRealtime() {
+    final supabase = Supabase.instance.client;
+    
+    _realtimeChannel = supabase
+        .channel('public:contacts')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'contacts',
+          callback: (payload) {
+            refresh();
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
   }
 
   bool get hasMore => _hasMore;
@@ -76,6 +100,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
     _hasMore = true;
     _isLoadingMore = false;
     try {
+      // Don't set state to loading – keep the list visible during silent refresh
       final contacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
       if (contacts.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(contacts);
@@ -100,6 +125,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Contact Created',
         '$userName added a new contact: ${newContact.name}',
+        type: 'contact_created',
         relatedEntityId: newContact.id,
         relatedEntityType: 'contact',
         showOnDevice: false,
@@ -125,11 +151,12 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'Contact Updated',
         '$userName updated contact: ${contact.name}',
+        type: 'contact_updated',
         relatedEntityId: contact.id,
         relatedEntityType: 'contact',
+        showOnDevice: false,
       );
     } catch (e) {
-      // Handle error
       rethrow;
     }
   }
@@ -150,6 +177,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'Contact Deleted',
         '$userName deleted a contact',
+        type: 'contact_deleted',
         relatedEntityType: 'contact',
       );
     } catch (e) {

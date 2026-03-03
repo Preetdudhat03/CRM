@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../models/deal_model.dart';
-import '../../../widgets/animations/fade_in_slide.dart';
 
 class PipelineWidget extends StatelessWidget {
   final Map<DealStage, int> pipelineData;

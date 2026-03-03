@@ -13,15 +13,12 @@ class NotificationService {
     try {
       final userId = _currentUserId;
 
-      // Fetch notifications. RLS should handle user isolation if configured.
-      // If RLS is not fully isolating, we might need a .eq('user_id', userId) filter here.
-      var query = _supabase
+      // Fetch ALL notifications, ordered by newest first
+      final response = await _supabase
           .from('notifications')
           .select()
           .order('created_at', ascending: false)
-          .limit(100);
-      
-      final response = await query.timeout(const Duration(seconds: 15));
+          .limit(50);
       
       final List<dynamic> data = response as List<dynamic>;
       
@@ -29,11 +26,13 @@ class NotificationService {
       
       // Filter out self-notifications (where sender_id == current user)
       final filtered = notifications.where((n) {
+        // Don't show notifications created by the current user
         if (n.senderId != null && n.senderId == userId) return false;
         return true;
       }).toList();
       
-      // Cache locally
+      
+      // Cache to local for offline access
       await _saveLocally(filtered);
       return filtered;
     } catch (e) {
@@ -70,14 +69,17 @@ class NotificationService {
     try {
       final data = notification.toJson();
       
-      // Ensure sender_id is set
-      data['sender_id'] = _currentUserId;
-
-      // If no explicit recipient (user_id) is set, it stays NULL (effectively a broadcast)
-      // Note: If RLS is strict, you may need a policy to allow viewing NULL user_id records.
+      // Ensure the sender_id is ALWAYS set to the currently logged-in user
+      final actualUserId = _currentUserId;
+      if (actualUserId != null) {
+          data['sender_id'] = actualUserId;
+          // Also update the encoded related_type as a backup for the Edge Function
+          if (data['related_type'] != null && !data['related_type'].toString().contains('||sender:')) {
+            data['related_type'] = "${data['related_type']}||sender:$actualUserId";
+          }
+      }
 
       await _supabase.from('notifications').insert(data);
-      
     } catch (e) {
       print('[NotificationService] INSERT ERROR: $e');
     }
@@ -85,15 +87,10 @@ class NotificationService {
 
   Future<void> markAsRead(String id) async {
     try {
-      // In a multi-user shared notification system, we should ideally mark as read
-      // in a junction table. For now, and to satisfy the "vanish" requirement,
-      // we handle it locally in the Notifier. 
-      // We only update the DB if the notification is private to this user.
       await _supabase
           .from('notifications')
           .update({'is_read': true})
-          .eq('id', id)
-          .eq('user_id', _currentUserId ?? ''); // Only if it's mine
+          .eq('id', id);
     } catch (e) {
       print('[NotificationService] Error marking read: $e');
     }
@@ -101,14 +98,10 @@ class NotificationService {
 
   Future<void> markAllAsRead() async {
     try {
-      // Similarly, only mark my own as read to avoid affecting others.
-      final userId = _currentUserId;
-      if (userId == null) return;
-
+      // Mark all unread as read
       await _supabase
           .from('notifications')
           .update({'is_read': true})
-          .eq('user_id', userId)
           .eq('is_read', false);
     } catch (e) {
       print('[NotificationService] Error marking all read: $e');

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../models/contact_model.dart';
 import '../../providers/contact_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
@@ -33,7 +33,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
   String _countryCode = '+1'; // Default
   late String _assignedTo;
   
-  File? _imageFile;
+  XFile? _imageFile;
   String? _avatarUrl;
   bool _isLoading = false;
 
@@ -181,7 +181,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                               radius: 50,
                               backgroundColor: Theme.of(context).primaryColor,
                               backgroundImage: _imageFile != null
-                                  ? FileImage(_imageFile!)
+                                  ? NetworkImage(_imageFile!.path)
                                   : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
                                       ? NetworkImage(_avatarUrl!) as ImageProvider
                                       : null,
@@ -377,8 +377,8 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                               border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                             ),
                             items: [
-                              const DropdownMenuItem<String>(value: null, child: Text('Unassigned')),
-                              ...users.map((user) => DropdownMenuItem<String>(
+                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
+                              ...users.map((user) => DropdownMenuItem(
                                 value: user.id,
                                 child: Text(user.name),
                               )),

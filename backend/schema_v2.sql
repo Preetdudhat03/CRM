@@ -150,7 +150,6 @@ CREATE TABLE notifications (
   is_read BOOLEAN DEFAULT FALSE,
   related_entity_id TEXT,
   related_entity_type TEXT,
-  sender_id UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

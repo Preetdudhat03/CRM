@@ -16,16 +16,15 @@ serve(async (req) => {
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         const supabase = createClient(supabaseUrl, supabaseKey)
 
-        // 1. Extract target roles and sender from related_entity_type (e.g. "task||roles:manager,admin||sender:123")
         let targetRoles: string[] = []
-        let senderId: string | null = null;
-        let rawType = record.related_entity_type;
+        let rawType = record.related_type || record.related_entity_type;
+        let senderId: string | null = record.sender_id || null;
 
         if (rawType) {
-            // Extract sender
+            // Extract sender from encoded string if present (fallback)
             if (rawType.includes('||sender:')) {
                 const parts = rawType.split('||sender:');
-                senderId = parts[1];
+                if (!senderId) senderId = parts[1];
                 rawType = parts[0];
             }
 
@@ -57,10 +56,14 @@ serve(async (req) => {
             return new Response('No users found for target roles', { status: 200 })
         }
 
-        let targetUserIds = profiles.map((p: any) => p.id)
+        let targetUserIds = profiles.map((p: any) => p.id.toString().toLowerCase())
+        const normalizedSenderId = senderId?.toString().toLowerCase();
 
-        if (senderId) {
-            targetUserIds = targetUserIds.filter((id: string) => id !== senderId);
+        console.log(`[Push FCM] Found ${targetUserIds.length} users. Sender ID: ${normalizedSenderId}`);
+
+        if (normalizedSenderId) {
+            targetUserIds = targetUserIds.filter((id: string) => id !== normalizedSenderId);
+            console.log(`[Push FCM] Users after sender filter: ${targetUserIds.length}`);
         }
 
         if (targetUserIds.length === 0) {
@@ -68,7 +71,7 @@ serve(async (req) => {
             return new Response('No matching users after filtering sender', { status: 200 })
         }
 
-        console.log(`[Push FCM] Found ${targetUserIds.length} users with matching roles.`);
+        console.log(`[Push FCM] Final target user list: ${targetUserIds.join(', ')}`);
 
         // 3. Get FCM Tokens for those users
         const { data: tokensData, error: tokenError } = await supabase
@@ -115,8 +118,24 @@ serve(async (req) => {
                     },
                     data: {
                         id: record.id,
-                        entityId: record.related_entity_id || '',
+                        entityId: record.related_id || record.related_entity_id || '',
                         entityType: rawType ? rawType.split('||')[0] : '',
+                    },
+                    android: {
+                        priority: 'HIGH',
+                        notification: {
+                            channel_id: 'high_importance_channel',
+                            notification_priority: 'PRIORITY_MAX',
+                            visibility: 'PUBLIC',
+                        }
+                    },
+                    apns: {
+                        payload: {
+                            aps: {
+                                contentAvailable: true,
+                                sound: 'default',
+                            }
+                        }
                     }
                 }
             }
@@ -134,9 +153,13 @@ serve(async (req) => {
         })
 
         const results = await Promise.all(sendPromises)
-        console.log('[Push FCM] Send results:', JSON.stringify(results));
+        console.log(`[Push FCM] Send results for ${tokens.length} tokens:`, JSON.stringify(results));
 
-        return new Response(JSON.stringify({ success: true, results }), {
+        return new Response(JSON.stringify({
+            success: true,
+            tokens_attempted: tokens.length,
+            results
+        }), {
             headers: { 'Content-Type': 'application/json' },
             status: 200
         })

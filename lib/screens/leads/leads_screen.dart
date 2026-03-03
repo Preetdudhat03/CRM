@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/permission_model.dart';
 import '../../models/lead_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/lead_provider.dart';
@@ -8,7 +7,6 @@ import 'widgets/lead_card.dart';
 import 'add_edit_lead_screen.dart';
 import 'lead_detail_screen.dart';
 import '../../core/services/permission_service.dart';
-import '../../utils/error_handler.dart';
 import '../../widgets/skeleton_loading.dart';
 
 class LeadsScreen extends ConsumerStatefulWidget {
@@ -78,80 +76,82 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
       LeadStatus.lost,
     ];
 
-    return SizedBox(
+    return Container(
       height: 60,
-      child: ListView.builder(
+      width: double.infinity,
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: statuses.length,
-        itemBuilder: (context, index) {
-          final status = statuses[index];
-          final count = allLeads.where((l) => l.status == status).length;
-          final isSelected = _selectedStatusFilter == status;
+        child: Row(
+          children: List.generate(statuses.length, (index) {
+            final status = statuses[index];
+            final count = allLeads.where((l) => l.status == status).length;
+            final isSelected = _selectedStatusFilter == status;
 
-          Color getBaseColor(LeadStatus s) {
-             switch (s) {
-              case LeadStatus.newLead: return Colors.blue;
-              case LeadStatus.contacted: return Colors.purple;
-              case LeadStatus.qualified: return Colors.teal;
-              case LeadStatus.lost: return Colors.red;
-              default: return Colors.grey;
-             }
-          }
-          final baseColor = getBaseColor(status);
+            Color getBaseColor(LeadStatus s) {
+               switch (s) {
+                case LeadStatus.newLead: return Colors.blue;
+                case LeadStatus.contacted: return Colors.purple;
+                case LeadStatus.qualified: return Colors.teal;
+                case LeadStatus.lost: return Colors.red;
+                default: return Colors.grey;
+               }
+            }
+            final baseColor = getBaseColor(status);
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedStatusFilter = isSelected ? null : status;
-                });
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: isSelected ? baseColor : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isSelected ? baseColor : Colors.grey.shade300),
-                  boxShadow: isSelected ? [
-                    BoxShadow(color: baseColor.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
-                  ] : null,
-                ),
-                alignment: Alignment.center,
-                child: Row(
-                  children: [
-                    Text(
-                      status.label,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: isSelected ? Colors.white : Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        count.toString(),
+            return Padding(
+              padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedStatusFilter = isSelected ? null : status;
+                  });
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? baseColor : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isSelected ? baseColor : Colors.grey.shade300),
+                    boxShadow: isSelected ? [
+                      BoxShadow(color: baseColor.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
+                    ] : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    children: [
+                      Text(
+                        status.label,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                           color: isSelected ? Colors.white : Colors.grey.shade700,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          }),
+        ),
       ),
     );
   }
@@ -171,7 +171,7 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(130),
+          preferredSize: const Size.fromHeight(160),
           child: Column(
             children: [
                Padding(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../models/contact_model.dart';
-import 'package:intl/intl.dart';
 
 class ContactCard extends StatelessWidget {
   final ContactModel contact;

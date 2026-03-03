@@ -1,6 +1,5 @@
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
-import '../models/role_model.dart';
 
 class AuthRepository {
   final AuthService _service;

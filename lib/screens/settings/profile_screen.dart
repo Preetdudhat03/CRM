@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/storage_service.dart';
 import '../../widgets/animations/fade_in_slide.dart';
@@ -21,7 +21,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late String _name;
   late String _email;
   String? _avatarUrl;
-  File? _imageFile;
+  XFile? _imageFile;
   bool _isLoading = false;
   
   String? _password;
@@ -103,15 +103,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(title: const Text('Edit Profile')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 FadeInSlide(
                   child: Center(
                     child: Stack(
@@ -131,7 +128,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               radius: 50,
                               backgroundColor: Theme.of(context).primaryColor,
                               backgroundImage: _imageFile != null
-                                  ? FileImage(_imageFile!)
+                                  ? NetworkImage(_imageFile!.path)
                                   : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
                                       ? NetworkImage(_avatarUrl!) as ImageProvider
                                       : null,
@@ -347,9 +344,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                   ),
                 ),
-                ],
-              ),
-            ),
+            ],
           ),
         ),
       ),

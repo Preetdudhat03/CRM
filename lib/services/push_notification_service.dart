@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -7,7 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('[FCM] Background message: ${message.notification?.title}');
+  debugPrint('[FCM] Background message: ${message.notification?.title}');
 }
 
 class PushNotificationService {
@@ -32,7 +33,7 @@ class PushNotificationService {
       badge: true,
       sound: true,
     );
-    print('[FCM] Permission status: ${settings.authorizationStatus}');
+    debugPrint('[FCM] Permission status: ${settings.authorizationStatus}');
   }
 
   /// Initialize FCM + local notifications + store token
@@ -43,9 +44,9 @@ class PushNotificationService {
 
     // Set up local notification channel for Android
     const androidChannel = AndroidNotificationChannel(
-      'crm_notifications',
-      'CRM Notifications',
-      description: 'Notifications for CRM app activities',
+      'high_importance_channel',
+      'High Importance Notifications',
+      description: 'This channel is used for important crm notifications.',
       importance: Importance.high,
     );
 
@@ -99,19 +100,20 @@ class PushNotificationService {
   }
 
   static Future<void> _saveToken() async {
+    if (kIsWeb) return; 
     try {
       final token = await _messaging.getToken();
       if (token != null) {
-        print('[FCM] Token: $token');
+        debugPrint('[FCM] Token: $token');
         await _saveTokenToSupabase(token);
       }
     } catch (e) {
-      print('[FCM] Error getting token: $e');
+      debugPrint('[FCM] Error getting token: $e');
     }
   }
 
   /// Save FCM token to Supabase so the server can send pushes
-  static Future<void> _saveTokenToSupabase(String token, {int retryCount = 0}) async {
+  static Future<void> _saveTokenToSupabase(String token) async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return;
@@ -122,15 +124,9 @@ class PushNotificationService {
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id');
 
-      print('[FCM] Token saved to Supabase');
+      debugPrint('[FCM] Token saved to Supabase');
     } catch (e) {
-      print('[FCM] Error saving token (attempt ${retryCount + 1}): $e');
-      
-      // Retry up to 3 times with exponential backoff for network-related errors
-      if (retryCount < 3 && e.toString().contains('SocketException')) {
-        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
-        return _saveTokenToSupabase(token, retryCount: retryCount + 1);
-      }
+      debugPrint('[FCM] Error saving token: $e');
     }
   }
 

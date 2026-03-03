@@ -1,13 +1,13 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/lead_model.dart';
-import '../models/role_model.dart';
+import '../models/user_model.dart';
 import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
 import '../services/activity_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
-import 'dashboard_provider.dart';
 
 // Service Provider
 final leadServiceProvider = Provider<LeadService>((ref) => LeadService());
@@ -20,18 +20,44 @@ final leadRepositoryProvider = Provider<LeadRepository>((ref) {
 // State Provider for Search Query
 final leadSearchQueryProvider = StateProvider<String>((ref) => '');
 
-// State Notifier for Lead List management
 class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   final LeadRepository _repository;
   final Ref _ref;
+  RealtimeChannel? _realtimeChannel;
+  final UserModel? _currentUser;
 
   int _currentPage = 0;
   final int _pageSize = 20;
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  LeadNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  LeadNotifier(this._repository, this._ref) 
+      : _currentUser = _ref.read(currentUserProvider),
+        super(const AsyncValue.loading()) {
     loadInitial();
+    _subscribeToRealtime();
+  }
+
+  void _subscribeToRealtime() {
+    final supabase = Supabase.instance.client;
+    
+    _realtimeChannel = supabase
+        .channel('public:leads')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'leads',
+          callback: (payload) {
+            refresh();
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
   }
 
   bool get hasMore => _hasMore;
@@ -74,6 +100,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
     _hasMore = true;
     _isLoadingMore = false;
     try {
+      // Don't set state to loading – keep existing list during background refresh
       final leads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
       if (leads.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(leads);
@@ -98,6 +125,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Lead Added',
         '$userName added a new lead: ${newLead.name}',
+        type: 'lead_created',
         relatedEntityId: newLead.id,
         relatedEntityType: 'lead',
         showOnDevice: false,
@@ -126,6 +154,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Lead Assigned',
             '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
+            type: 'lead_assigned',
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
           );
@@ -133,6 +162,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Lead Status Updated',
             '$userName changed lead ${lead.name} status to ${lead.status.label}',
+            type: 'lead_status_updated',
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
           );
@@ -140,6 +170,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Lead Updated',
             '$userName updated lead: ${lead.name}',
+            type: 'lead_updated',
             relatedEntityId: lead.id,
             relatedEntityType: 'lead',
           );
@@ -166,6 +197,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'Lead Deleted',
         '$userName deleted a lead',
+        type: 'lead_deleted',
         relatedEntityType: 'lead',
       );
     } catch (e) {
@@ -189,6 +221,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'Lead Converted',
         '$userName converted a lead to contact',
+        type: 'lead_converted',
         relatedEntityId: id,
         relatedEntityType: 'lead',
       );

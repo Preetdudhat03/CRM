@@ -1,13 +1,12 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/deal_model.dart';
-import '../models/role_model.dart';
 import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
 import '../services/activity_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
-import 'dashboard_provider.dart';
 
 // Service Provider
 final dealServiceProvider = Provider<DealService>((ref) => DealService());
@@ -24,6 +23,7 @@ final dealSearchQueryProvider = StateProvider<String>((ref) => '');
 class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
   final DealRepository _repository;
   final Ref _ref;
+  RealtimeChannel? _realtimeChannel;
 
   int _currentPage = 0;
   final int _pageSize = 20;
@@ -32,6 +32,29 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 
   DealNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadInitial();
+    _subscribeToRealtime();
+  }
+
+  void _subscribeToRealtime() {
+    final supabase = Supabase.instance.client;
+    
+    _realtimeChannel = supabase
+        .channel('public:deals')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'deals',
+          callback: (payload) {
+            refresh();
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
   }
 
   bool get hasMore => _hasMore;
@@ -74,6 +97,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     _hasMore = true;
     _isLoadingMore = false;
     try {
+      // Background silent refresh
       final deals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
       if (deals.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(deals);
@@ -98,6 +122,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'New Deal Created',
         '$userName added a new deal: ${newDeal.title}',
+        type: 'deal_created',
         relatedEntityId: newDeal.id,
         relatedEntityType: 'deal',
       );
@@ -124,6 +149,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Deal Stage Updated',
             '$userName moved deal ${deal.title} to ${deal.stage.label}',
+            type: 'deal_stage_updated',
             relatedEntityId: deal.id,
             relatedEntityType: 'deal',
           );
@@ -131,6 +157,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
           _ref.read(notificationsProvider.notifier).pushNotificationLocally(
             'Deal Updated',
             '$userName updated deal: ${deal.title}',
+            type: 'deal_updated',
             relatedEntityId: deal.id,
             relatedEntityType: 'deal',
           );
@@ -157,6 +184,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       _ref.read(notificationsProvider.notifier).pushNotificationLocally(
         'Deal Deleted',
         '$userName deleted a deal',
+        type: 'deal_deleted',
         relatedEntityType: 'deal',
       );
     } catch (e) {

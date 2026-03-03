@@ -1,0 +1,149 @@
+﻿
+current_analysis.txt:3:warnin
+g - Unused import: 'screens/m
+ain_layout_screen.dart' - 
+lib\main.dart:9:8 - 
+unused_import
+current_analysis.txt:4:warnin
+g - Unused import: 
+'../models/role_model.dart' 
+- lib\providers\contact_provi
+der.dart:5:8 - unused_import
+current_analysis.txt:5:warnin
+g - Unused import: 
+'../models/role_model.dart' 
+- lib\providers\deal_provider
+.dart:5:8 - unused_import
+current_analysis.txt:6:warnin
+g - Unused import: 
+'dashboard_provider.dart' - l
+ib\providers\deal_provider.da
+rt:11:8 - unused_import
+current_analysis.txt:7:warnin
+g - Unused import: 
+'../models/role_model.dart' 
+- lib\providers\lead_provider
+.dart:6:8 - unused_import
+current_analysis.txt:8:warnin
+g - Unused import: 
+'dashboard_provider.dart' - l
+ib\providers\lead_provider.da
+rt:12:8 - unused_import
+current_analysis.txt:13:warni
+ng - Unused import: 
+'../models/role_model.dart' 
+- lib\providers\task_provider
+.dart:6:8 - unused_import
+current_analysis.txt:17:warni
+ng - Unused import: 
+'../models/role_model.dart' 
+- lib\repositories\auth_repos
+itory.dart:3:8 - 
+unused_import
+current_analysis.txt:24:warni
+ng - Unused import: '../../mo
+dels/permission_model.dart' 
+- lib\screens\contacts\contac
+ts_screen.dart:3:8 - 
+unused_import
+current_analysis.txt:25:warni
+ng - Unused import: '../../ut
+ils/error_handler.dart' - lib
+\screens\contacts\contacts_sc
+reen.dart:11:8 - 
+unused_import
+current_analysis.txt:31:warni
+ng - Unused import: 
+'package:intl/intl.dart' - li
+b\screens\contacts\widgets\co
+ntact_card.dart:3:8 - 
+unused_import
+current_analysis.txt:39:warni
+ng - Unused import: '../../mo
+dels/permission_model.dart' 
+- lib\screens\deals\deals_scr
+een.dart:4:8 - unused_import
+current_analysis.txt:43:warni
+ng - Unused import: '../../mo
+dels/permission_model.dart' 
+- lib\screens\home\home_scree
+n.dart:4:8 - unused_import
+current_analysis.txt:44:warni
+ng - Unused import: '../../mo
+dels/user_model.dart' - lib\s
+creens\home\home_screen.dart:
+6:8 - unused_import
+current_analysis.txt:45:warni
+ng - Unused import: 
+'../../theme/app_theme.dart' 
+- lib\screens\home\home_scree
+n.dart:9:8 - unused_import
+current_analysis.txt:46:warni
+ng - Unused import: '../../pr
+oviders/contact_provider.dart
+' - lib\screens\home\home_scr
+een.dart:11:8 - unused_import
+current_analysis.txt:47:warni
+ng - Unused import: '../../pr
+oviders/deal_provider.dart' 
+- lib\screens\home\home_scree
+n.dart:12:8 - unused_import
+current_analysis.txt:48:warni
+ng - Unused import: '../../pr
+oviders/lead_provider.dart' 
+- lib\screens\home\home_scree
+n.dart:13:8 - unused_import
+current_analysis.txt:56:warni
+ng - Unused import: '../../..
+/widgets/animations/fade_in_s
+lide.dart' - lib\screens\home
+\widgets\pipeline_widget.dart
+:3:8 - unused_import
+current_analysis.txt:78:warni
+ng - Unused import: '../../..
+/../widgets/animations/fade_i
+n_slide.dart' - lib\screens\h
+ome\widgets\tasks_due_today_w
+idget.dart:6:8 - 
+unused_import
+current_analysis.txt:88:warni
+ng - Unused import: '../../mo
+dels/permission_model.dart' 
+- lib\screens\leads\leads_scr
+een.dart:3:8 - unused_import
+current_analysis.txt:89:warni
+ng - Unused import: '../../ut
+ils/error_handler.dart' - lib
+\screens\leads\leads_screen.d
+art:11:8 - unused_import
+current_analysis.txt:93:warni
+ng - Unused import: '../../..
+/../models/permission_model.d
+art' - lib\screens\leads\widg
+ets\lead_card.dart:4:8 - 
+unused_import
+current_analysis.txt:100:warn
+ing - Unused import: '../../m
+odels/permission_model.dart' 
+- lib\screens\settings\roles_
+permissions_screen.dart:4:8 
+- unused_import
+current_analysis.txt:105:warn
+ing - Unused import: '../../m
+odels/permission_model.dart' 
+- lib\screens\settings\settin
+gs_screen.dart:6:8 - 
+unused_import
+current_analysis.txt:114:warn
+ing - Unused import: '../../.
+./models/user_model.dart' - l
+ib\screens\settings\user_mana
+gement\user_management_screen
+.dart:6:8 - unused_import
+current_analysis.txt:130:warn
+ing - Unused import: '../../m
+odels/permission_model.dart' 
+- lib\screens\tasks\tasks_scr
+een.dart:4:8 - unused_import
+
+

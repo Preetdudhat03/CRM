@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
-import 'screens/main_layout_screen.dart';
 import 'screens/auth/auth_gate.dart';
 import 'providers/theme_provider.dart';
 
@@ -17,8 +17,18 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // Initialize Firebase first
-    await Firebase.initializeApp();
+    // Initialize Firebase
+    if (!kIsWeb) {
+      await Firebase.initializeApp();
+    } else {
+      // On Web, Firebase usually needs options. 
+      // If firebase_options.dart is missing, we try-catch to avoid crashing the whole app.
+      try {
+        await Firebase.initializeApp();
+      } catch (e) {
+        debugPrint('Firebase Web initialization skipped: $e');
+      }
+    }
     
     // Initialize Supabase
     await Supabase.initialize(
@@ -26,25 +36,27 @@ Future<void> main() async {
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eWxlYmJyY2F3ZWJ3c3F4enVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMzMwMzksImV4cCI6MjA4NjcwOTAzOX0.KvcQj5CYblv708lgKzBQPbnd6oDiiH4AC1cMhwMnRjY',
     );
     
-    // Initialize Local Notifications
-    await LocalNotificationService.initialize();
-    
-    // Initialize Push Notifications (FCM)
-    await PushNotificationService.init();
+    // Initialize Local Notifications (Mobile only mostly)
+    if (!kIsWeb) {
+      await LocalNotificationService.initialize();
+      await PushNotificationService.init();
+    }
 
-    // Set preferred orientations
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-    
-    // Make status bar transparent
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
+    if (!kIsWeb) {
+      // Set preferred orientations
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+      
+      // Make status bar transparent
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+      );
+    }
 
     // Initialize SharedPreferences
     final prefs = await SharedPreferences.getInstance();

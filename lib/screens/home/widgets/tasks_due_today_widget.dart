@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../providers/dashboard_provider.dart';
 import '../../../../models/task_model.dart';
-import '../../../../widgets/animations/fade_in_slide.dart';
 import '../../tasks/tasks_screen.dart';
 
 class TasksDueTodayWidget extends ConsumerWidget {
