@@ -129,7 +129,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
 
       ActivityService.log(
         title: 'Created company: ${newCompany.name}',
-        activityType: 'company',
+        activityactivityType: 'company',
         relatedId: newCompany.id,
       );
 
@@ -140,9 +140,9 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
           .pushNotificationLocally(
             'New Company Created',
             '$userName added a new company: ${newCompany.name}',
-            activityType: 'company_created',
+            activityactivityType: 'company_created',
             relatedId: newCompany.id,
-            relatedEntityactivityType: 'company',
+            relatedEntityactivityactivityType: 'company',
             showOnDevice: false,
           );
     } catch (e) {
@@ -161,7 +161,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
       });
       ActivityService.log(
         title: 'Updated company: ${company.name}',
-        activityType: 'company',
+        activityactivityType: 'company',
         relatedId: company.id,
       );
 
@@ -172,9 +172,9 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
           .pushNotificationLocally(
             'Company Updated',
             '$userName updated company: ${company.name}',
-            activityType: 'company_updated',
+            activityactivityType: 'company_updated',
             relatedId: company.id,
-            relatedEntityactivityType: 'company',
+            relatedEntityactivityactivityType: 'company',
             showOnDevice: false,
           );
     } catch (e) {
@@ -193,7 +193,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
       });
       ActivityService.log(
         title: 'Deleted a company',
-        activityType: 'company',
+        activityactivityType: 'company',
         relatedId: id,
       );
 
@@ -204,8 +204,8 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
           .pushNotificationLocally(
             'Company Deleted',
             '$userName deleted a company',
-            activityType: 'company_deleted',
-            relatedEntityactivityType: 'company',
+            activityactivityType: 'company_deleted',
+            relatedEntityactivityactivityType: 'company',
           );
     } catch (e) {
       // Handle error
@@ -236,3 +236,4 @@ final filteredCompaniesProvider = Provider<AsyncValue<List<CompanyModel>>>((
     }).toList();
   });
 });
+

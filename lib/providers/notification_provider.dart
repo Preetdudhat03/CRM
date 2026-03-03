@@ -193,8 +193,8 @@ class NotificationNotifier
       message: message,
       date: DateTime.now(),
       relatedId: relatedEntityId,
-      relatedEntityType: encodedType,
-      type: type ?? 'general',
+      relatedEntityactivityType: encodedType,
+      activityType: type ?? 'general',
       senderId: _currentUser?.id,
     );
 
@@ -227,3 +227,4 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
 List<String> getUpperRanks(Role role) {
   return Role.values.map((e) => e.name).toList();
 }
+

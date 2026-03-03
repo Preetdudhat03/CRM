@@ -32,7 +32,7 @@ final entityActivitiesProvider =
             schema: 'public',
             table: 'activities',
             filter: PostgresChangeFilter(
-              type: PostgresChangeFilterType.eq,
+              activityType: PostgresChangeFilterType.eq,
               column: 'related_id',
               value: arg.id,
             ),
@@ -47,7 +47,8 @@ final entityActivitiesProvider =
       });
 
       return service.getEntityActivities(
-        relatedType: arg.type,
+        relatedactivityType: arg.type,
         relatedId: arg.id,
       );
     });
+

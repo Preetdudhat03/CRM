@@ -49,3 +49,4 @@ final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
   final prefs = ref.watch(sharedPreferencesProvider);
   return ThemeModeNotifier(prefs);
 });
+

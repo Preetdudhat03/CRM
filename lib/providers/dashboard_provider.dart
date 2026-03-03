@@ -91,3 +91,4 @@ final dashboardMetricsProvider = FutureProvider<Map<String, dynamic>>((
   final service = ref.watch(dashboardServiceProvider);
   return await service.fetchDashboardMetrics();
 });
+

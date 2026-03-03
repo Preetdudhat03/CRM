@@ -127,7 +127,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 
       ActivityService.log(
         title: 'Created lead: ${newLead.name}',
-        activityType: 'lead',
+        activityactivityType: 'lead',
         relatedId: newLead.id,
       );
 
@@ -138,9 +138,9 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           .pushNotificationLocally(
             'New Lead Added',
             '$userName added a new lead: ${newLead.name}',
-            activityType: 'lead_created',
+            activityactivityType: 'lead_created',
             relatedId: newLead.id,
-            relatedEntityactivityType: 'lead',
+            relatedEntityactivityactivityType: 'lead',
             showOnDevice: false,
           );
     } catch (e) {
@@ -173,9 +173,9 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
               .pushNotificationLocally(
                 'Lead Assigned',
                 '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
-                activityType: 'lead_assigned',
+                activityactivityType: 'lead_assigned',
                 relatedId: lead.id,
-                relatedEntityactivityType: 'lead',
+                relatedEntityactivityactivityType: 'lead',
               );
         } else if (existingLead.status != lead.status) {
           _ref
@@ -183,9 +183,9 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
               .pushNotificationLocally(
                 'Lead Status Updated',
                 '$userName changed lead ${lead.name} status to ${lead.status.label}',
-                activityType: 'lead_status_updated',
+                activityactivityType: 'lead_status_updated',
                 relatedId: lead.id,
-                relatedEntityactivityType: 'lead',
+                relatedEntityactivityactivityType: 'lead',
               );
         } else {
           _ref
@@ -193,9 +193,9 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
               .pushNotificationLocally(
                 'Lead Updated',
                 '$userName updated lead: ${lead.name}',
-                activityType: 'lead_updated',
+                activityactivityType: 'lead_updated',
                 relatedId: lead.id,
-                relatedEntityactivityType: 'lead',
+                relatedEntityactivityactivityType: 'lead',
               );
         }
       });
@@ -215,7 +215,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       });
       ActivityService.log(
         title: 'Deleted a lead',
-        activityType: 'lead',
+        activityactivityType: 'lead',
         relatedId: id,
       );
 
@@ -226,8 +226,8 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           .pushNotificationLocally(
             'Lead Deleted',
             '$userName deleted a lead',
-            activityType: 'lead_deleted',
-            relatedEntityactivityType: 'lead',
+            activityactivityType: 'lead_deleted',
+            relatedEntityactivityactivityType: 'lead',
           );
     } catch (e) {
       // Handle error
@@ -245,7 +245,7 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       });
       ActivityService.log(
         title: 'Converted lead to contact',
-        activityType: 'lead',
+        activityactivityType: 'lead',
         relatedId: id,
       );
 
@@ -256,9 +256,9 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
           .pushNotificationLocally(
             'Lead Converted',
             '$userName converted a lead to contact',
-            activityType: 'lead_converted',
+            activityactivityType: 'lead_converted',
             relatedId: id,
-            relatedEntityactivityType: 'lead',
+            relatedEntityactivityactivityType: 'lead',
           );
     } catch (e) {
       rethrow;
@@ -291,3 +291,4 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
     }).toList();
   });
 });
+

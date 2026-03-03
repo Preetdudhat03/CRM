@@ -74,3 +74,4 @@ class AuthNotifier extends StateNotifier<UserModel?> {
     await _repository.updatePassword(newPassword);
   }
 }
+
