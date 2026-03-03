@@ -18,7 +18,7 @@ class ContactsScreen extends ConsumerStatefulWidget {
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   final ScrollController _scrollController = ScrollController();
-  
+
   // Local Filter & Sort State
   ContactStatus? _statusFilter;
   String _sortOption = 'Recently Added'; // 'Name', 'Recently Added', 'Company'
@@ -36,12 +36,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
       ref.read(contactsProvider.notifier).loadMore();
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, ContactModel contact) {
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    ContactModel contact,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -67,100 +72,109 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     );
   }
 
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      backgroundColor: Colors.white,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
+  Widget _buildStatusIndicator(List<ContactModel> allContacts) {
+    final statuses = [
+      ContactStatus.lead,
+      ContactStatus.customer,
+      ContactStatus.churned,
+    ];
+
+    return Container(
+      height: 60,
+      width: double.infinity,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: List.generate(statuses.length, (index) {
+            final status = statuses[index];
+            final count = allContacts.where((c) => c.status == status).length;
+            final isSelected = _statusFilter == status;
+
+            Color getBaseColor(ContactStatus s) {
+              switch (s) {
+                case ContactStatus.lead:
+                  return Colors.orange;
+                case ContactStatus.customer:
+                  return Colors.green;
+                case ContactStatus.churned:
+                  return Colors.red;
+              }
+            }
+
+            final baseColor = getBaseColor(status);
+
             return Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _statusFilter = isSelected ? null : status;
+                  });
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? baseColor : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? baseColor : Colors.grey.shade300,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: baseColor.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
                     children: [
-                      const Text(
-                        'Filter & Sort',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      Text(
+                        status.label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.grey.shade700,
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      )
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Sort By', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ['Recently Added', 'Name', 'Company'].map((sort) {
-                      final isSelected = _sortOption == sort;
-                      return ChoiceChip(
-                        label: Text(sort),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() => _sortOption = sort);
-                            setState(() => _sortOption = sort);
-                          }
-                        },
-                        selectedColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text('Status', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [null, ContactStatus.customer, ContactStatus.lead, ContactStatus.churned].map((status) {
-                      final isSelected = _statusFilter == status;
-                      final label = status == null ? 'All' : status.label;
-                      return ChoiceChip(
-                        label: Text(label),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() => _statusFilter = status);
-                            setState(() => _statusFilter = status);
-                          }
-                        },
-                        selectedColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('Apply Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  )
-                ],
+                ),
               ),
             );
-          },
-        );
-      },
+          }),
+        ),
+      ),
     );
   }
 
@@ -175,69 +189,110 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Contacts', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
+        title: const Text(
+          'Contacts',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(88),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search contacts...',
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade200),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
-                    onChanged: (value) {
-                      ref.read(contactSearchQueryProvider.notifier).state = value;
-                    },
-                  ),
+          preferredSize: const Size.fromHeight(160),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: _showFilterBottomSheet,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                          ? Theme.of(context).primaryColor.withOpacity(0.1) 
-                          : Colors.grey.shade50,
-                      border: Border.all(
-                        color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                            ? Theme.of(context).primaryColor 
-                            : Colors.grey.shade200
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search contacts...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.grey.shade500,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          ref.read(contactSearchQueryProvider.notifier).state =
+                              value;
+                        },
                       ),
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      Icons.tune, 
-                      color: (_statusFilter != null || _sortOption != 'Recently Added') 
-                          ? Theme.of(context).primaryColor 
-                          : Colors.grey.shade700
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: _sortOption,
+                            icon: Icon(Icons.sort, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              color: Colors.grey.shade800,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            items: ['Recently Added', 'Name', 'Company'].map((
+                              sort,
+                            ) {
+                              return DropdownMenuItem(
+                                value: sort,
+                                child: Text(sort),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() {
+                                  _sortOption = val;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              ],
-            ),
+                  ],
+                ),
+              ),
+              contactsAsync.maybeWhen(
+                data: (allContacts) => _buildStatusIndicator(allContacts),
+                orElse: () => const SizedBox(height: 60),
+              ),
+            ],
           ),
         ),
       ),
@@ -246,13 +301,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           // Apply local UI filters & sorting
           var contacts = unfilteredContacts;
           if (_statusFilter != null) {
-            contacts = contacts.where((c) => c.status == _statusFilter).toList();
+            contacts = contacts
+                .where((c) => c.status == _statusFilter)
+                .toList();
           }
 
           if (_sortOption == 'Name') {
-            contacts.sort((a, b) => a.name.compareTo(b.name));
+            contacts.sort(
+              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+            );
           } else if (_sortOption == 'Company') {
-            contacts.sort((a, b) => a.company.compareTo(b.company));
+            contacts.sort(
+              (a, b) =>
+                  a.company.toLowerCase().compareTo(b.company.toLowerCase()),
+            );
           } else {
             // Recently Added
             contacts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -272,21 +334,36 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                             Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor.withOpacity(0.05),
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withOpacity(0.05),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(Icons.badge_outlined, size: 64, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                              child: Icon(
+                                Icons.badge_outlined,
+                                size: 64,
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withOpacity(0.5),
+                              ),
                             ),
                             const SizedBox(height: 24),
                             Text(
                               'No Contacts Yet',
-                              style: TextStyle(color: Colors.grey.shade800, fontSize: 20, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.grey.shade800,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               "You don't have any contacts matching\n the current filters.",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                              ),
                             ),
                             const SizedBox(height: 24),
                             if (canCreate)
@@ -295,17 +372,23 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const AddEditContactScreen(),
+                                      builder: (context) =>
+                                          const AddEditContactScreen(),
                                     ),
                                   );
                                 },
                                 icon: const Icon(Icons.add),
                                 label: const Text('Add Contact'),
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                              )
+                              ),
                           ],
                         ),
                       ),
@@ -337,7 +420,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ContactDetailScreen(contact: contact),
+                                  builder: (context) =>
+                                      ContactDetailScreen(contact: contact),
                                 ),
                               );
                             },
@@ -346,13 +430,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => AddEditContactScreen(contact: contact),
+                                        builder: (context) =>
+                                            AddEditContactScreen(
+                                              contact: contact,
+                                            ),
                                       ),
                                     );
                                   }
                                 : null,
                             onDelete: canDelete
-                                ? () => _showDeleteConfirmation(context, ref, contact)
+                                ? () => _showDeleteConfirmation(
+                                    context,
+                                    ref,
+                                    contact,
+                                  )
                                 : null,
                           ),
                         ),
@@ -364,7 +455,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         loading: () => ListView.builder(
           itemCount: 6,
           padding: const EdgeInsets.only(top: 8),
-          itemBuilder: (context, index) => const SkeletonCard(height: 100),
+          itemBuilder: (context, index) => SkeletonCard(height: 100),
         ),
         error: (error, stack) => Center(
           child: Column(
@@ -372,14 +463,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             children: [
               Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
               const SizedBox(height: 16),
-              Text('Failed to load contacts', style: TextStyle(color: Colors.grey.shade800, fontSize: 16)),
+              Text(
+                'Failed to load contacts',
+                style: TextStyle(color: Colors.grey.shade800, fontSize: 16),
+              ),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () => ref.read(contactsProvider.notifier).refresh(),
                 child: const Text('Retry'),
-              )
+              ),
             ],
-          )
+          ),
         ),
       ),
       floatingActionButton: canCreate
@@ -395,7 +489,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               },
               backgroundColor: Theme.of(context).primaryColor,
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,

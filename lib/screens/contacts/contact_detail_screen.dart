@@ -1,54 +1,64 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/contact_provider.dart';
 import 'package:flutter/material.dart';
 import 'add_edit_contact_screen.dart';
 import '../../models/contact_model.dart';
-
 import '../../core/services/permission_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/activity_timeline.dart';
 
-class ContactDetailScreen extends ConsumerWidget {
+class ContactDetailScreen extends ConsumerStatefulWidget {
   final ContactModel contact;
 
   const ContactDetailScreen({super.key, required this.contact});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ContactDetailScreen> createState() =>
+      _ContactDetailScreenState();
+}
+
+class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final canEdit = PermissionService.canEditContacts(user);
+
+    final contactsAsync = ref.watch(contactsProvider);
+    final contact =
+        contactsAsync.value?.firstWhere(
+          (c) => c.id == widget.contact.id,
+          orElse: () => widget.contact,
+        ) ??
+        widget.contact;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(contact.name),
         actions: [
-          // Watch the specific contact to update UI when provider updates
-          // BUT we are in a stateless widget inside a list, watching the whole list is inefficient.
-          // However, since we are inside detail screen, we can just use the passed contact or
-          // rebuild the widget when the list updates.
-          // Simple hack: We just toggle. The parent screen (ContactsScreen) needs to pass updated object if we go back.
-          // For detail screen to reflect change LIVE, we should query provider by ID.
-          Consumer(
-            builder: (context, ref, child) {
-              final contactsAsync = ref.watch(contactsProvider);
-              final updatedContact = contactsAsync.value?.firstWhere((c) => c.id == contact.id, orElse: () => contact) ?? contact;
-
-              return IconButton(
-                icon: Icon(
-                  updatedContact.isFavorite ? Icons.star : Icons.star_border,
-                  color: updatedContact.isFavorite ? Colors.amber : null,
-                ),
-                onPressed: () {
-                  ref.read(contactsProvider.notifier).toggleFavorite(contact.id, updatedContact.isFavorite);
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(
-                      content: Text(updatedContact.isFavorite ? 'Removed from favorites' : 'Added to favorites'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-              );
+          IconButton(
+            icon: Icon(
+              contact.isFavorite ? Icons.star : Icons.star_border,
+              color: contact.isFavorite ? Colors.amber : null,
+            ),
+            onPressed: () {
+              ref
+                  .read(contactsProvider.notifier)
+                  .toggleFavorite(contact.id, contact.isFavorite);
             },
           ),
           if (canEdit)
@@ -58,29 +68,48 @@ class ContactDetailScreen extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddEditContactScreen(contact: contact),
+                    builder: (context) =>
+                        AddEditContactScreen(contact: contact),
                   ),
                 );
               },
             ),
         ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-             _buildHeader(context),
-             const SizedBox(height: 20),
-             _buildInfoSection(context),
-             const SizedBox(height: 20),
-             if (contact.notes != null && contact.notes!.isNotEmpty)
-              _buildNotesSection(context),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Overview'),
+            Tab(text: 'Activity'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildOverviewTab(context, contact),
+          ActivityTimeline(relatedType: 'contact', relatedId: contact.id),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildOverviewTab(BuildContext context, ContactModel contact) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildHeader(context, contact),
+          const SizedBox(height: 20),
+          _buildInfoSection(context, contact),
+          const SizedBox(height: 20),
+          if (contact.notes != null && contact.notes!.isNotEmpty)
+            _buildNotesSection(context, contact),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ContactModel contact) {
     return Container(
       padding: const EdgeInsets.all(24),
       color: Theme.of(context).cardColor,
@@ -89,12 +118,15 @@ class ContactDetailScreen extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundImage: contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
+            backgroundImage:
+                contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
                 ? NetworkImage(contact.avatarUrl!)
                 : null,
             child: (contact.avatarUrl == null || contact.avatarUrl!.isEmpty)
                 ? Text(
-                    contact.name.isNotEmpty ? contact.name.substring(0, 1).toUpperCase() : 'C',
+                    contact.name.isNotEmpty
+                        ? contact.name.substring(0, 1).toUpperCase()
+                        : 'C',
                     style: const TextStyle(fontSize: 40),
                   )
                 : null,
@@ -102,16 +134,16 @@ class ContactDetailScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             contact.name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             '${contact.position} at ${contact.company}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 16),
           Chip(
@@ -127,7 +159,7 @@ class ContactDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoSection(BuildContext context) {
+  Widget _buildInfoSection(BuildContext context, ContactModel contact) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -135,24 +167,27 @@ class ContactDetailScreen extends ConsumerWidget {
         children: [
           Text(
             'Contact Info',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.shade200),
+            ),
             child: Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.email_outlined),
                   title: Text(contact.email),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.phone_outlined),
                   title: Text(contact.phone),
-                  trailing: const Icon(Icons.message_outlined, size: 20),
                 ),
                 if (contact.address != null && contact.address!.isNotEmpty) ...[
                   const Divider(height: 1),
@@ -169,7 +204,7 @@ class ContactDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotesSection(BuildContext context) {
+  Widget _buildNotesSection(BuildContext context, ContactModel contact) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       width: double.infinity,
@@ -178,12 +213,17 @@ class ContactDetailScreen extends ConsumerWidget {
         children: [
           Text(
             'Notes',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.shade200),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(

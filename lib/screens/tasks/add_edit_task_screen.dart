@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/task_model.dart';
@@ -85,10 +84,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
       appBar: AppBar(
         title: Text(widget.task == null ? 'Add Task' : 'Edit Task'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _submit,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _submit),
         ],
       ),
       body: Padding(
@@ -106,7 +102,9 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Title',
                       prefixIcon: Icon(Icons.title),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Please enter a title' : null,
@@ -121,7 +119,9 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Description',
                       prefixIcon: Icon(Icons.description_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     maxLines: 3,
                     onSaved: (value) => _description = value ?? '',
@@ -131,19 +131,23 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                 FadeInSlide(
                   delay: 0.2,
                   child: Card(
-                     elevation: 0,
-                     shape: RoundedRectangleBorder(
-                       borderRadius: BorderRadius.circular(12),
-                       side: BorderSide(color: Theme.of(context).dividerColor),
-                     ),
-                     child: ListTile(
-                      title: Text('Due Date: ${_dueDate.toIso8601String().split('T')[0]}'),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Theme.of(context).dividerColor),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        'Due Date: ${_dueDate.toIso8601String().split('T')[0]}',
+                      ),
                       leading: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
                           initialDate: _dueDate,
-                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 365),
+                          ),
                           lastDate: DateTime(2101),
                         );
                         if (picked != null) {
@@ -159,16 +163,18 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                   child: usersAsync.when(
                     data: (users) {
                       String? selectedValue;
-                      if (_assignedTo.isNotEmpty && users.any((u) => u.name == _assignedTo)) {
+                      if (_assignedTo.isNotEmpty &&
+                          users.any((u) => u.name == _assignedTo)) {
                         selectedValue = _assignedTo;
                       } else if (_assignedTo.isNotEmpty) {
-                         // Keep the old value mapped if not found to prevent crash, or add it to the list dynamically
-                         selectedValue = _assignedTo;
+                        // Keep the old value mapped if not found to prevent crash, or add it to the list dynamically
+                        selectedValue = _assignedTo;
                       }
-                      
+
                       final allItems = users.map((u) => u.name).toList();
-                      if (selectedValue != null && !allItems.contains(selectedValue)) {
-                         allItems.add(selectedValue);
+                      if (selectedValue != null &&
+                          !allItems.contains(selectedValue)) {
+                        allItems.add(selectedValue);
                       }
 
                       return DropdownButtonFormField<String>(
@@ -176,8 +182,13 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Assigned To',
                           prefixIcon: Icon(Icons.person_outline),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 16,
+                          ),
                         ),
                         items: allItems.map((uName) {
                           return DropdownMenuItem<String>(
@@ -185,7 +196,9 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                             child: Text(uName),
                           );
                         }).toList(),
-                        validator: (value) => (value == null || value.isEmpty) ? 'Please assign a user' : null,
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? 'Please assign a user'
+                            : null,
                         onChanged: (value) {
                           setState(() {
                             if (value != null) _assignedTo = value;
@@ -210,8 +223,15 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                           value: _status,
                           decoration: const InputDecoration(
                             labelText: 'Status',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
                           ),
                           items: TaskStatus.values.map((status) {
                             return DropdownMenuItem(
@@ -222,7 +242,8 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                               ),
                             );
                           }).toList(),
-                          onChanged: (value) => setState(() => _status = value!),
+                          onChanged: (value) =>
+                              setState(() => _status = value!),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -231,8 +252,15 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                           value: _priority,
                           decoration: const InputDecoration(
                             labelText: 'Priority',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
                           ),
                           items: TaskPriority.values.map((priority) {
                             return DropdownMenuItem(
@@ -243,7 +271,8 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                               ),
                             );
                           }).toList(),
-                          onChanged: (value) => setState(() => _priority = value!),
+                          onChanged: (value) =>
+                              setState(() => _priority = value!),
                         ),
                       ),
                     ],
@@ -252,7 +281,10 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                 const SizedBox(height: 24),
                 FadeInSlide(
                   delay: 0.5,
-                  child: Text('Related To (Optional)', style: Theme.of(context).textTheme.titleSmall),
+                  child: Text(
+                    'Related To (Optional)',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 FadeInSlide(
@@ -264,13 +296,26 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                           value: _relatedEntityType,
                           decoration: const InputDecoration(
                             labelText: 'Type',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
                           ),
                           items: const [
                             DropdownMenuItem(value: null, child: Text('None')),
-                            DropdownMenuItem(value: 'Contact', child: Text('Contact')),
-                            DropdownMenuItem(value: 'Deal', child: Text('Deal')),
+                            DropdownMenuItem(
+                              value: 'Contact',
+                              child: Text('Contact'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Deal',
+                              child: Text('Deal'),
+                            ),
                           ],
                           onChanged: (value) {
                             setState(() {
@@ -285,55 +330,89 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                       Expanded(
                         child: _relatedEntityType == 'Contact'
                             ? contactsAsync.when(
-                                data: (contacts) => DropdownButtonFormField<String>(
-                                  value: _relatedEntityId,
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Select Contact',
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                                  ),
-                                  items: contacts.map((c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(c.name, overflow: TextOverflow.ellipsis),
-                                  )).toList(),
-                                  onChanged: (value) {
-                                    final contact = contacts.firstWhere((c) => c.id == value);
-                                    setState(() {
-                                      _relatedEntityId = value;
-                                      _relatedEntityName = contact.name;
-                                    });
-                                  },
-                                ),
+                                data: (contacts) =>
+                                    DropdownButtonFormField<String>(
+                                      value: _relatedEntityId,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Select Contact',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(12),
+                                          ),
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 16,
+                                        ),
+                                      ),
+                                      items: contacts
+                                          .map(
+                                            (c) => DropdownMenuItem(
+                                              value: c.id,
+                                              child: Text(
+                                                c.name,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (value) {
+                                        final contact = contacts.firstWhere(
+                                          (c) => c.id == value,
+                                        );
+                                        setState(() {
+                                          _relatedEntityId = value;
+                                          _relatedEntityName = contact.name;
+                                        });
+                                      },
+                                    ),
                                 loading: () => const LinearProgressIndicator(),
                                 error: (_, __) => const Text('Error'),
                               )
                             : _relatedEntityType == 'Deal'
-                                ? dealsAsync.when(
-                                    data: (deals) => DropdownButtonFormField<String>(
+                            ? dealsAsync.when(
+                                data: (deals) =>
+                                    DropdownButtonFormField<String>(
                                       value: _relatedEntityId,
                                       isExpanded: true,
                                       decoration: const InputDecoration(
                                         labelText: 'Select Deal',
-                                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(12),
+                                          ),
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 16,
+                                        ),
                                       ),
-                                      items: deals.map((d) => DropdownMenuItem(
-                                        value: d.id,
-                                        child: Text(d.title, overflow: TextOverflow.ellipsis),
-                                      )).toList(),
+                                      items: deals
+                                          .map(
+                                            (d) => DropdownMenuItem(
+                                              value: d.id,
+                                              child: Text(
+                                                d.title,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
                                       onChanged: (value) {
-                                        final deal = deals.firstWhere((d) => d.id == value);
+                                        final deal = deals.firstWhere(
+                                          (d) => d.id == value,
+                                        );
                                         setState(() {
                                           _relatedEntityId = value;
                                           _relatedEntityName = deal.title;
                                         });
                                       },
                                     ),
-                                    loading: () => const LinearProgressIndicator(),
-                                    error: (_, __) => const Text('Error'),
-                                  )
-                                : Container(),
+                                loading: () => const LinearProgressIndicator(),
+                                error: (_, __) => const Text('Error'),
+                              )
+                            : Container(),
                       ),
                     ],
                   ),
@@ -345,11 +424,16 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       widget.task == null ? 'Create Task' : 'Update Task',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

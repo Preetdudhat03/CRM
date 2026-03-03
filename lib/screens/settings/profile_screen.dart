@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,13 +16,13 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _storageService = StorageService();
-  
+
   late String _name;
   late String _email;
   String? _avatarUrl;
   XFile? _imageFile;
   bool _isLoading = false;
-  
+
   String? _password;
   String? _confirmPassword;
 
@@ -50,13 +49,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       setState(() => _isLoading = true);
-      
+
       try {
         final currentUser = ref.read(currentUserProvider);
         if (currentUser == null) return;
 
         String? newAvatarUrl = _avatarUrl;
-        
+
         // Upload image if selected
         if (_imageFile != null) {
           final path = 'users/${currentUser.id}'; // Overwrite existing
@@ -76,7 +75,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         // Update password if provided
         if (_password != null && _password!.isNotEmpty) {
-           await ref.read(currentUserProvider.notifier).updatePassword(_password!);
+          await ref
+              .read(currentUserProvider.notifier)
+              .updatePassword(_password!);
         }
 
         if (mounted) {
@@ -88,7 +89,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Error: ${ErrorHandler.formatError(e)}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       } finally {
@@ -129,10 +133,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               backgroundColor: Theme.of(context).primaryColor,
                               backgroundImage: _imageFile != null
                                   ? NetworkImage(_imageFile!.path)
-                                  : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
-                                      ? NetworkImage(_avatarUrl!) as ImageProvider
-                                      : null,
-                              child: (_imageFile == null && (_avatarUrl == null || _avatarUrl!.isEmpty))
+                                  : (_avatarUrl != null &&
+                                        _avatarUrl!.isNotEmpty)
+                                  ? NetworkImage(_avatarUrl!) as ImageProvider
+                                  : null,
+                              child:
+                                  (_imageFile == null &&
+                                      (_avatarUrl == null ||
+                                          _avatarUrl!.isEmpty))
                                   ? Text(
                                       _name.isNotEmpty
                                           ? _name.substring(0, 1).toUpperCase()
@@ -158,7 +166,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 color: Theme.of(context).primaryColor,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Theme.of(context).scaffoldBackgroundColor,
+                                  color: Theme.of(
+                                    context,
+                                  ).scaffoldBackgroundColor,
                                   width: 2,
                                 ),
                               ),
@@ -170,7 +180,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                         ),
-                         if (_imageFile != null || (_avatarUrl != null && _avatarUrl!.isNotEmpty))
+                        if (_imageFile != null ||
+                            (_avatarUrl != null && _avatarUrl!.isNotEmpty))
                           Positioned(
                             bottom: 0,
                             left: 0,
@@ -187,7 +198,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   color: Colors.red,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                    color: Theme.of(
+                                      context,
+                                    ).scaffoldBackgroundColor,
                                     width: 2,
                                   ),
                                 ),
@@ -204,7 +217,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 FadeInSlide(
                   delay: 0.1,
                   child: TextFormField(
@@ -222,7 +235,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 FadeInSlide(
                   delay: 0.2,
                   child: TextFormField(
@@ -232,7 +245,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       labelText: 'Email Address',
                       prefixIcon: const Icon(Icons.email_outlined),
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                         borderSide: BorderSide.none,
@@ -241,12 +256,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 const Divider(),
                 const SizedBox(height: 16),
                 Text(
                   'Change Password',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -259,7 +276,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                         ),
                         onPressed: () {
                           setState(() {
@@ -273,10 +292,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       helperText: 'Leave empty to keep current password',
                     ),
                     validator: (value) {
-                       if (value != null && value.isNotEmpty && value.length < 6) {
-                         return 'Password must be at least 6 characters';
-                       }
-                       return null;
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
                     },
                     onChanged: (value) => _password = value,
                     onSaved: (value) => _password = value,
@@ -293,7 +314,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       prefixIcon: const Icon(Icons.lock_reset),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscureConfirmPassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                         ),
                         onPressed: () {
                           setState(() {
@@ -306,22 +329,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     validator: (value) {
-                       if (_password != null && _password!.isNotEmpty) {
-                         if (value == null || value.isEmpty) {
-                           return 'Please confirm password';
-                         }
-                         if (value != _password) {
-                           return 'Passwords do not match';
-                         }
-                       }
-                       return null;
+                      if (_password != null && _password!.isNotEmpty) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm password';
+                        }
+                        if (value != _password) {
+                          return 'Passwords do not match';
+                        }
+                      }
+                      return null;
                     },
                     onSaved: (value) => _confirmPassword = value,
                   ),
                 ),
 
                 const SizedBox(height: 40),
-                
+
                 FadeInSlide(
                   delay: 0.5,
                   child: ElevatedButton(
@@ -334,21 +357,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: _isLoading
                         ? const SizedBox(
-                            height: 20, 
-                            width: 20, 
-                            child: CircularProgressIndicator(strokeWidth: 2)
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text(
                             'Save Changes',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }

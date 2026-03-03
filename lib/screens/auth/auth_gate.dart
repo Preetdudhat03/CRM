@@ -28,8 +28,8 @@ class AuthGate extends ConsumerWidget {
               Text(
                 'Field CRM',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 32),
               const SizedBox(

@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../models/role_model.dart';
@@ -11,8 +10,8 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return UserRepository(ref.watch(userServiceProvider));
 });
 
-
-class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> {
+class UserManagementNotifier
+    extends StateNotifier<AsyncValue<List<UserModel>>> {
   final UserRepository _repository;
 
   UserManagementNotifier(this._repository) : super(const AsyncValue.loading()) {
@@ -52,7 +51,8 @@ class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> 
       final updatedUser = await _repository.updateUser(user);
       state.whenData((users) {
         state = AsyncValue.data([
-          for (final u in users) if (u.id == user.id) updatedUser else u,
+          for (final u in users)
+            if (u.id == user.id) updatedUser else u,
         ]);
       });
     } catch (e) {
@@ -66,7 +66,8 @@ class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> 
       await _repository.deleteUser(id);
       state.whenData((users) {
         state = AsyncValue.data([
-          for (final u in users) if (u.id != id) u,
+          for (final u in users)
+            if (u.id != id) u,
         ]);
       });
     } catch (e) {
@@ -76,6 +77,9 @@ class UserManagementNotifier extends StateNotifier<AsyncValue<List<UserModel>>> 
   }
 }
 
-final userManagementProvider = StateNotifierProvider<UserManagementNotifier, AsyncValue<List<UserModel>>>((ref) {
-  return UserManagementNotifier(ref.watch(userRepositoryProvider));
-});
+final userManagementProvider =
+    StateNotifierProvider<UserManagementNotifier, AsyncValue<List<UserModel>>>((
+      ref,
+    ) {
+      return UserManagementNotifier(ref.watch(userRepositoryProvider));
+    });

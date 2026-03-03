@@ -1,18 +1,8 @@
-
 import 'package:flutter/material.dart';
 
-enum TaskStatus {
-  pending,
-  inProgress,
-  completed,
-  cancelled,
-}
+enum TaskStatus { pending, inProgress, completed, cancelled }
 
-enum TaskPriority {
-  low,
-  medium,
-  high,
-}
+enum TaskPriority { low, medium, high }
 
 extension TaskStatusExtension on TaskStatus {
   String get label {
@@ -120,7 +110,6 @@ class TaskModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
-
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(

@@ -5,7 +5,7 @@ class NotificationModel {
   final DateTime date;
   final bool isRead;
   final String? relatedEntityId;
-  final String? relatedEntityType; 
+  final String? relatedEntityType;
   final String type;
   final String? senderId;
 
@@ -49,10 +49,13 @@ class NotificationModel {
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
       message: json['message'] ?? '',
-      date: json['created_at'] != null ? DateTime.parse(json['created_at']).toLocal() : DateTime.now(),
+      date: json['created_at'] != null
+          ? DateTime.parse(json['created_at']).toLocal()
+          : DateTime.now(),
       isRead: json['is_read'] ?? false,
       type: json['type'] ?? 'general',
-      relatedEntityId: (json['related_id'] ?? json['related_entity_id'])?.toString(),
+      relatedEntityId: (json['related_id'] ?? json['related_entity_id'])
+          ?.toString(),
       relatedEntityType: json['related_type'] ?? json['related_entity_type'],
       senderId: json['sender_id']?.toString(),
     );
@@ -75,7 +78,7 @@ class NotificationModel {
       json['related_entity_type'] = relatedEntityType;
     }
     if (senderId != null) json['sender_id'] = senderId;
-    
+
     return json;
   }
 }

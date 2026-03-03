@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../models/role_model.dart';
@@ -13,9 +12,10 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref.watch(authServiceProvider));
 });
 
-
 // Current User State
-final currentUserProvider = StateNotifierProvider<AuthNotifier, UserModel?>((ref) {
+final currentUserProvider = StateNotifierProvider<AuthNotifier, UserModel?>((
+  ref,
+) {
   return AuthNotifier(ref.watch(authRepositoryProvider), ref);
 });
 
@@ -69,6 +69,7 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   Future<void> updateProfile(UserModel user) async {
     state = await _repository.updateProfile(user);
   }
+
   Future<void> updatePassword(String newPassword) async {
     await _repository.updatePassword(newPassword);
   }

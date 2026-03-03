@@ -13,7 +13,8 @@ class RecentActivityList extends ConsumerWidget {
 
     return activityAsync.when(
       data: (metrics) {
-        final recentActivities = metrics['recentActivities'] as List<dynamic>? ?? [];
+        final recentActivities =
+            metrics['recentActivities'] as List<dynamic>? ?? [];
 
         if (recentActivities.isEmpty) {
           return Container(
@@ -21,7 +22,9 @@ class RecentActivityList extends ConsumerWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withOpacity(0.1),
+              ),
             ),
             child: Center(
               child: Column(
@@ -48,7 +51,9 @@ class RecentActivityList extends ConsumerWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
+            ),
           ),
           child: ListView.separated(
             physics: const NeverScrollableScrollPhysics(),
@@ -74,11 +79,18 @@ class RecentActivityList extends ConsumerWidget {
                 leading: CircleAvatar(
                   radius: 18,
                   backgroundColor: _getColorForType(typeStr).withOpacity(0.1),
-                  child: Icon(_getIconForType(typeStr), color: _getColorForType(typeStr), size: 18),
+                  child: Icon(
+                    _getIconForType(typeStr),
+                    color: _getColorForType(typeStr),
+                    size: 18,
+                  ),
                 ),
                 title: Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -94,7 +106,9 @@ class RecentActivityList extends ConsumerWidget {
                     : null,
                 trailing: Text(
                   timeago.format(date),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontSize: 11),
                 ),
               );
             },
@@ -102,7 +116,8 @@ class RecentActivityList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: ${ErrorHandler.formatError(error)}')),
+      error: (error, _) =>
+          Center(child: Text('Error: ${ErrorHandler.formatError(error)}')),
     );
   }
 

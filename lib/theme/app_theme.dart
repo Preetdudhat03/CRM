@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/constants/app_colors.dart';
@@ -41,10 +40,7 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 18,
         ),
-        bodyLarge: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 16,
-        ),
+        bodyLarge: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
         bodyMedium: const TextStyle(
           color: AppColors.textSecondary,
           fontSize: 14,
@@ -93,7 +89,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.accent, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.border),
     );
@@ -104,7 +103,8 @@ class AppTheme {
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.accent, // Use accent as primary in dark mode for visibility
+        primary: AppColors
+            .accent, // Use accent as primary in dark mode for visibility
         secondary: AppColors.secondary,
         surface: AppColors.surfaceDark,
         onPrimary: Colors.white,
@@ -115,36 +115,37 @@ class AppTheme {
         tertiary: AppColors.accent,
       ),
       typography: Typography.material2021(),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: const TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontWeight: FontWeight.bold,
-          fontSize: 32,
-        ),
-        displayMedium: const TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontWeight: FontWeight.bold,
-          fontSize: 28,
-        ),
-        titleLarge: const TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontWeight: FontWeight.w600,
-          fontSize: 22,
-        ),
-        titleMedium: const TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
-        bodyLarge: const TextStyle(
-          color: AppColors.textPrimaryDark,
-          fontSize: 16,
-        ),
-        bodyMedium: const TextStyle(
-          color: AppColors.textSecondaryDark,
-          fontSize: 14,
-        ),
-      ),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            displayLarge: const TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontWeight: FontWeight.bold,
+              fontSize: 32,
+            ),
+            displayMedium: const TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontWeight: FontWeight.bold,
+              fontSize: 28,
+            ),
+            titleLarge: const TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontWeight: FontWeight.w600,
+              fontSize: 22,
+            ),
+            titleMedium: const TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+            bodyLarge: const TextStyle(
+              color: AppColors.textPrimaryDark,
+              fontSize: 16,
+            ),
+            bodyMedium: const TextStyle(
+              color: AppColors.textSecondaryDark,
+              fontSize: 14,
+            ),
+          ),
       cardTheme: const CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 0,
@@ -190,7 +191,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.accent, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.borderDark),
       iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),

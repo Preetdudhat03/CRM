@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/deal_model.dart';
+import 'activity_service.dart';
 
 class DealService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -13,7 +14,7 @@ class DealService {
         .select('*, contacts(name, company)')
         .order('created_at', ascending: false)
         .range(start, end);
-    
+
     final List<dynamic> data = response as List<dynamic>;
     return data.map((json) {
       final contact = json['contacts'];
@@ -29,24 +30,33 @@ class DealService {
 
   Future<DealModel> addDeal(DealModel deal) async {
     final json = deal.toJson();
-    // Remove denormalized fields if we don't want to store them in deals table
-    // But schema.sql has company_name, so we keep it. 
-    // contact_name is NOT in schema, so we should remove it to avoid error?
-    // Supabase ignores unknown columns usually? No, it throws error.
-    json.remove('contact_name'); 
-    
+    json.remove('contact_name');
+
     final response = await _supabase
         .from('deals')
         .insert(json)
         .select('*, contacts(name, company)')
         .single();
-    
+
     final contact = response['contacts'];
     if (contact != null) {
       response['contact_name'] = contact['name'];
     }
 
-    return DealModel.fromJson(response);
+    final newDeal = DealModel.fromJson(response);
+
+    // Log Activity: Deal Created
+    ActivityService.log(
+      relatedType: 'deal',
+      relatedId: newDeal.id,
+      activityType: 'created',
+      title: 'Deal Created',
+      description:
+          'Deal "${newDeal.title}" added for \$${newDeal.value.toStringAsFixed(2)}',
+      metadata: {'value': newDeal.value, 'stage': newDeal.stage.name},
+    );
+
+    return newDeal;
   }
 
   Future<DealModel> updateDeal(DealModel deal) async {
@@ -65,7 +75,19 @@ class DealService {
       response['contact_name'] = contact['name'];
     }
 
-    return DealModel.fromJson(response);
+    final updatedDeal = DealModel.fromJson(response);
+
+    // Log Activity
+    ActivityService.log(
+      relatedType: 'deal',
+      relatedId: updatedDeal.id,
+      activityType: 'stage_changed', // Assuming stage change is the main update
+      title: 'Deal Updated',
+      description: 'Stage: ${updatedDeal.stage.displayName}',
+      metadata: {'stage': updatedDeal.stage.name, 'value': updatedDeal.value},
+    );
+
+    return updatedDeal;
   }
 
   Future<void> deleteDeal(String id) async {

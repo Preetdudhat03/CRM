@@ -27,19 +27,26 @@ class NotificationsScreen extends ConsumerWidget {
         data: (notifications) {
           if (notifications.isEmpty) {
             return RefreshIndicator(
-              onRefresh: () => ref.read(notificationsProvider.notifier).getNotifications(),
+              onRefresh: () =>
+                  ref.read(notificationsProvider.notifier).getNotifications(),
               child: ListView(
                 children: const [
                   SizedBox(height: 200),
                   Center(child: Text('No notifications right now.')),
-                  Center(child: Text('Pull down to refresh', style: TextStyle(color: Colors.grey))),
+                  Center(
+                    child: Text(
+                      'Pull down to refresh',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
                 ],
               ),
             );
           }
 
           return RefreshIndicator(
-            onRefresh: () => ref.read(notificationsProvider.notifier).getNotifications(),
+            onRefresh: () =>
+                ref.read(notificationsProvider.notifier).getNotifications(),
             child: ListView.builder(
               itemCount: notifications.length,
               itemBuilder: (context, index) {
@@ -47,20 +54,22 @@ class NotificationsScreen extends ConsumerWidget {
                 return ListTile(
                   isThreeLine: true,
                   leading: CircleAvatar(
-                    backgroundColor: notification.isRead 
-                        ? Colors.grey.withOpacity(0.2) 
+                    backgroundColor: notification.isRead
+                        ? Colors.grey.withOpacity(0.2)
                         : Theme.of(context).primaryColor.withOpacity(0.2),
                     child: Icon(
                       _getIconForType(notification.relatedEntityType),
-                      color: notification.isRead 
-                          ? Colors.grey 
+                      color: notification.isRead
+                          ? Colors.grey
                           : Theme.of(context).primaryColor,
                     ),
                   ),
                   title: Text(
                     notification.title,
                     style: TextStyle(
-                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                      fontWeight: notification.isRead
+                          ? FontWeight.normal
+                          : FontWeight.bold,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -81,12 +90,14 @@ class NotificationsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  trailing: !notification.isRead 
+                  trailing: !notification.isRead
                       ? const Icon(Icons.circle, color: Colors.blue, size: 12)
                       : null,
                   onTap: () {
                     if (!notification.isRead) {
-                      ref.read(notificationsProvider.notifier).markAsRead(notification.id);
+                      ref
+                          .read(notificationsProvider.notifier)
+                          .markAsRead(notification.id);
                     }
                     // Optionally navigate based on relatedEntityType and ID
                   },

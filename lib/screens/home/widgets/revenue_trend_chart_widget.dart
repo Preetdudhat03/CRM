@@ -17,7 +17,9 @@ class RevenueTrendChart extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -31,9 +33,9 @@ class RevenueTrendChart extends ConsumerWidget {
         children: [
           Text(
             'Revenue Trend (Last 6 Months)',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
@@ -115,28 +117,37 @@ class RevenueTrendChart extends ConsumerWidget {
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.1),
                           strokeWidth: 1,
                         );
                       },
                     ),
                     titlesData: FlTitlesData(
                       show: true,
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
                           interval: 1,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() < 0 || value.toInt() >= last6Months.length) {
+                            if (value.toInt() < 0 ||
+                                value.toInt() >= last6Months.length) {
                               return const Text('');
                             }
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
-                                DateFormat('MMM').format(last6Months[value.toInt()]),
+                                DateFormat(
+                                  'MMM',
+                                ).format(last6Months[value.toInt()]),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             );

@@ -1,12 +1,4 @@
-
-enum LeadStatus {
-  newLead,
-  contacted,
-  interested,
-  qualified,
-  lost,
-  converted,
-}
+enum LeadStatus { newLead, contacted, interested, qualified, lost, converted }
 
 extension LeadStatusExtension on LeadStatus {
   String get label {
@@ -40,6 +32,11 @@ class LeadModel {
   final String? notes;
   final String? convertedContactId;
   final DateTime? convertedAt;
+
+  String get firstName => name.split(' ').first;
+  String get lastName =>
+      name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : '';
+  String get leadSource => source;
 
   const LeadModel({
     required this.id,
@@ -86,7 +83,6 @@ class LeadModel {
     );
   }
 
-
   factory LeadModel.fromJson(Map<String, dynamic> json) {
     // Schema stores status as snake_case (e.g. 'new_lead'), enum is camelCase (newLead)
     final rawStatus = (json['status'] ?? 'new_lead') as String;
@@ -96,8 +92,11 @@ class LeadModel {
     );
     return LeadModel(
       id: json['id'],
-      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim().isNotEmpty 
-          ? '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim() 
+      name:
+          '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'
+              .trim()
+              .isNotEmpty
+          ? '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim()
           : (json['name'] ?? ''),
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
@@ -111,7 +110,9 @@ class LeadModel {
       estimatedValue: (json['estimated_value'] as num?)?.toDouble(),
       notes: json['notes'] as String?,
       convertedContactId: json['converted_contact_id'] as String?,
-      convertedAt: json['converted_at'] != null ? DateTime.tryParse(json['converted_at']) : null,
+      convertedAt: json['converted_at'] != null
+          ? DateTime.tryParse(json['converted_at'])
+          : null,
     );
   }
 
@@ -124,7 +125,7 @@ class LeadModel {
     final nameParts = name.trim().split(' ');
     final firstName = nameParts.first;
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-    
+
     return {
       'first_name': firstName,
       'last_name': lastName,

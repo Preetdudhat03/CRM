@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'contacts/contacts_screen.dart';
+import 'companies/companies_screen.dart';
 import 'deals/deals_screen.dart';
 import 'home/home_screen.dart';
 import 'leads/leads_screen.dart';
@@ -39,6 +39,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
     final List<Widget> screens = [
       const HomeScreen(),
       const ContactsScreen(),
+      const CompaniesScreen(),
       const LeadsScreen(),
       const DealsScreen(),
       const TasksScreen(),
@@ -55,7 +56,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                 NavigationRail(
                   selectedIndex: currentIndex,
                   onDestinationSelected: (index) {
-                     ref.read(bottomNavIndexProvider.notifier).state = index;
+                    ref.read(bottomNavIndexProvider.notifier).state = index;
                   },
                   labelType: NavigationRailLabelType.all,
                   destinations: const [
@@ -68,6 +69,11 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                       icon: Icon(Icons.people_outlined),
                       selectedIcon: Icon(Icons.people),
                       label: Text('Contacts'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.business_outlined),
+                      selectedIcon: Icon(Icons.business),
+                      label: Text('Companies'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.leaderboard_outlined),
@@ -102,10 +108,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             );
           } else {
             // Mobile/Tablet Portrait: Show BottomNavigationBar
-            return AnimatedIndexedStack(
-              index: currentIndex,
-              children: screens,
-            );
+            return AnimatedIndexedStack(index: currentIndex, children: screens);
           }
         },
       ),

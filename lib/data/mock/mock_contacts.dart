@@ -1,4 +1,3 @@
-
 import '../../models/contact_model.dart';
 
 final List<ContactModel> mockContacts = [

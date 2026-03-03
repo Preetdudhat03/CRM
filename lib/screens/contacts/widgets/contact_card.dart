@@ -47,13 +47,18 @@ class ContactCard extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                backgroundImage: contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColor.withOpacity(0.1),
+                backgroundImage:
+                    contact.avatarUrl != null && contact.avatarUrl!.isNotEmpty
                     ? NetworkImage(contact.avatarUrl!)
                     : null,
                 child: (contact.avatarUrl == null || contact.avatarUrl!.isEmpty)
                     ? Text(
-                        contact.name.isNotEmpty ? contact.name.substring(0, 1).toUpperCase() : 'C',
+                        contact.name.isNotEmpty
+                            ? contact.name.substring(0, 1).toUpperCase()
+                            : 'C',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 18,
@@ -73,17 +78,29 @@ class ContactCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             contact.name,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         // Badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(contact.status).withOpacity(0.1),
+                            color: _getStatusColor(
+                              contact.status,
+                            ).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _getStatusColor(contact.status).withOpacity(0.5)),
+                            border: Border.all(
+                              color: _getStatusColor(
+                                contact.status,
+                              ).withOpacity(0.5),
+                            ),
                           ),
                           child: Text(
                             contact.status.label,
@@ -100,7 +117,11 @@ class ContactCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         contact.company,
-                        style: TextStyle(color: Colors.grey.shade700, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -109,12 +130,19 @@ class ContactCard extends StatelessWidget {
                     if (contact.email.isNotEmpty)
                       Row(
                         children: [
-                          Icon(Icons.email_outlined, size: 14, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.email_outlined,
+                            size: 14,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               contact.email,
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -124,12 +152,19 @@ class ContactCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.phone_outlined, size: 14, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.phone_outlined,
+                            size: 14,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               contact.phone,
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -181,7 +216,11 @@ class ContactCard extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                          Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 18,
+                          ),
                           SizedBox(width: 8),
                           Text('Delete', style: TextStyle(color: Colors.red)),
                         ],

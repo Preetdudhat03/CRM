@@ -1,4 +1,3 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -33,7 +32,7 @@ class StorageService {
       if (!['jpg', 'jpeg', 'png', 'webp'].contains(fileExt)) {
         throw Exception('Invalid file type');
       }
-      
+
       final storagePath = '$path.$fileExt'; // e.g. users/123.jpg
 
       String mimeType;
@@ -55,7 +54,9 @@ class StorageService {
       final bytes = await file.readAsBytes();
 
       // Upload file (upsert: true overwrites existing file at same path)
-      await _supabase.storage.from('avatars').uploadBinary(
+      await _supabase.storage
+          .from('avatars')
+          .uploadBinary(
             storagePath,
             bytes,
             fileOptions: FileOptions(
@@ -66,8 +67,10 @@ class StorageService {
           );
 
       // Get public URL
-      final publicUrl = _supabase.storage.from('avatars').getPublicUrl(storagePath);
-      
+      final publicUrl = _supabase.storage
+          .from('avatars')
+          .getPublicUrl(storagePath);
+
       return '$publicUrl?t=${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
       debugPrint('Error uploading avatar: $e');

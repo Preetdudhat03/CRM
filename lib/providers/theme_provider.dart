@@ -43,7 +43,9 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
+  ref,
+) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ThemeModeNotifier(prefs);
 });

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../models/role_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
@@ -28,22 +27,32 @@ class RolesPermissionsScreen extends StatelessWidget {
                 ),
               ),
               child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                collapsedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.security, color: Theme.of(context).primaryColor),
+                  child: Icon(
+                    Icons.security,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
                 title: Text(
                   role.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 subtitle: Text(
                   '${role.permissions.length} Permissions',
@@ -59,9 +68,8 @@ class RolesPermissionsScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Granted Permissions',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Theme.of(context).hintColor,
-                              ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(color: Theme.of(context).hintColor),
                         ),
                         const SizedBox(height: 12),
                         Wrap(
@@ -74,17 +82,20 @@ class RolesPermissionsScreen extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                                  color: Theme.of(
+                                    context,
+                                  ).dividerColor.withOpacity(0.1),
                                 ),
                               ),
                               child: Text(
                                 p.name.replaceAll(RegExp(r'(?=[A-Z])'), ' '),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(fontWeight: FontWeight.w500),
                               ),
                             );
                           }).toList(),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/role_model.dart';
@@ -39,7 +38,8 @@ class HomeScreen extends ConsumerWidget {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+              backgroundImage:
+                  (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
                   ? NetworkImage(user.avatarUrl!)
                   : null,
               radius: 18,
@@ -153,7 +153,8 @@ class HomeScreen extends ConsumerWidget {
                       }).toList(),
                       onChanged: (value) {
                         if (value != null) {
-                          ref.read(dashboardPeriodProvider.notifier).state = value;
+                          ref.read(dashboardPeriodProvider.notifier).state =
+                              value;
                         }
                       },
                     ),
@@ -176,7 +177,8 @@ class HomeScreen extends ConsumerWidget {
                     mainAxisSpacing: 16,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 1.2, // Adjust aspect ratio for better look on wide screens
+                    childAspectRatio:
+                        1.2, // Adjust aspect ratio for better look on wide screens
                     children: [
                       // Dynamic Stats Cards
                       FadeInSlide(
@@ -188,7 +190,8 @@ class HomeScreen extends ConsumerWidget {
                           color: Colors.blue,
                           valueKey: 'totalContacts',
                           onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 1; // Contacts Tab
+                            ref.read(bottomNavIndexProvider.notifier).state =
+                                1; // Contacts Tab
                           },
                         ),
                       ),
@@ -201,7 +204,8 @@ class HomeScreen extends ConsumerWidget {
                           color: Colors.orange,
                           valueKey: 'totalLeads',
                           onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 2; // Leads Tab
+                            ref.read(bottomNavIndexProvider.notifier).state =
+                                2; // Leads Tab
                           },
                         ),
                       ),
@@ -214,7 +218,8 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.handshake_outlined,
                           color: Colors.purple,
                           onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state = 3; // Deals Tab
+                            ref.read(bottomNavIndexProvider.notifier).state =
+                                3; // Deals Tab
                           },
                         ),
                       ),
@@ -230,7 +235,8 @@ class HomeScreen extends ConsumerWidget {
                             color: Colors.green,
                             isCurrency: true,
                             onTap: () {
-                              ref.read(bottomNavIndexProvider.notifier).state = 3;
+                              ref.read(bottomNavIndexProvider.notifier).state =
+                                  3;
                             },
                           ),
                         )
@@ -239,9 +245,13 @@ class HomeScreen extends ConsumerWidget {
                           delay: 0.4,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Theme.of(context).dividerColor),
+                              border: Border.all(
+                                color: Theme.of(context).dividerColor,
+                              ),
                             ),
                             child: const Center(
                               child: Column(
@@ -260,22 +270,20 @@ class HomeScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 32),
-              
+
               // Tasks Due Today Snapshot
-              const FadeInSlide(
-                delay: 0.4,
-                child: TasksDueTodayWidget(),
-              ),
+              const FadeInSlide(delay: 0.4, child: TasksDueTodayWidget()),
               const SizedBox(height: 32),
-              
+
               // Deal Pipeline Horizontal Snapshot
               FadeInSlide(
                 delay: 0.45,
                 child: dashboardMetrics.when(
                   data: (stats) {
-                    final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
+                    final rawPipeline =
+                        stats['rawPipeline'] as Map<String, int>? ?? {};
                     if (rawPipeline.isEmpty) return const SizedBox();
-                    
+
                     final Map<DealStage, int> pipeline = {};
                     for (var stage in DealStage.values) {
                       // Check both camelCase (e.g. closedWon) and snake_case (closed_won)
@@ -283,11 +291,14 @@ class HomeScreen extends ConsumerWidget {
                         RegExp(r'[A-Z]'),
                         (m) => '_${m.group(0)!.toLowerCase()}',
                       );
-                      pipeline[stage] = (rawPipeline[stage.name] ?? 0) + (rawPipeline[snakeName] ?? 0);
+                      pipeline[stage] =
+                          (rawPipeline[stage.name] ?? 0) +
+                          (rawPipeline[snakeName] ?? 0);
                     }
 
-                    if (pipeline.values.every((val) => val == 0)) return const SizedBox();
-                    
+                    if (pipeline.values.every((val) => val == 0))
+                      return const SizedBox();
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -296,7 +307,8 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, __) => Text('Error loading pipeline: $error'),
                 ),
               ),
@@ -304,10 +316,7 @@ class HomeScreen extends ConsumerWidget {
 
               // Revenue Trend Chart (only if user has analytics permission)
               if (canViewAnalytics)
-                const FadeInSlide(
-                  delay: 0.48,
-                  child: RevenueTrendChart(),
-                ),
+                const FadeInSlide(delay: 0.48, child: RevenueTrendChart()),
               if (canViewAnalytics) const SizedBox(height: 32),
 
               FadeInSlide(
@@ -323,7 +332,9 @@ class HomeScreen extends ConsumerWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const AllActivitiesScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const AllActivitiesScreen(),
+                          ),
                         );
                       },
                       child: const Text('View All'),
@@ -356,26 +367,26 @@ class HomeScreen extends ConsumerWidget {
         final value = stats[valueKey];
         final double? trend = trendKey != null ? stats[trendKey] : null;
         final bool? isUp = isUpTrendKey != null ? stats[isUpTrendKey] : null;
-        
+
         String displayValue = '0';
         if (value != null) {
-            if (isCurrency && value is num) {
-                // Simple currency formatting for now, ideally use NumberFormat
-                displayValue = '\$${value.toStringAsFixed(0)}'; 
-            } else {
-                displayValue = value.toString();
-            }
+          if (isCurrency && value is num) {
+            // Simple currency formatting for now, ideally use NumberFormat
+            displayValue = '\$${value.toStringAsFixed(0)}';
+          } else {
+            displayValue = value.toString();
+          }
         }
-        
+
         return DashboardCard(
-        title: title,
-        value: displayValue,
-        icon: icon,
-        color: color,
-        trendPercentage: trend,
-        isUpTrend: isUp,
-        onTap: onTap,
-      );
+          title: title,
+          value: displayValue,
+          icon: icon,
+          color: color,
+          trendPercentage: trend,
+          isUpTrend: isUp,
+          onTap: onTap,
+        );
       },
       loading: () => DashboardCard(
         title: title,
@@ -419,43 +430,63 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _quickActionBtn(
-                    context, 
-                    icon: Icons.person_add_alt_1, 
-                    label: 'Contact', 
-                    color: Colors.blue, 
+                    context,
+                    icon: Icons.person_add_alt_1,
+                    label: 'Contact',
+                    color: Colors.blue,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditContactScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddEditContactScreen(),
+                        ),
+                      );
                     },
                   ),
                   _quickActionBtn(
-                    context, 
-                    icon: Icons.leaderboard, 
-                    label: 'Lead', 
-                    color: Colors.orange, 
+                    context,
+                    icon: Icons.leaderboard,
+                    label: 'Lead',
+                    color: Colors.orange,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditLeadScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddEditLeadScreen(),
+                        ),
+                      );
                     },
                   ),
                   _quickActionBtn(
-                    context, 
-                    icon: Icons.handshake, 
-                    label: 'Deal', 
-                    color: Colors.purple, 
+                    context,
+                    icon: Icons.handshake,
+                    label: 'Deal',
+                    color: Colors.purple,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditDealScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddEditDealScreen(),
+                        ),
+                      );
                     },
                   ),
                   _quickActionBtn(
-                    context, 
-                    icon: Icons.check_circle_outline, 
-                    label: 'Task', 
-                    color: Colors.green, 
+                    context,
+                    icon: Icons.check_circle_outline,
+                    label: 'Task',
+                    color: Colors.green,
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditTaskScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddEditTaskScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -467,7 +498,13 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _quickActionBtn(BuildContext context, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+  Widget _quickActionBtn(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -487,8 +524,10 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-            )
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),

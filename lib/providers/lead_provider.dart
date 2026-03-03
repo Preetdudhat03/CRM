@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/lead_model.dart';
@@ -16,7 +15,6 @@ final leadRepositoryProvider = Provider<LeadRepository>((ref) {
   return LeadRepository(ref.watch(leadServiceProvider));
 });
 
-
 // State Provider for Search Query
 final leadSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -31,16 +29,16 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  LeadNotifier(this._repository, this._ref) 
-      : _currentUser = _ref.read(currentUserProvider),
-        super(const AsyncValue.loading()) {
+  LeadNotifier(this._repository, this._ref)
+    : _currentUser = _ref.read(currentUserProvider),
+      super(const AsyncValue.loading()) {
     loadInitial();
     _subscribeToRealtime();
   }
 
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
-    
+
     _realtimeChannel = supabase
         .channel('public:leads')
         .onPostgresChanges(
@@ -69,7 +67,10 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
     _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final leads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      final leads = await _repository.getLeads(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (leads.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(leads);
     } catch (e, stack) {
@@ -83,7 +84,10 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
     _isLoadingMore = true;
     try {
       _currentPage++;
-      final newLeads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      final newLeads = await _repository.getLeads(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (newLeads.length < _pageSize) _hasMore = false;
       state.whenData((currentLeads) {
         state = AsyncValue.data([...currentLeads, ...newLeads]);
@@ -101,7 +105,10 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
     _isLoadingMore = false;
     try {
       // Don't set state to loading – keep existing list during background refresh
-      final leads = await _repository.getLeads(page: _currentPage, pageSize: _pageSize);
+      final leads = await _repository.getLeads(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (leads.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(leads);
     } catch (e, stack) {
@@ -118,18 +125,24 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         state = AsyncValue.data([...leads, newLead]);
       });
 
-      ActivityService.log(title: 'Created lead: ${newLead.name}', type: 'lead', relatedEntityId: newLead.id);
+      ActivityService.log(
+        title: 'Created lead: ${newLead.name}',
+        activityType: 'lead',
+        relatedId: newLead.id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'New Lead Added',
-        '$userName added a new lead: ${newLead.name}',
-        type: 'lead_created',
-        relatedEntityId: newLead.id,
-        relatedEntityType: 'lead',
-        showOnDevice: false,
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'New Lead Added',
+            '$userName added a new lead: ${newLead.name}',
+            activityType: 'lead_created',
+            relatedId: newLead.id,
+            relatedEntityactivityType: 'lead',
+            showOnDevice: false,
+          );
     } catch (e) {
       rethrow;
     }
@@ -138,42 +151,52 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
   Future<void> updateLead(LeadModel lead) async {
     try {
       await _repository.updateLead(lead);
-      
+
       state.whenData((leads) {
-        final existingLead = leads.firstWhere((l) => l.id == lead.id, orElse: () => lead);
-        
+        final existingLead = leads.firstWhere(
+          (l) => l.id == lead.id,
+          orElse: () => lead,
+        );
+
         state = AsyncValue.data([
           for (final l in leads)
-            if (l.id == lead.id) lead else l
+            if (l.id == lead.id) lead else l,
         ]);
 
         final currentUser = _ref.read(currentUserProvider);
         final userName = currentUser?.name ?? 'Someone';
 
-        if (existingLead.assignedTo != lead.assignedTo && lead.assignedTo.isNotEmpty) {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Lead Assigned',
-            '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
-            type: 'lead_assigned',
-            relatedEntityId: lead.id,
-            relatedEntityType: 'lead',
-          );
+        if (existingLead.assignedTo != lead.assignedTo &&
+            lead.assignedTo.isNotEmpty) {
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Lead Assigned',
+                '$userName assigned the lead ${lead.name} to ${lead.assignedTo}',
+                activityType: 'lead_assigned',
+                relatedId: lead.id,
+                relatedEntityactivityType: 'lead',
+              );
         } else if (existingLead.status != lead.status) {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Lead Status Updated',
-            '$userName changed lead ${lead.name} status to ${lead.status.label}',
-            type: 'lead_status_updated',
-            relatedEntityId: lead.id,
-            relatedEntityType: 'lead',
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Lead Status Updated',
+                '$userName changed lead ${lead.name} status to ${lead.status.label}',
+                activityType: 'lead_status_updated',
+                relatedId: lead.id,
+                relatedEntityactivityType: 'lead',
+              );
         } else {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Lead Updated',
-            '$userName updated lead: ${lead.name}',
-            type: 'lead_updated',
-            relatedEntityId: lead.id,
-            relatedEntityType: 'lead',
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Lead Updated',
+                '$userName updated lead: ${lead.name}',
+                activityType: 'lead_updated',
+                relatedId: lead.id,
+                relatedEntityactivityType: 'lead',
+              );
         }
       });
     } catch (e) {
@@ -187,19 +210,25 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       state.whenData((leads) {
         state = AsyncValue.data([
           for (final l in leads)
-            if (l.id != id) l
+            if (l.id != id) l,
         ]);
       });
-      ActivityService.log(title: 'Deleted a lead', type: 'lead', relatedEntityId: id);
+      ActivityService.log(
+        title: 'Deleted a lead',
+        activityType: 'lead',
+        relatedId: id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Lead Deleted',
-        '$userName deleted a lead',
-        type: 'lead_deleted',
-        relatedEntityType: 'lead',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Lead Deleted',
+            '$userName deleted a lead',
+            activityType: 'lead_deleted',
+            relatedEntityactivityType: 'lead',
+          );
     } catch (e) {
       // Handle error
     }
@@ -211,20 +240,26 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
       state.whenData((leads) {
         state = AsyncValue.data([
           for (final l in leads)
-            if (l.id == id) l.copyWith(status: LeadStatus.converted) else l
+            if (l.id == id) l.copyWith(status: LeadStatus.converted) else l,
         ]);
       });
-      ActivityService.log(title: 'Converted lead to contact', type: 'lead', relatedEntityId: id);
+      ActivityService.log(
+        title: 'Converted lead to contact',
+        activityType: 'lead',
+        relatedId: id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Lead Converted',
-        '$userName converted a lead to contact',
-        type: 'lead_converted',
-        relatedEntityId: id,
-        relatedEntityType: 'lead',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Lead Converted',
+            '$userName converted a lead to contact',
+            activityType: 'lead_converted',
+            relatedId: id,
+            relatedEntityactivityType: 'lead',
+          );
     } catch (e) {
       rethrow;
     }
@@ -234,8 +269,8 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
 // Leads List Provider
 final leadsProvider =
     StateNotifierProvider<LeadNotifier, AsyncValue<List<LeadModel>>>((ref) {
-  return LeadNotifier(ref.watch(leadRepositoryProvider), ref);
-});
+      return LeadNotifier(ref.watch(leadRepositoryProvider), ref);
+    });
 
 // Filtered Leads Provider
 final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
@@ -244,7 +279,9 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
 
   return leadsAsync.whenData((leads) {
     // Filter out converted leads from default view
-    var activeLeads = leads.where((lead) => lead.status != LeadStatus.converted).toList();
+    var activeLeads = leads
+        .where((lead) => lead.status != LeadStatus.converted)
+        .toList();
 
     if (query.isEmpty) return activeLeads;
     return activeLeads.where((lead) {
@@ -254,4 +291,3 @@ final filteredLeadsProvider = Provider<AsyncValue<List<LeadModel>>>((ref) {
     }).toList();
   });
 });
-

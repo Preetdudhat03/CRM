@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../models/task_model.dart';
 
@@ -54,19 +53,21 @@ class TaskDetailScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.calendar_today),
               title: Text(task.dueDate.toIso8601String().split('T')[0]),
-               subtitle: const Text('Due Date'),
+              subtitle: const Text('Due Date'),
             ),
-             ListTile(
+            ListTile(
               leading: const Icon(Icons.person),
               title: Text(task.assignedTo),
               subtitle: const Text('Assigned To'),
             ),
-             if (task.relatedEntityName != null)
-             ListTile(
-              leading: const Icon(Icons.link),
-              title: Text('${task.relatedEntityName} (${task.relatedEntityType})'),
-              subtitle: const Text('Related To'),
-            ),
+            if (task.relatedEntityName != null)
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: Text(
+                  '${task.relatedEntityName} (${task.relatedEntityType})',
+                ),
+                subtitle: const Text('Related To'),
+              ),
           ],
         ),
       ),

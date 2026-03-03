@@ -38,31 +38,33 @@ class UserService {
 
   // To add a user, we effectively "Invite" them or just create a profile placeholder.
   // Real user creation happens via Auth Sign Up.
-  // For this IAM demo, we will creating a profile entry. 
-  // NOTE: This does NOT create a login account. 
+  // For this IAM demo, we will creating a profile entry.
+  // NOTE: This does NOT create a login account.
   // In a real app, you'd call an Edge Function to invite the user.
   Future<UserModel> addUser(UserModel user) async {
     // This is a placeholder for the "Invite User" flow.
     // We will insert into profiles just to show them in the list.
     // The ID would ideally come from the auth user creation.
     // Since we can't create auth user here, we'll generate a temp ID or fail.
-    
+
     // BETTER APPROACH: Use a strictly typed "Invite" function which calls an RPC or Edge Function.
     // For now, we simulate success by adding to local state or throwing "Not Implemented" for real backend.
-    
-    // Let's implement a visual-only addition if backend logic is missing, 
+
+    // Let's implement a visual-only addition if backend logic is missing,
     // BUT user wants "Impl IAM".
     // I will enable listing and updating ROLES.
-    
+
     // 1. Create profile (assuming trigger doesn't exist or we want to pre-fill)
-    // We can't create an ID. 
-    // We will throw an error saying "Please use Registration screen to create users" 
+    // We can't create an ID.
+    // We will throw an error saying "Please use Registration screen to create users"
     // OR valid IAM flow: Admin creates user -> Edge Function -> Auth User + Profile.
-    
+
     // Given the constraints, I will implement 'updateUser' (Role Change) which is the most critical IAM feature.
     // 'addUser' will be "Invite" which sends an email (mocked).
-    
-    throw UnimplementedError('To add users, they must register or be invited via Edge Functions.');
+
+    throw UnimplementedError(
+      'To add users, they must register or be invited via Edge Functions.',
+    );
   }
 
   Future<UserModel> updateUser(UserModel user) async {
@@ -73,7 +75,9 @@ class UserService {
           .update({
             'name': user.name,
             'role': user.role.name,
-            'custom_permissions': user.customPermissions?.map((e) => e.name).toList(),
+            'custom_permissions': user.customPermissions
+                ?.map((e) => e.name)
+                .toList(),
           })
           .eq('id', user.id)
           .select()
@@ -95,17 +99,22 @@ class UserService {
     } catch (e) {
       // If direct update fails (e.g. RLS), try via Admin RPC
       try {
-        final response = await _supabase.rpc('admin_update_profile', params: {
-          'target_user_id': user.id,
-          'new_name': user.name,
-          'new_role': user.role.name,
-          'new_custom_permissions': user.customPermissions?.map((e) => e.name).toList(),
-        });
+        final response = await _supabase.rpc(
+          'admin_update_profile',
+          params: {
+            'target_user_id': user.id,
+            'new_name': user.name,
+            'new_role': user.role.name,
+            'new_custom_permissions': user.customPermissions
+                ?.map((e) => e.name)
+                .toList(),
+          },
+        );
 
         // Use the returned data or the input user if RPC is void/bool
         // The SQL function returns the updated fields
         final data = response as Map<String, dynamic>;
-        
+
         return UserModel(
           id: data['id'] ?? user.id,
           name: data['name'] ?? user.name,

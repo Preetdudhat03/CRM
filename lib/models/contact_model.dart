@@ -1,9 +1,4 @@
-
-enum ContactStatus {
-  lead,
-  customer,
-  churned,
-}
+enum ContactStatus { lead, customer, churned }
 
 extension ContactStatusExtension on ContactStatus {
   String get label {
@@ -36,6 +31,8 @@ class ContactModel {
   final bool? createdFromLead;
   final String? sourceLeadId;
 
+  final String? companyId;
+
   const ContactModel({
     required this.id,
     required this.name,
@@ -53,6 +50,7 @@ class ContactModel {
     this.assignedTo,
     this.createdFromLead,
     this.sourceLeadId,
+    this.companyId,
   });
 
   ContactModel copyWith({
@@ -72,6 +70,7 @@ class ContactModel {
     String? assignedTo,
     bool? createdFromLead,
     String? sourceLeadId,
+    String? companyId,
   }) {
     return ContactModel(
       id: id ?? this.id,
@@ -90,14 +89,18 @@ class ContactModel {
       assignedTo: assignedTo ?? this.assignedTo,
       createdFromLead: createdFromLead ?? this.createdFromLead,
       sourceLeadId: sourceLeadId ?? this.sourceLeadId,
+      companyId: companyId ?? this.companyId,
     );
   }
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
       id: json['id'],
-      name: '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim().isNotEmpty 
-          ? '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim() 
+      name:
+          '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'
+              .trim()
+              .isNotEmpty
+          ? '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim()
           : (json['name'] ?? ''),
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
@@ -105,9 +108,10 @@ class ContactModel {
       position: json['position'] ?? '',
       address: json['address'],
       notes: json['notes'],
-      status: (json['is_customer'] == false) 
+      status: (json['is_customer'] == false)
           ? ContactStatus.lead
-          : ContactStatus.customer, // Assume it's a customer by default if null or true
+          : ContactStatus
+                .customer, // Assume it's a customer by default if null or true
       createdAt: DateTime.parse(json['created_at']),
       lastContacted: json['last_contacted'] != null
           ? DateTime.parse(json['last_contacted'])
@@ -117,6 +121,7 @@ class ContactModel {
       assignedTo: json['assigned_to'],
       createdFromLead: json['created_from_lead'],
       sourceLeadId: json['source_lead_id'],
+      companyId: json['company_id'],
     );
   }
 
@@ -124,7 +129,7 @@ class ContactModel {
     final nameParts = name.trim().split(' ');
     final firstName = nameParts.first;
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-    
+
     return {
       'first_name': firstName,
       'last_name': lastName,
@@ -134,12 +139,16 @@ class ContactModel {
       'position': position,
       'address': address,
       'notes': notes,
-      'is_customer': status == ContactStatus.customer || status == ContactStatus.churned,
+      'is_customer':
+          status == ContactStatus.customer || status == ContactStatus.churned,
       'created_at': createdAt.toIso8601String(),
       'last_contacted': lastContacted.toIso8601String(),
       'avatar_url': avatarUrl,
       'is_favorite': isFavorite,
-      'assigned_to': assignedTo == null || assignedTo!.isEmpty ? null : assignedTo,
+      'assigned_to': assignedTo == null || assignedTo!.isEmpty
+          ? null
+          : assignedTo,
+      'company_id': companyId,
     };
   }
 }

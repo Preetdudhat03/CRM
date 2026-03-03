@@ -5,7 +5,10 @@ class ContactService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   /// Fetch paginated contacts, ordered by created_at descending
-  Future<List<ContactModel>> getContacts({int page = 0, int pageSize = 20}) async {
+  Future<List<ContactModel>> getContacts({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     final start = page * pageSize;
     final end = start + pageSize - 1;
 
@@ -31,14 +34,20 @@ class ContactService {
   }
 
   /// Search contacts by name, email, or company
-  Future<List<ContactModel>> searchContacts(String query, {int page = 0, int pageSize = 20}) async {
+  Future<List<ContactModel>> searchContacts(
+    String query, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     final start = page * pageSize;
     final end = start + pageSize - 1;
 
     final response = await _supabase
         .from('contacts')
         .select()
-        .or('first_name.ilike.%$query%,last_name.ilike.%$query%,email.ilike.%$query%,company_name.ilike.%$query%')
+        .or(
+          'first_name.ilike.%$query%,last_name.ilike.%$query%,email.ilike.%$query%,company_name.ilike.%$query%',
+        )
         .order('created_at', ascending: false)
         .range(start, end);
 
@@ -96,7 +105,9 @@ class ContactService {
 
   /// Get basic contact statistics
   Future<Map<String, dynamic>> getStats() async {
-    final response = await _supabase.from('contacts').select('id, is_customer, is_favorite, created_at');
+    final response = await _supabase
+        .from('contacts')
+        .select('id, is_customer, is_favorite, created_at');
     final List<dynamic> data = response as List<dynamic>;
 
     final now = DateTime.now();

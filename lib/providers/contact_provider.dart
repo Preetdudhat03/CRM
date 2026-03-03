@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/contact_model.dart';
@@ -10,7 +9,9 @@ import 'auth_provider.dart';
 import 'notification_provider.dart';
 
 // Service Provider
-final contactServiceProvider = Provider<ContactService>((ref) => ContactService());
+final contactServiceProvider = Provider<ContactService>(
+  (ref) => ContactService(),
+);
 
 final contactRepositoryProvider = Provider<ContactRepository>((ref) {
   return ContactRepository(ref.watch(contactServiceProvider));
@@ -29,14 +30,15 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  ContactNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  ContactNotifier(this._repository, this._ref)
+    : super(const AsyncValue.loading()) {
     loadInitial();
     _subscribeToRealtime();
   }
 
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
-    
+
     _realtimeChannel = supabase
         .channel('public:contacts')
         .onPostgresChanges(
@@ -65,7 +67,10 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
     _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final contacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      final contacts = await _repository.getContacts(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (contacts.length < _pageSize) {
         _hasMore = false;
       }
@@ -81,7 +86,10 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
     _isLoadingMore = true;
     try {
       _currentPage++;
-      final newContacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      final newContacts = await _repository.getContacts(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (newContacts.length < _pageSize) {
         _hasMore = false;
       }
@@ -101,7 +109,10 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
     _isLoadingMore = false;
     try {
       // Don't set state to loading – keep the list visible during silent refresh
-      final contacts = await _repository.getContacts(page: _currentPage, pageSize: _pageSize);
+      final contacts = await _repository.getContacts(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (contacts.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(contacts);
     } catch (e, stack) {
@@ -117,19 +128,25 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       state.whenData((contacts) {
         state = AsyncValue.data([...contacts, newContact]);
       });
-      
-      ActivityService.log(title: 'Created contact: ${newContact.name}', type: 'contact', relatedEntityId: newContact.id);
+
+      ActivityService.log(
+        title: 'Created contact: ${newContact.name}',
+        activityType: 'contact',
+        relatedId: newContact.id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'New Contact Created',
-        '$userName added a new contact: ${newContact.name}',
-        type: 'contact_created',
-        relatedEntityId: newContact.id,
-        relatedEntityType: 'contact',
-        showOnDevice: false,
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'New Contact Created',
+            '$userName added a new contact: ${newContact.name}',
+            activityType: 'contact_created',
+            relatedId: newContact.id,
+            relatedEntityactivityType: 'contact',
+            showOnDevice: false,
+          );
     } catch (e) {
       rethrow;
     }
@@ -141,21 +158,27 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
-            if (c.id == contact.id) contact else c
+            if (c.id == contact.id) contact else c,
         ]);
       });
-      ActivityService.log(title: 'Updated contact: ${contact.name}', type: 'contact', relatedEntityId: contact.id);
+      ActivityService.log(
+        title: 'Updated contact: ${contact.name}',
+        activityType: 'contact',
+        relatedId: contact.id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Contact Updated',
-        '$userName updated contact: ${contact.name}',
-        type: 'contact_updated',
-        relatedEntityId: contact.id,
-        relatedEntityType: 'contact',
-        showOnDevice: false,
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Contact Updated',
+            '$userName updated contact: ${contact.name}',
+            activityType: 'contact_updated',
+            relatedId: contact.id,
+            relatedEntityactivityType: 'contact',
+            showOnDevice: false,
+          );
     } catch (e) {
       rethrow;
     }
@@ -167,19 +190,25 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
-            if (c.id != id) c
+            if (c.id != id) c,
         ]);
       });
-      ActivityService.log(title: 'Deleted a contact', type: 'contact', relatedEntityId: id);
+      ActivityService.log(
+        title: 'Deleted a contact',
+        activityType: 'contact',
+        relatedId: id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Contact Deleted',
-        '$userName deleted a contact',
-        type: 'contact_deleted',
-        relatedEntityType: 'contact',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Contact Deleted',
+            '$userName deleted a contact',
+            activityType: 'contact_deleted',
+            relatedEntityactivityType: 'contact',
+          );
     } catch (e) {
       // Handle error
     }
@@ -191,7 +220,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       state.whenData((contacts) {
         state = AsyncValue.data([
           for (final c in contacts)
-            if (c.id == id) c.copyWith(isFavorite: !currentStatus) else c
+            if (c.id == id) c.copyWith(isFavorite: !currentStatus) else c,
         ]);
       });
     } catch (e) {
@@ -202,12 +231,16 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
 // Contacts List Provider
 final contactsProvider =
-    StateNotifierProvider<ContactNotifier, AsyncValue<List<ContactModel>>>((ref) {
-  return ContactNotifier(ref.watch(contactRepositoryProvider), ref);
-});
+    StateNotifierProvider<ContactNotifier, AsyncValue<List<ContactModel>>>((
+      ref,
+    ) {
+      return ContactNotifier(ref.watch(contactRepositoryProvider), ref);
+    });
 
 // Filtered Contacts Provider
-final filteredContactsProvider = Provider<AsyncValue<List<ContactModel>>>((ref) {
+final filteredContactsProvider = Provider<AsyncValue<List<ContactModel>>>((
+  ref,
+) {
   final contactsAsync = ref.watch(contactsProvider);
   final query = ref.watch(contactSearchQueryProvider).toLowerCase();
 
@@ -228,15 +261,25 @@ final contactStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
   return contactsAsync.whenData((contacts) {
     int totalContacts = contacts.length;
     int leads = contacts.where((c) => c.status == ContactStatus.lead).length;
-    int customers = contacts.where((c) => c.status == ContactStatus.customer).length;
-    
-    final currentPeriodContacts = contacts.where((c) => c.createdAt.isAfter(period.startDate)).length;
-    final previousPeriodContacts = contacts.where((c) => 
-      c.createdAt.isAfter(period.previousPeriodStartDate) && 
-      c.createdAt.isBefore(period.previousPeriodEndDate)
-    ).length;
-    
-    final trendData = calculateTrend(currentPeriodContacts, previousPeriodContacts);
+    int customers = contacts
+        .where((c) => c.status == ContactStatus.customer)
+        .length;
+
+    final currentPeriodContacts = contacts
+        .where((c) => c.createdAt.isAfter(period.startDate))
+        .length;
+    final previousPeriodContacts = contacts
+        .where(
+          (c) =>
+              c.createdAt.isAfter(period.previousPeriodStartDate) &&
+              c.createdAt.isBefore(period.previousPeriodEndDate),
+        )
+        .length;
+
+    final trendData = calculateTrend(
+      currentPeriodContacts,
+      previousPeriodContacts,
+    );
 
     return {
       'total': totalContacts,

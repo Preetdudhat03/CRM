@@ -67,14 +67,16 @@ class _LeadCardState extends ConsumerState<LeadCard> {
       await ref.read(leadsProvider.notifier).convertLead(widget.lead.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lead converted to Contact successfully!')),
+          const SnackBar(
+            content: Text('Lead converted to Contact successfully!'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error converting lead: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error converting lead: $e')));
       }
     } finally {
       if (mounted) {
@@ -88,15 +90,15 @@ class _LeadCardState extends ConsumerState<LeadCard> {
       final updatedLead = widget.lead.copyWith(status: LeadStatus.lost);
       await ref.read(leadsProvider.notifier).updateLead(updatedLead);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lead marked as Lost')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Lead marked as Lost')));
       }
     } catch (e) {
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating lead: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating lead: $e')));
       }
     }
   }
@@ -133,7 +135,10 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                       children: [
                         Text(
                           widget.lead.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
@@ -141,11 +146,20 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                           children: [
                             // Status Badge
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(widget.lead.status).withOpacity(0.1),
+                                color: _getStatusColor(
+                                  widget.lead.status,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _getStatusColor(widget.lead.status).withOpacity(0.5)),
+                                border: Border.all(
+                                  color: _getStatusColor(
+                                    widget.lead.status,
+                                  ).withOpacity(0.5),
+                                ),
                               ),
                               child: Text(
                                 widget.lead.status.label,
@@ -160,7 +174,10 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                             // Source Badge
                             if (widget.lead.source.isNotEmpty)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade100,
                                   borderRadius: BorderRadius.circular(4),
@@ -168,7 +185,13 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.source, size: 10, color: _getSourceColor(widget.lead.source)),
+                                    Icon(
+                                      Icons.source,
+                                      size: 10,
+                                      color: _getSourceColor(
+                                        widget.lead.source,
+                                      ),
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       widget.lead.source,
@@ -195,32 +218,63 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                         OutlinedButton(
                           onPressed: _isConverting ? null : _convertLead,
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             minimumSize: const Size(0, 32),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            side: BorderSide(color: Theme.of(context).primaryColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            side: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                           child: _isConverting
-                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                              : Text('Convert', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Convert',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
                         )
                       else if (isConverted)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green.shade50,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'CONVERTED',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green.shade700),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
                           ),
                         ),
-                        
+
                       const SizedBox(width: 4),
                       // Three-dot menu
                       PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
                         padding: EdgeInsets.zero,
                         splashRadius: 20,
                         onSelected: (value) {
@@ -228,7 +282,8 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                             widget.onTap();
                           } else if (value == 'edit' && widget.onEdit != null) {
                             widget.onEdit!();
-                          } else if (value == 'delete' && widget.onDelete != null) {
+                          } else if (value == 'delete' &&
+                              widget.onDelete != null) {
                             widget.onDelete!();
                           } else if (value == 'lost') {
                             _markLost();
@@ -261,7 +316,11 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                               value: 'lost',
                               child: Row(
                                 children: [
-                                  Icon(Icons.thumb_down_outlined, size: 18, color: Colors.orange),
+                                  Icon(
+                                    Icons.thumb_down_outlined,
+                                    size: 18,
+                                    color: Colors.orange,
+                                  ),
                                   SizedBox(width: 8),
                                   Text('Mark Lost'),
                                 ],
@@ -272,9 +331,16 @@ class _LeadCardState extends ConsumerState<LeadCard> {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                  Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                    size: 18,
+                                  ),
                                   SizedBox(width: 8),
-                                  Text('Delete', style: TextStyle(color: Colors.red)),
+                                  Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
                                 ],
                               ),
                             ),
@@ -287,15 +353,28 @@ class _LeadCardState extends ConsumerState<LeadCard> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
+                  Icon(
+                    Icons.person_outline,
+                    size: 14,
+                    color: Colors.grey.shade500,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      widget.lead.assignedTo.isNotEmpty ? widget.lead.assignedTo : 'Unassigned',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      widget.lead.assignedTo.isNotEmpty
+                          ? widget.lead.assignedTo
+                          : 'Unassigned',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                  Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 12,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     DateFormat('MMM d, yyyy').format(widget.lead.createdAt),

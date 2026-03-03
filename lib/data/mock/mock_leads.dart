@@ -1,4 +1,3 @@
-
 import '../../models/lead_model.dart';
 
 final List<LeadModel> mockLeads = [

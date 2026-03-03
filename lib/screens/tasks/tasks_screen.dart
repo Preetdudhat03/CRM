@@ -33,7 +33,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
       ref.read(tasksProvider.notifier).loadMore();
     }
   }
@@ -92,11 +93,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'No tasks found',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
@@ -137,16 +145,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                TaskDetailScreen(task: task),
+                            builder: (context) => TaskDetailScreen(task: task),
                           ),
                         );
                       },
                       onStatusChanged: (value) {
-                        final newStatus = value == true ? TaskStatus.completed : TaskStatus.pending;
-                        ref.read(tasksProvider.notifier).updateTask(
-                          task.copyWith(status: newStatus)
-                        );
+                        final newStatus = value == true
+                            ? TaskStatus.completed
+                            : TaskStatus.pending;
+                        ref
+                            .read(tasksProvider.notifier)
+                            .updateTask(task.copyWith(status: newStatus));
                       },
                       onEdit: canEdit
                           ? () {
@@ -172,11 +181,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         error: (error, stack) => RefreshIndicator(
           onRefresh: () => ref.read(tasksProvider.notifier).refresh(),
           child: SingleChildScrollView(
-             physics: const AlwaysScrollableScrollPhysics(),
-             child: SizedBox(
-               height: MediaQuery.of(context).size.height,
-               child: Center(child: Text('Error: ${ErrorHandler.formatError(error ?? '')}')),
-             ),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Center(
+                child: Text('Error: ${ErrorHandler.formatError(error ?? '')}'),
+              ),
+            ),
           ),
         ),
       ),
@@ -217,28 +228,32 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               ListTile(
                 title: const Text('Pending'),
                 onTap: () {
-                  ref.read(taskStatusFilterProvider.notifier).state = TaskStatus.pending;
+                  ref.read(taskStatusFilterProvider.notifier).state =
+                      TaskStatus.pending;
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: const Text('In Progress'),
                 onTap: () {
-                  ref.read(taskStatusFilterProvider.notifier).state = TaskStatus.inProgress;
+                  ref.read(taskStatusFilterProvider.notifier).state =
+                      TaskStatus.inProgress;
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: const Text('Completed'),
                 onTap: () {
-                  ref.read(taskStatusFilterProvider.notifier).state = TaskStatus.completed;
+                  ref.read(taskStatusFilterProvider.notifier).state =
+                      TaskStatus.completed;
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: const Text('Cancelled'),
                 onTap: () {
-                  ref.read(taskStatusFilterProvider.notifier).state = TaskStatus.cancelled;
+                  ref.read(taskStatusFilterProvider.notifier).state =
+                      TaskStatus.cancelled;
                   Navigator.pop(context);
                 },
               ),
@@ -250,7 +265,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   void _showDeleteConfirmation(
-      BuildContext context, WidgetRef ref, TaskModel task) {
+    BuildContext context,
+    WidgetRef ref,
+    TaskModel task,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -265,9 +283,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             onPressed: () {
               ref.read(tasksProvider.notifier).deleteTask(task.id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Task deleted')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Task deleted')));
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),

@@ -11,9 +11,10 @@ import 'auth_provider.dart';
 import 'package:uuid/uuid.dart';
 import '../services/push_notification_service.dart';
 
-final notificationSettingsProvider = StateNotifierProvider<NotificationSettingsNotifier, bool>((ref) {
-  return NotificationSettingsNotifier();
-});
+final notificationSettingsProvider =
+    StateNotifierProvider<NotificationSettingsNotifier, bool>((ref) {
+      return NotificationSettingsNotifier();
+    });
 
 class NotificationSettingsNotifier extends StateNotifier<bool> {
   NotificationSettingsNotifier() : super(true) {
@@ -32,18 +33,22 @@ class NotificationSettingsNotifier extends StateNotifier<bool> {
   }
 }
 
-final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
+final notificationServiceProvider = Provider<NotificationService>(
+  (ref) => NotificationService(),
+);
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(ref.watch(notificationServiceProvider));
 });
 
-class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationModel>>> {
+class NotificationNotifier
+    extends StateNotifier<AsyncValue<List<NotificationModel>>> {
   final NotificationRepository _repository;
   final UserModel? _currentUser;
   RealtimeChannel? _realtimeChannel;
 
-  NotificationNotifier(this._repository, this._currentUser) : super(const AsyncValue.loading()) {
+  NotificationNotifier(this._repository, this._currentUser)
+    : super(const AsyncValue.loading()) {
     getNotifications();
     _subscribeToRealtime();
   }
@@ -52,7 +57,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
     final currentUserId = _currentUser?.id;
-    
+
     _realtimeChannel = supabase
         .channel('notifications_realtime')
         .onPostgresChanges(
@@ -62,15 +67,15 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
           callback: (payload) {
             final newRecord = payload.newRecord;
             final senderId = newRecord['sender_id']?.toString();
-            
+
             // Only show push notification if it's from ANOTHER user
             if (senderId != null && senderId != currentUserId) {
               final title = newRecord['title'] ?? 'New Notification';
               final message = newRecord['message'] ?? '';
-              
+
               // Show local push notification on this phone
               _showPushNotification(title, message);
-              
+
               // Refresh the in-app notification list
               getNotifications();
             }
@@ -82,7 +87,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   Future<void> _showPushNotification(String title, String body) async {
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('notifications_enabled') ?? true;
-    
+
     if (enabled) {
       LocalNotificationService.showNotification(
         id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -127,7 +132,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
           notifications.map((n) {
             if (n.id == id) return n.copyWith(isRead: true);
             return n;
-          }).toList()
+          }).toList(),
         );
       });
     } catch (e) {
@@ -140,7 +145,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       await _repository.markAllAsRead();
       state.whenData((notifications) {
         state = AsyncValue.data(
-          notifications.map((n) => n.copyWith(isRead: true)).toList()
+          notifications.map((n) => n.copyWith(isRead: true)).toList(),
         );
       });
     } catch (e) {
@@ -149,28 +154,33 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   }
 
   /// Create and broadcast a notification (saved to Supabase, Realtime pushes to others)
-  void pushNotificationLocally(String title, String message, {
+  void pushNotificationLocally(
+    String title,
+    String message, {
     String? type,
-    String? relatedEntityId, 
-    String? relatedEntityType, 
+    String? relatedEntityId,
+    String? relatedEntityType,
     bool deduplicate = false,
     bool showOnDevice = false,
   }) async {
     if (deduplicate) {
       bool exists = false;
       state.whenData((notifications) {
-        exists = notifications.any((n) => n.title == title && n.relatedEntityId == relatedEntityId);
+        exists = notifications.any(
+          (n) => n.title == title && n.relatedEntityId == relatedEntityId,
+        );
       });
       if (exists) return;
     }
-    
+
     // For the backend Edge Function to pick up target roles:
     // Format: "type||roles:admin,manager||sender:id"
     String? encodedType = relatedEntityType;
     if (encodedType != null) {
       // Use internal role names to match 'profiles.role' column in Supabase
       // Include variants (camelCase, snake_case, etc) to ensure matching regardless of naming convention used in DB
-      const targetRoles = 'superAdmin,admin,manager,employee,viewer,super_admin,agent';
+      const targetRoles =
+          'superAdmin,admin,manager,employee,viewer,super_admin,agent';
       encodedType = '$encodedType||roles:$targetRoles';
       if (_currentUser?.id != null) {
         encodedType = '$encodedType||sender:${_currentUser!.id}';
@@ -182,7 +192,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
       title: title,
       message: message,
       date: DateTime.now(),
-      relatedEntityId: relatedEntityId,
+      relatedId: relatedEntityId,
       relatedEntityType: encodedType,
       type: type ?? 'general',
       senderId: _currentUser?.id,
@@ -194,10 +204,17 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
   }
 }
 
-final notificationsProvider = StateNotifierProvider<NotificationNotifier, AsyncValue<List<NotificationModel>>>((ref) {
-  final user = ref.watch(currentUserProvider);
-  return NotificationNotifier(ref.watch(notificationRepositoryProvider), user);
-});
+final notificationsProvider =
+    StateNotifierProvider<
+      NotificationNotifier,
+      AsyncValue<List<NotificationModel>>
+    >((ref) {
+      final user = ref.watch(currentUserProvider);
+      return NotificationNotifier(
+        ref.watch(notificationRepositoryProvider),
+        user,
+      );
+    });
 
 final unreadNotificationsCountProvider = Provider<int>((ref) {
   final notificationsAsync = ref.watch(notificationsProvider);

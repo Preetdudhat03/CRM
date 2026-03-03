@@ -33,7 +33,8 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
     }
   }
@@ -41,7 +42,10 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
   Future<void> _loadActivities() async {
     setState(() => _isLoading = true);
     try {
-      final data = await _service.getAllActivities(page: 0, pageSize: _pageSize);
+      final data = await _service.getAllActivities(
+        page: 0,
+        pageSize: _pageSize,
+      );
       setState(() {
         _activities.clear();
         _activities.addAll(data);
@@ -59,7 +63,10 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
     _isLoadingMore = true;
     _page++;
     try {
-      final data = await _service.getAllActivities(page: _page, pageSize: _pageSize);
+      final data = await _service.getAllActivities(
+        page: _page,
+        pageSize: _pageSize,
+      );
       setState(() {
         _activities.addAll(data);
         _hasMore = data.length >= _pageSize;
@@ -74,31 +81,29 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Activities'),
-      ),
+      appBar: AppBar(title: const Text('All Activities')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _activities.isEmpty
-              ? const Center(child: Text('No activities yet'))
-              : RefreshIndicator(
-                  onRefresh: _loadActivities,
-                  child: ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _activities.length + (_hasMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      if (index >= _activities.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      return _buildActivityTile(context, _activities[index]);
-                    },
-                  ),
-                ),
+          ? const Center(child: Text('No activities yet'))
+          : RefreshIndicator(
+              onRefresh: _loadActivities,
+              child: ListView.separated(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: _activities.length + (_hasMore ? 1 : 0),
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  if (index >= _activities.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return _buildActivityTile(context, _activities[index]);
+                },
+              ),
+            ),
     );
   }
 
@@ -116,12 +121,13 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
       contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
       leading: CircleAvatar(
         backgroundColor: _getColorForType(typeStr).withOpacity(0.1),
-        child: Icon(_getIconForType(typeStr), color: _getColorForType(typeStr), size: 20),
+        child: Icon(
+          _getIconForType(typeStr),
+          color: _getColorForType(typeStr),
+          size: 20,
+        ),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

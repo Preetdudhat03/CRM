@@ -6,7 +6,10 @@ class ContactRepository {
 
   ContactRepository(this._service);
 
-  Future<List<ContactModel>> getContacts({int page = 0, int pageSize = 20}) async {
+  Future<List<ContactModel>> getContacts({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     return _service.getContacts(page: page, pageSize: pageSize);
   }
 
@@ -14,7 +17,11 @@ class ContactRepository {
     return _service.getContactById(id);
   }
 
-  Future<List<ContactModel>> searchContacts(String query, {int page = 0, int pageSize = 20}) async {
+  Future<List<ContactModel>> searchContacts(
+    String query, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
     return _service.searchContacts(query, page: page, pageSize: pageSize);
   }
 

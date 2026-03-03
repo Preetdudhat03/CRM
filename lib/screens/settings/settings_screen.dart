@@ -55,19 +55,27 @@ class SettingsScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Theme.of(context).primaryColor.withOpacity(0.2),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.2),
                           width: 3,
                         ),
                       ),
                       child: CircleAvatar(
                         radius: 32,
                         backgroundColor: Theme.of(context).primaryColor,
-                        backgroundImage: (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
+                        backgroundImage:
+                            (user?.avatarUrl != null &&
+                                user!.avatarUrl!.isNotEmpty)
                             ? NetworkImage(user.avatarUrl!)
                             : null,
-                        child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
+                        child:
+                            (user?.avatarUrl == null ||
+                                user!.avatarUrl!.isEmpty)
                             ? Text(
-                                (user?.name ?? 'G').substring(0, 1).toUpperCase(),
+                                (user?.name ?? 'G')
+                                    .substring(0, 1)
+                                    .toUpperCase(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 26,
@@ -84,16 +92,14 @@ class SettingsScreen extends ConsumerWidget {
                         children: [
                           Text(
                             user?.name ?? 'Guest User',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             user?.email ?? 'No Email Linked',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).hintColor,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Theme.of(context).hintColor),
                           ),
                           const SizedBox(height: 10),
                           Container(
@@ -102,19 +108,21 @@ class SettingsScreen extends ConsumerWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               user?.role.displayName ?? 'Viewer',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                  ),
                             ),
                           ),
                         ],
@@ -124,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             _buildAnimatedItem(
               delay: 0.1,
               child: ListTile(
@@ -134,12 +142,14 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
                   );
                 },
               ),
             ),
-            
+
             if (canManageUsers)
               _buildAnimatedItem(
                 delay: 0.2,
@@ -151,7 +161,9 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const UserManagementScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const UserManagementScreen(),
+                      ),
                     );
                   },
                 ),
@@ -167,14 +179,16 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RolesPermissionsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const RolesPermissionsScreen(),
+                    ),
                   );
                 },
               ),
             ),
-            
+
             const Divider(),
-            
+
             _buildAnimatedItem(
               delay: 0.4,
               child: ListTile(
@@ -183,12 +197,14 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: Switch(
                   value: Theme.of(context).brightness == Brightness.dark,
                   onChanged: (val) {
-                    ref.read(themeModeProvider.notifier).setTheme(val ? ThemeMode.dark : ThemeMode.light);
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setTheme(val ? ThemeMode.dark : ThemeMode.light);
                   },
                 ),
               ),
             ),
-            
+
             _buildAnimatedItem(
               delay: 0.5,
               child: ListTile(
@@ -215,14 +231,17 @@ class SettingsScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: 24),
-            
+
             _buildAnimatedItem(
               delay: 0.7,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  label: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.red),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     padding: const EdgeInsets.symmetric(vertical: 12),

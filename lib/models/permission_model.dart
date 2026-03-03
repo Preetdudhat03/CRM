@@ -1,4 +1,3 @@
-
 enum Permission {
   viewContacts,
   createContacts,

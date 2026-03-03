@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/user_management_provider.dart';
+import '../../widgets/pickers/company_picker.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditDealScreen extends ConsumerStatefulWidget {
@@ -21,6 +21,7 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
   late String _title;
   String? _contactId;
   String _contactName = '';
+  String? _companyId;
   String _companyName = '';
   late double _value;
   late DealStage _stage;
@@ -34,6 +35,7 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
     _title = widget.deal?.title ?? '';
     _contactId = widget.deal?.contactId;
     _contactName = widget.deal?.contactName ?? '';
+    _companyId = widget.deal?.companyId;
     _companyName = widget.deal?.companyName ?? '';
     _value = widget.deal?.value ?? 0.0;
     _stage = widget.deal?.stage ?? DealStage.qualification;
@@ -45,12 +47,13 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
       final deal = DealModel(
         id: widget.deal?.id ?? '',
         title: _title,
         contactId: _contactId ?? '',
         contactName: _contactName,
+        companyId: _companyId,
         companyName: _companyName,
         value: _value,
         stage: _stage,
@@ -84,10 +87,7 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
       appBar: AppBar(
         title: Text(widget.deal == null ? 'Add Deal' : 'Edit Deal'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _submit,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _submit),
         ],
       ),
       body: Padding(
@@ -105,7 +105,9 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Deal Name',
                       prefixIcon: Icon(Icons.work_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Please enter a deal name' : null,
@@ -121,22 +123,37 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Contact',
                         prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
                       ),
-                      items: contacts.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text('${c.name} (${c.company})', overflow: TextOverflow.ellipsis),
-                      )).toList(),
+                      items: contacts
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(
+                                '${c.name} (${c.company})',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (value) {
-                         final selectedContact = contacts.firstWhere((c) => c.id == value);
-                         setState(() {
-                           _contactId = value;
-                           _contactName = selectedContact.name;
-                           _companyName = selectedContact.company;
-                         });
+                        final selectedContact = contacts.firstWhere(
+                          (c) => c.id == value,
+                        );
+                        setState(() {
+                          _contactId = value;
+                          _contactName = selectedContact.name;
+                          _companyName = selectedContact.company;
+                        });
                       },
-                      validator: (value) => value == null ? 'Please select a contact' : null,
+                      validator: (value) =>
+                          value == null ? 'Please select a contact' : null,
                     ),
                     loading: () => const LinearProgressIndicator(),
                     error: (_, __) => const Text('Error loading contacts'),
@@ -144,14 +161,33 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                 ),
                 const SizedBox(height: 16),
                 FadeInSlide(
+                  delay: 0.15,
+                  child: CompanyPicker(
+                    selectedCompanyId: _companyId,
+                    onSelected: (company) {
+                      setState(() {
+                        _companyId = company?.id;
+                        if (company != null) {
+                          _companyName = company.name;
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
                   delay: 0.2,
                   child: TextFormField(
-                    key: ValueKey(_companyName), // Force rebuild to show update from contact selection
+                    key: ValueKey(
+                      _companyName,
+                    ), // Force rebuild to show update from contact selection
                     initialValue: _companyName,
                     decoration: const InputDecoration(
-                      labelText: 'Company',
+                      labelText: 'Company (Custom)',
                       prefixIcon: Icon(Icons.business),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     onChanged: (value) => _companyName = value,
                     onSaved: (value) => _companyName = value ?? '',
@@ -165,7 +201,9 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Value (INR)',
                       prefixIcon: Icon(Icons.currency_rupee),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Please enter value' : null,
@@ -183,43 +221,60 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                       return usersAsync.when(
                         data: (users) {
                           final validIds = users.map((u) => u.id).toList();
-                          final currentValue = validIds.contains(_assignedTo) ? _assignedTo : '';
+                          final currentValue = validIds.contains(_assignedTo)
+                              ? _assignedTo
+                              : '';
                           return DropdownButtonFormField<String>(
                             value: currentValue.isEmpty ? null : currentValue,
                             decoration: const InputDecoration(
                               labelText: 'Assigned To',
                               prefixIcon: Icon(Icons.person_pin_outlined),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
                             ),
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
-                              ...users.map((user) => DropdownMenuItem(
-                                value: user.id,
-                                child: Text(user.name),
-                              )),
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('Unassigned'),
+                              ),
+                              ...users.map(
+                                (user) => DropdownMenuItem(
+                                  value: user.id,
+                                  child: Text(user.name),
+                                ),
+                              ),
                             ],
-                            onChanged: (value) => setState(() => _assignedTo = value ?? ''),
+                            onChanged: (value) =>
+                                setState(() => _assignedTo = value ?? ''),
                             onSaved: (value) => _assignedTo = value ?? '',
-                            validator: (value) => value == null || value.isEmpty ? 'Please assign a user' : null,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Please assign a user'
+                                : null,
                           );
                         },
-                        loading: () => const Center(child: CircularProgressIndicator()),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (_, __) => const Text('Failed to load users'),
                       );
                     },
-                   ),
+                  ),
                 ),
-                 const SizedBox(height: 16),
-                 FadeInSlide(
-                   delay: 0.5,
-                   child: Card(
-                     elevation: 0,
-                     shape: RoundedRectangleBorder(
-                       borderRadius: BorderRadius.circular(12),
-                       side: BorderSide(color: Theme.of(context).dividerColor),
-                     ),
-                     child: ListTile(
-                      title: Text('Close Date: ${_expectedCloseDate.toIso8601String().split('T')[0]}'),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.5,
+                  child: Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Theme.of(context).dividerColor),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        'Close Date: ${_expectedCloseDate.toIso8601String().split('T')[0]}',
+                      ),
                       leading: const Icon(Icons.event),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -235,8 +290,8 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                         }
                       },
                     ),
-                   ),
-                 ),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.6,
@@ -245,8 +300,13 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Stage',
                       prefixIcon: Icon(Icons.stairs_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
                     ),
                     items: DealStage.values.map((stage) {
                       return DropdownMenuItem(
@@ -265,7 +325,9 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Notes',
                       prefixIcon: Icon(Icons.note_alt_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     maxLines: 3,
                     onSaved: (value) => _notes = value ?? '',
@@ -278,11 +340,16 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       widget.deal == null ? 'Create Deal' : 'Update Deal',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

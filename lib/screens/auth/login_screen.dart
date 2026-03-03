@@ -22,10 +22,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _login() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(currentUserProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text.trim(),
-          );
+      await ref
+          .read(currentUserProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text.trim());
       // AuthGate will automatically redirect to home when user is set
     } catch (e) {
       if (!mounted) return;
@@ -42,23 +41,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final auth = ref.read(authServiceProvider);
       final isConnected = await auth.checkConnection();
-      
+
       if (!mounted) return;
       if (isConnected) {
         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text('✅ Connected to Supabase!'),
-             backgroundColor: Colors.green,
-             duration: Duration(seconds: 3),
-           ),
+          const SnackBar(
+            content: Text('✅ Connected to Supabase!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-             content: const Text('❌ Connection Failed!\nCheck debug console for details.'),
-             backgroundColor: Colors.red,
-             duration: const Duration(seconds: 5),
-           ),
+          SnackBar(
+            content: const Text(
+              '❌ Connection Failed!\nCheck debug console for details.',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     } catch (e) {
@@ -99,8 +100,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   'Field CRM',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -109,9 +110,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Text(
                   'Sign in to continue',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 48),
@@ -122,7 +123,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -136,10 +139,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -157,7 +164,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -185,7 +194,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
                     );
                   },
                   child: const Text('Create Account'),

@@ -1,13 +1,6 @@
-
 import 'permission_model.dart';
 
-enum Role {
-  superAdmin,
-  admin,
-  manager,
-  employee,
-  viewer,
-}
+enum Role { superAdmin, admin, manager, employee, viewer }
 
 extension RoleExtension on Role {
   String get displayName {

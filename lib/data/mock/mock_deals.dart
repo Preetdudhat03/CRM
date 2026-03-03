@@ -1,4 +1,3 @@
-
 import '../../models/deal_model.dart';
 
 final List<DealModel> mockDeals = [

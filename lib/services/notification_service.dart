@@ -19,19 +19,20 @@ class NotificationService {
           .select()
           .order('created_at', ascending: false)
           .limit(50);
-      
+
       final List<dynamic> data = response as List<dynamic>;
-      
-      final notifications = data.map((json) => NotificationModel.fromJson(json)).toList();
-      
+
+      final notifications = data
+          .map((json) => NotificationModel.fromJson(json))
+          .toList();
+
       // Filter out self-notifications (where sender_id == current user)
       final filtered = notifications.where((n) {
         // Don't show notifications created by the current user
         if (n.senderId != null && n.senderId == userId) return false;
         return true;
       }).toList();
-      
-      
+
       // Cache to local for offline access
       await _saveLocally(filtered);
       return filtered;
@@ -56,27 +57,29 @@ class NotificationService {
   }
 
   Future<void> _saveLocally(List<NotificationModel> notifications) async {
-     try {
-       final prefs = await SharedPreferences.getInstance();
-       final encoded = jsonEncode(notifications.map((n) => n.toJson()).toList());
-       await prefs.setString('local_notifications', encoded);
-     } catch(e) {
-       print('[NotificationService] Error saving local: $e');
-     }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = jsonEncode(notifications.map((n) => n.toJson()).toList());
+      await prefs.setString('local_notifications', encoded);
+    } catch (e) {
+      print('[NotificationService] Error saving local: $e');
+    }
   }
 
   Future<void> addNotification(NotificationModel notification) async {
     try {
       final data = notification.toJson();
-      
+
       // Ensure the sender_id is ALWAYS set to the currently logged-in user
       final actualUserId = _currentUserId;
       if (actualUserId != null) {
-          data['sender_id'] = actualUserId;
-          // Also update the encoded related_type as a backup for the Edge Function
-          if (data['related_type'] != null && !data['related_type'].toString().contains('||sender:')) {
-            data['related_type'] = "${data['related_type']}||sender:$actualUserId";
-          }
+        data['sender_id'] = actualUserId;
+        // Also update the encoded related_type as a backup for the Edge Function
+        if (data['related_type'] != null &&
+            !data['related_type'].toString().contains('||sender:')) {
+          data['related_type'] =
+              "${data['related_type']}||sender:$actualUserId";
+        }
       }
 
       await _supabase.from('notifications').insert(data);

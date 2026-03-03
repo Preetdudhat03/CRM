@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class DashboardCard extends StatelessWidget {
@@ -28,7 +27,9 @@ class DashboardCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -52,16 +53,23 @@ class DashboardCard extends StatelessWidget {
                   ),
                   if (trendPercentage != null && isUpTrend != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: isUpTrend! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                        color: isUpTrend!
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            isUpTrend! ? Icons.arrow_upward : Icons.arrow_downward,
+                            isUpTrend!
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
                             color: isUpTrend! ? Colors.green : Colors.red,
                             size: 14,
                           ),
@@ -86,16 +94,16 @@ class DashboardCard extends StatelessWidget {
                   Text(
                     value,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                   ),
                 ],
               ),

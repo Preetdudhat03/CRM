@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +23,13 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
   late String _email;
   late String _phone;
   late String _source;
-  final List<String> _sourceOptions = ['website', 'instagram', 'referral', 'cold_call', 'other'];
+  final List<String> _sourceOptions = [
+    'website',
+    'instagram',
+    'referral',
+    'cold_call',
+    'other',
+  ];
   late String _assignedTo;
   late double? _estimatedValue;
   late LeadStatus _status;
@@ -52,7 +57,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
       final lead = LeadModel(
         id: widget.lead?.id ?? '',
         name: _name,
@@ -100,10 +105,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
       appBar: AppBar(
         title: Text(widget.lead == null ? 'Add Lead' : 'Edit Lead'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _submit,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _submit),
         ],
       ),
       body: Padding(
@@ -121,7 +123,9 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Lead Name',
                       prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Please enter a name' : null,
@@ -136,7 +140,9 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Email Address',
                       prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (value) =>
                         value!.isEmpty ? 'Please enter an email' : null,
@@ -148,7 +154,10 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                 FadeInSlide(
                   delay: 0.2,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(12),
@@ -157,11 +166,13 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                       children: [
                         CountryCodePicker(
                           onChanged: (country) {
-                             setState(() {
-                               _countryCode = country.dialCode ?? '+91';
-                             });
+                            setState(() {
+                              _countryCode = country.dialCode ?? '+91';
+                            });
                           },
-                          initialSelection: _phone.startsWith('+') ? _phone.split(' ')[0] : 'IN',
+                          initialSelection: _phone.startsWith('+')
+                              ? _phone.split(' ')[0]
+                              : 'IN',
                           favorite: const ['+91', 'US', 'IN', 'GB'],
                           showCountryOnly: false,
                           showOnlyCountryWhenClosed: false,
@@ -181,7 +192,8 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             validator: (value) {
-                              if (value == null || value.isEmpty) return 'Enter phone number';
+                              if (value == null || value.isEmpty)
+                                return 'Enter phone number';
                               if (value.length < 7) return 'Too short';
                               return null;
                             },
@@ -206,12 +218,17 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Lead Source',
                       prefixIcon: Icon(Icons.source_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     items: _sourceOptions.map((source) {
                       return DropdownMenuItem(
                         value: source,
-                        child: Text(source[0].toUpperCase() + source.substring(1).replaceAll('_', ' ')),
+                        child: Text(
+                          source[0].toUpperCase() +
+                              source.substring(1).replaceAll('_', ' '),
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) => setState(() => _source = value!),
@@ -227,23 +244,35 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                         data: (users) {
                           // Validate if current _assignedTo exists in the users list.
                           final validIds = users.map((u) => u.id).toList();
-                          final currentValue = validIds.contains(_assignedTo) ? _assignedTo : '';
+                          final currentValue = validIds.contains(_assignedTo)
+                              ? _assignedTo
+                              : '';
 
                           return DropdownButtonFormField<String>(
                             value: currentValue.isEmpty ? null : currentValue,
                             decoration: const InputDecoration(
                               labelText: 'Assigned To',
                               prefixIcon: Icon(Icons.assignment_ind_outlined),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
                             ),
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('Unassigned')),
-                              ...users.map((user) => DropdownMenuItem(
-                                value: user.id,
-                                child: Text(user.name),
-                              )),
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('Unassigned'),
+                              ),
+                              ...users.map(
+                                (user) => DropdownMenuItem(
+                                  value: user.id,
+                                  child: Text(user.name),
+                                ),
+                              ),
                             ],
-                            onChanged: (value) => setState(() => _assignedTo = value ?? ''),
+                            onChanged: (value) =>
+                                setState(() => _assignedTo = value ?? ''),
                             onSaved: (value) => _assignedTo = value ?? '',
                           );
                         },
@@ -264,9 +293,12 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Estimated Value',
                       prefixIcon: Icon(Icons.attach_money),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
-                    onSaved: (value) => _estimatedValue = double.tryParse(value ?? ''),
+                    onSaved: (value) =>
+                        _estimatedValue = double.tryParse(value ?? ''),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -278,17 +310,23 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Status',
                       prefixIcon: Icon(Icons.flag_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
                     ),
                     items: LeadStatus.values
                         .where((s) => s != LeadStatus.converted)
                         .map((status) {
-                      return DropdownMenuItem(
-                        value: status,
-                        child: Text(status.label),
-                      );
-                    }).toList(),
+                          return DropdownMenuItem(
+                            value: status,
+                            child: Text(status.label),
+                          );
+                        })
+                        .toList(),
                     onChanged: (value) => setState(() => _status = value!),
                   ),
                 ),
@@ -299,11 +337,16 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       widget.lead == null ? 'Create Lead' : 'Update Lead',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

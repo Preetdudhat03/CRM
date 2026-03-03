@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -15,13 +14,13 @@ import 'services/push_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Initialize Firebase
     if (!kIsWeb) {
       await Firebase.initializeApp();
     } else {
-      // On Web, Firebase usually needs options. 
+      // On Web, Firebase usually needs options.
       // If firebase_options.dart is missing, we try-catch to avoid crashing the whole app.
       try {
         await Firebase.initializeApp();
@@ -29,13 +28,14 @@ Future<void> main() async {
         debugPrint('Firebase Web initialization skipped: $e');
       }
     }
-    
+
     // Initialize Supabase
     await Supabase.initialize(
       url: 'https://iyylebbrcawebwsqxzup.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eWxlYmJyY2F3ZWJ3c3F4enVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMzMwMzksImV4cCI6MjA4NjcwOTAzOX0.KvcQj5CYblv708lgKzBQPbnd6oDiiH4AC1cMhwMnRjY',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eWxlYmJyY2F3ZWJ3c3F4enVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMzMwMzksImV4cCI6MjA4NjcwOTAzOX0.KvcQj5CYblv708lgKzBQPbnd6oDiiH4AC1cMhwMnRjY',
     );
-    
+
     // Initialize Local Notifications (Mobile only mostly)
     if (!kIsWeb) {
       await LocalNotificationService.initialize();
@@ -48,7 +48,7 @@ Future<void> main() async {
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
-      
+
       // Make status bar transparent
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
@@ -63,29 +63,29 @@ Future<void> main() async {
 
     runApp(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: const MyApp(),
       ),
     );
   } catch (e, stackTrace) {
     debugPrint('Initialization error: $e\n$stackTrace');
-    runApp(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Text(
-                'Failed to initialize app:\n$e\n\n$stackTrace',
-                style: const TextStyle(color: Colors.red, fontSize: 12),
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Text(
+                  'Failed to initialize app:\n$e\n\n$stackTrace',
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
     return;
   }
 }

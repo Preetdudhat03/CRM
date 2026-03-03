@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/task_model.dart';
@@ -16,7 +15,6 @@ final taskRepositoryProvider = Provider<TaskRepository>((ref) {
   return TaskRepository(ref.watch(taskServiceProvider));
 });
 
-
 // State Provider for Search Query and Filters
 final taskSearchQueryProvider = StateProvider<String>((ref) => '');
 final taskStatusFilterProvider = StateProvider<TaskStatus?>((ref) => null);
@@ -33,16 +31,16 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  TaskNotifier(this._repository, this._ref) 
-      : _currentUser = _ref.read(currentUserProvider),
-        super(const AsyncValue.loading()) {
+  TaskNotifier(this._repository, this._ref)
+    : _currentUser = _ref.read(currentUserProvider),
+      super(const AsyncValue.loading()) {
     loadInitial();
     _subscribeToRealtime();
   }
 
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
-    
+
     _realtimeChannel = supabase
         .channel('public:tasks')
         .onPostgresChanges(
@@ -72,23 +70,30 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
     _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final tasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      final tasks = await _repository.getTasks(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (tasks.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(tasks);
 
       // Check for Task Due Reminders
       final now = DateTime.now();
       for (final t in tasks) {
-         if (t.status != TaskStatus.completed && t.dueDate.isAfter(now) && t.dueDate.difference(now).inHours < 24) {
-            _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-               'Task Due Soon',
-               'Task "${t.title}" is due in less than 24 hours!',
-               type: 'task_overdue',
-               relatedEntityId: t.id,
-               relatedEntityType: 'task',
-               deduplicate: true,
-            );
-         }
+        if (t.status != TaskStatus.completed &&
+            t.dueDate.isAfter(now) &&
+            t.dueDate.difference(now).inHours < 24) {
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Task Due Soon',
+                'Task "${t.title}" is due in less than 24 hours!',
+                activityType: 'task_overdue',
+                relatedId: t.id,
+                relatedEntityactivityType: 'task',
+                deduplicate: true,
+              );
+        }
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -101,7 +106,10 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
     _isLoadingMore = true;
     try {
       _currentPage++;
-      final newTasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      final newTasks = await _repository.getTasks(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (newTasks.length < _pageSize) _hasMore = false;
       state.whenData((currentTasks) {
         state = AsyncValue.data([...currentTasks, ...newTasks]);
@@ -119,7 +127,10 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
     _isLoadingMore = false;
     try {
       // Don't set state to loading — keep the list visible during refresh (silent refresh)
-      final tasks = await _repository.getTasks(page: _currentPage, pageSize: _pageSize);
+      final tasks = await _repository.getTasks(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (tasks.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(tasks);
     } catch (e, stack) {
@@ -137,18 +148,24 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         state = AsyncValue.data([...tasks, newTask]);
       });
 
-      ActivityService.log(title: 'Created task: ${newTask.title}', type: 'task', relatedEntityId: newTask.id);
+      ActivityService.log(
+        title: 'Created task: ${newTask.title}',
+        activityType: 'task',
+        relatedId: newTask.id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'New Task Created',
-        '$userName added a new task: ${newTask.title}',
-        type: 'task_created',
-        relatedEntityId: newTask.id,
-        relatedEntityType: 'task',
-        showOnDevice: false,
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'New Task Created',
+            '$userName added a new task: ${newTask.title}',
+            activityType: 'task_created',
+            relatedId: newTask.id,
+            relatedEntityactivityType: 'task',
+            showOnDevice: false,
+          );
     } catch (e) {
       rethrow;
     }
@@ -158,34 +175,41 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
     try {
       final updatedTask = await _repository.updateTask(task);
       state.whenData((tasks) {
-        final existingTask = tasks.firstWhere((t) => t.id == task.id, orElse: () => task);
+        final existingTask = tasks.firstWhere(
+          (t) => t.id == task.id,
+          orElse: () => task,
+        );
 
         state = AsyncValue.data([
           for (final t in tasks)
-            if (t.id == task.id) updatedTask else t
+            if (t.id == task.id) updatedTask else t,
         ]);
 
         final currentUser = _ref.read(currentUserProvider);
         final userName = currentUser?.name ?? 'Someone';
-        
+
         if (existingTask.status != task.status) {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Task Status Updated',
-            '$userName marked the task ${task.title} as ${task.status.name}',
-            type: 'task_status_updated',
-            relatedEntityId: task.id,
-            relatedEntityType: 'task',
-            showOnDevice: false,
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Task Status Updated',
+                '$userName marked the task ${task.title} as ${task.status.name}',
+                activityType: 'task_status_updated',
+                relatedId: task.id,
+                relatedEntityactivityType: 'task',
+                showOnDevice: false,
+              );
         } else {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Task Updated',
-            '$userName updated task: ${task.title}',
-            type: 'task_updated',
-            relatedEntityId: task.id,
-            relatedEntityType: 'task',
-            showOnDevice: false,
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Task Updated',
+                '$userName updated task: ${task.title}',
+                activityType: 'task_updated',
+                relatedId: task.id,
+                relatedEntityactivityType: 'task',
+                showOnDevice: false,
+              );
         }
       });
     } catch (e) {
@@ -199,19 +223,25 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
       state.whenData((tasks) {
         state = AsyncValue.data([
           for (final t in tasks)
-            if (t.id != id) t
+            if (t.id != id) t,
         ]);
       });
-      ActivityService.log(title: 'Deleted a task', type: 'task', relatedEntityId: id);
+      ActivityService.log(
+        title: 'Deleted a task',
+        activityType: 'task',
+        relatedId: id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Task Deleted',
-        '$userName deleted a task',
-        type: 'task_deleted',
-        relatedEntityType: 'task',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Task Deleted',
+            '$userName deleted a task',
+            activityType: 'task_deleted',
+            relatedEntityactivityType: 'task',
+          );
     } catch (e) {
       // Handle error
     }
@@ -221,8 +251,8 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
 // Tasks List Provider
 final tasksProvider =
     StateNotifierProvider<TaskNotifier, AsyncValue<List<TaskModel>>>((ref) {
-  return TaskNotifier(ref.watch(taskRepositoryProvider), ref);
-});
+      return TaskNotifier(ref.watch(taskRepositoryProvider), ref);
+    });
 
 // Filtered Tasks Provider
 final filteredTasksProvider = Provider<AsyncValue<List<TaskModel>>>((ref) {
@@ -232,11 +262,12 @@ final filteredTasksProvider = Provider<AsyncValue<List<TaskModel>>>((ref) {
 
   return tasksAsync.whenData((tasks) {
     return tasks.where((task) {
-      final matchesQuery = query.isEmpty ||
+      final matchesQuery =
+          query.isEmpty ||
           task.title.toLowerCase().contains(query) ||
           task.description.toLowerCase().contains(query) ||
           (task.relatedEntityName?.toLowerCase().contains(query) ?? false);
-          
+
       final matchesStatus = statusFilter == null || task.status == statusFilter;
 
       return matchesQuery && matchesStatus;

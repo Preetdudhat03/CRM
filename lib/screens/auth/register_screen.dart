@@ -33,7 +33,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _nameController.text.trim(),
         _selectedRole,
       );
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful! Please login.')),
@@ -42,7 +42,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${ErrorHandler.formatError(e)}')),
+        SnackBar(
+          content: Text('Registration failed: ${ErrorHandler.formatError(e)}'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -77,8 +79,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     'Join Field CRM',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -89,7 +91,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Full Name',
                       prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
@@ -102,7 +106,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) => v!.contains('@') ? null : 'Invalid email',
@@ -118,10 +124,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
-                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -140,12 +150,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Role',
                       prefixIcon: Icon(Icons.security),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
-                    items: Role.values.map((r) => DropdownMenuItem(
-                      value: r,
-                      child: Text(r.name.toUpperCase()),
-                    )).toList(),
+                    items: Role.values
+                        .map(
+                          (r) => DropdownMenuItem(
+                            value: r,
+                            child: Text(r.name.toUpperCase()),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (v) => setState(() => _selectedRole = v!),
                   ),
                 ),
@@ -156,7 +172,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onPressed: _isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -164,7 +182,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Register', style: TextStyle(fontSize: 16)),
+                        : const Text(
+                            'Register',
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
               ],

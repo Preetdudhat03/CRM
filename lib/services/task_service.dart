@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/task_model.dart';
+import 'activity_service.dart';
+import 'activity_service.dart';
 
 class TaskService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -13,22 +15,38 @@ class TaskService {
         .select()
         .order('due_date', ascending: true)
         .range(start, end);
-    
+
     final List<dynamic> data = response as List<dynamic>;
     return data.map((json) => TaskModel.fromJson(json)).toList();
   }
 
   Future<TaskModel> addTask(TaskModel task) async {
     final json = task.toJson();
-    // ID handling same as others
-    
+
     final response = await _supabase
         .from('tasks')
         .insert(json)
         .select()
         .single();
-    
-    return TaskModel.fromJson(response);
+
+    final newTask = TaskModel.fromJson(response);
+
+    // Log Activity: Task Created
+    if (newTask.relatedEntityId != null) {
+      ActivityService.log(
+        relatedType: newTask.relatedEntityType ?? 'task',
+        relatedId: newTask.relatedEntityId!,
+        activityType: 'task_created',
+        title: 'Task Created',
+        description: 'New task: ${newTask.title}',
+        metadata: {
+          'task_id': newTask.id,
+          'due_date': newTask.dueDate.toIso8601String(),
+        },
+      );
+    }
+
+    return newTask;
   }
 
   Future<TaskModel> updateTask(TaskModel task) async {
@@ -39,7 +57,21 @@ class TaskService {
         .select()
         .single();
 
-    return TaskModel.fromJson(response);
+    final updatedTask = TaskModel.fromJson(response);
+
+    // Log Activity if completed
+    if (updatedTask.isCompleted && updatedTask.relatedEntityId != null) {
+      ActivityService.log(
+        relatedType: updatedTask.relatedEntityType ?? 'task',
+        relatedId: updatedTask.relatedEntityId!,
+        activityType: 'task_completed',
+        title: 'Task Completed',
+        description: 'Task "${updatedTask.title}" marked as done.',
+        metadata: {'task_id': updatedTask.id},
+      );
+    }
+
+    return updatedTask;
   }
 
   Future<void> deleteTask(String id) async {

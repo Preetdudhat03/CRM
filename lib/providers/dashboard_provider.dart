@@ -1,12 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/dashboard_service.dart';
 
-enum DashboardPeriod {
-  today,
-  quarter,
-  thisYear,
-  allTime,
-}
+enum DashboardPeriod { today, quarter, thisYear, allTime }
 
 extension DashboardPeriodExtension on DashboardPeriod {
   String get label {
@@ -59,14 +54,20 @@ extension DashboardPeriodExtension on DashboardPeriod {
       case DashboardPeriod.quarter:
         return start.subtract(const Duration(microseconds: 1));
       case DashboardPeriod.thisYear:
-        return DateTime(start.year, 1, 1).subtract(const Duration(microseconds: 1));
+        return DateTime(
+          start.year,
+          1,
+          1,
+        ).subtract(const Duration(microseconds: 1));
       case DashboardPeriod.allTime:
         return DateTime.now();
     }
   }
 }
 
-final dashboardPeriodProvider = StateProvider<DashboardPeriod>((ref) => DashboardPeriod.allTime);
+final dashboardPeriodProvider = StateProvider<DashboardPeriod>(
+  (ref) => DashboardPeriod.allTime,
+);
 
 // Helper function to calculate trend
 Map<String, dynamic> calculateTrend(int current, int previous) {
@@ -74,18 +75,19 @@ Map<String, dynamic> calculateTrend(int current, int previous) {
     if (current == 0) return {'trend': 0.0, 'isUp': true};
     return {'trend': 100.0, 'isUp': true};
   }
-  
+
   final double change = ((current - previous) / previous) * 100;
-  return {
-    'trend': change.abs(),
-    'isUp': change >= 0,
-  };
+  return {'trend': change.abs(), 'isUp': change >= 0};
 }
 
 // Dashboard Provider
-final dashboardServiceProvider = Provider<DashboardService>((ref) => DashboardService());
+final dashboardServiceProvider = Provider<DashboardService>(
+  (ref) => DashboardService(),
+);
 
-final dashboardMetricsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final dashboardMetricsProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
   final service = ref.watch(dashboardServiceProvider);
   return await service.fetchDashboardMetrics();
 });

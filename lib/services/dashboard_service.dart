@@ -17,11 +17,30 @@ class DashboardService {
       // 2: deals count
       _safeQuery(() => _supabase.from('deals').count(CountOption.exact), 0),
       // 3: won deals for revenue
-      _safeQuery(() => _supabase.from('deals').select('value, stage'), <dynamic>[]),
+      _safeQuery(
+        () => _supabase.from('deals').select('value, stage'),
+        <dynamic>[],
+      ),
       // 4: recent activities
-      _safeQuery(() => _supabase.from('activities').select().order('created_at', ascending: false).limit(10), <dynamic>[]),
+      _safeQuery(
+        () => _supabase
+            .from('activities')
+            .select()
+            .order('created_at', ascending: false)
+            .limit(10),
+        <dynamic>[],
+      ),
       // 5: tasks due today
-      _safeQuery(() => _supabase.from('tasks').select().gte('due_date', startOfDay.toIso8601String()).lt('due_date', endOfDay.toIso8601String()).order('due_date', ascending: true).limit(10), <dynamic>[]),
+      _safeQuery(
+        () => _supabase
+            .from('tasks')
+            .select()
+            .gte('due_date', startOfDay.toIso8601String())
+            .lt('due_date', endOfDay.toIso8601String())
+            .order('due_date', ascending: true)
+            .limit(10),
+        <dynamic>[],
+      ),
       // 6: pipeline stages
       _safeQuery(() => _supabase.from('deals').select('stage'), <dynamic>[]),
     ]);
@@ -58,7 +77,10 @@ class DashboardService {
   }
 
   /// Runs a query with error handling — returns fallback on failure
-  Future<dynamic> _safeQuery(Future<dynamic> Function() query, dynamic fallback) async {
+  Future<dynamic> _safeQuery(
+    Future<dynamic> Function() query,
+    dynamic fallback,
+  ) async {
     try {
       return await query();
     } catch (e) {

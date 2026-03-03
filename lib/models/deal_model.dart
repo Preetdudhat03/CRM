@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 enum DealStage {
@@ -44,6 +43,8 @@ extension DealStageExtension on DealStage {
         return Colors.red;
     }
   }
+
+  String get displayName => label;
 }
 
 class DealModel {
@@ -60,6 +61,8 @@ class DealModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final String? companyId;
+
   const DealModel({
     required this.id,
     required this.title,
@@ -73,6 +76,7 @@ class DealModel {
     this.notes,
     required this.createdAt,
     required this.updatedAt,
+    this.companyId,
   });
 
   DealModel copyWith({
@@ -88,6 +92,7 @@ class DealModel {
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? companyId,
   }) {
     return DealModel(
       id: id ?? this.id,
@@ -102,8 +107,10 @@ class DealModel {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      companyId: companyId ?? this.companyId,
     );
   }
+
   factory DealModel.fromJson(Map<String, dynamic> json) {
     // Convert snake_case stage to camelCase for enum matching
     final rawStage = (json['stage'] ?? 'qualification') as String;
@@ -133,6 +140,7 @@ class DealModel {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : DateTime.now(),
+      companyId: json['company_id'],
     );
   }
 
@@ -150,6 +158,7 @@ class DealModel {
       'stage': stageSnake,
       'assigned_to': assignedTo.isEmpty ? null : assignedTo,
       'expected_close_date': expectedCloseDate.toIso8601String(),
+      'company_id': companyId,
     };
   }
 }

@@ -1,4 +1,3 @@
-
 import '../models/user_model.dart';
 import '../models/role_model.dart';
 
@@ -13,12 +12,12 @@ class AuthService {
         email: email,
         password: password,
       );
-      
+
       final User? user = res.user;
       if (user == null) {
         throw Exception('Login failed: User is null');
       }
-  
+
       // Fetch user role from profiles table
       try {
         final profile = await _supabase
@@ -35,7 +34,10 @@ class AuthService {
 
         return UserModel(
           id: user.id,
-          name: profile['name'] ?? user.userMetadata?['name'] ?? email.split('@')[0],
+          name:
+              profile['name'] ??
+              user.userMetadata?['name'] ??
+              email.split('@')[0],
           email: profile['email'] ?? email,
           role: role,
           avatarUrl: profile['avatar_url'],
@@ -47,7 +49,7 @@ class AuthService {
           (e) => e.name == roleString,
           orElse: () => Role.viewer,
         );
-    
+
         return UserModel(
           id: user.id,
           name: user.userMetadata?['name'] ?? email.split('@')[0],
@@ -57,7 +59,9 @@ class AuthService {
       }
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
-        throw Exception('Email not confirmed. Please check your inbox or ask admin to confirm.');
+        throw Exception(
+          'Email not confirmed. Please check your inbox or ask admin to confirm.',
+        );
       }
       throw Exception(e.message);
     } catch (e) {
@@ -117,27 +121,24 @@ class AuthService {
   }
 
   // Helper to register a new user (optional, good to have)
-  Future<UserModel> register(String email, String password, String name, Role role) async {
+  Future<UserModel> register(
+    String email,
+    String password,
+    String name,
+    Role role,
+  ) async {
     final AuthResponse res = await _supabase.auth.signUp(
       email: email,
       password: password,
-      data: {
-        'name': name,
-        'role': role.name,
-      },
+      data: {'name': name, 'role': role.name},
     );
-    
+
     final User? user = res.user;
     if (user == null) {
       throw Exception('Registration failed');
     }
 
-    return UserModel(
-      id: user.id,
-      name: name,
-      email: email,
-      role: role,
-    );
+    return UserModel(id: user.id, name: name, email: email, role: role);
   }
 
   Future<UserModel> updateProfile(UserModel user) async {
@@ -162,12 +163,9 @@ class AuthService {
       ),
     );
   }
+
   Future<void> updatePassword(String newPassword) async {
-    await _supabase.auth.updateUser(
-      UserAttributes(
-        password: newPassword,
-      ),
-    );
+    await _supabase.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   // Check connectivity by making a lightweight request

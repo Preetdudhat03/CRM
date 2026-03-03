@@ -23,7 +23,9 @@ class PipelineWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -37,9 +39,9 @@ class PipelineWidget extends StatelessWidget {
         children: [
           Text(
             'Sales Pipeline',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           LayoutBuilder(
@@ -104,9 +106,9 @@ class PipelineWidget extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                ),
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

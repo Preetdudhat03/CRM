@@ -1,10 +1,10 @@
 class ErrorHandler {
   static String formatError(Object error) {
     String errorMsg = error.toString();
-    
+
     // Check for network related exceptions
     final lowerCaseError = errorMsg.toLowerCase();
-    if (lowerCaseError.contains('socketexception') || 
+    if (lowerCaseError.contains('socketexception') ||
         lowerCaseError.contains('clientexception') ||
         lowerCaseError.contains('failed host lookup') ||
         lowerCaseError.contains('connection refused')) {

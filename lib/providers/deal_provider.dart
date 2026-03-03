@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/deal_model.dart';
@@ -15,7 +14,6 @@ final dealRepositoryProvider = Provider<DealRepository>((ref) {
   return DealRepository(ref.watch(dealServiceProvider));
 });
 
-
 // State Provider for Search Query
 final dealSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -30,14 +28,15 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  DealNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  DealNotifier(this._repository, this._ref)
+    : super(const AsyncValue.loading()) {
     loadInitial();
     _subscribeToRealtime();
   }
 
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
-    
+
     _realtimeChannel = supabase
         .channel('public:deals')
         .onPostgresChanges(
@@ -66,7 +65,10 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     _isLoadingMore = false;
     try {
       state = const AsyncValue.loading();
-      final deals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      final deals = await _repository.getDeals(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (deals.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(deals);
     } catch (e, stack) {
@@ -80,7 +82,10 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     _isLoadingMore = true;
     try {
       _currentPage++;
-      final newDeals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      final newDeals = await _repository.getDeals(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (newDeals.length < _pageSize) _hasMore = false;
       state.whenData((currentDeals) {
         state = AsyncValue.data([...currentDeals, ...newDeals]);
@@ -98,7 +103,10 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     _isLoadingMore = false;
     try {
       // Background silent refresh
-      final deals = await _repository.getDeals(page: _currentPage, pageSize: _pageSize);
+      final deals = await _repository.getDeals(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
       if (deals.length < _pageSize) _hasMore = false;
       state = AsyncValue.data(deals);
     } catch (e, stack) {
@@ -114,18 +122,24 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       state.whenData((deals) {
         state = AsyncValue.data([...deals, newDeal]);
       });
-      
-      ActivityService.log(title: 'Created deal: ${newDeal.title}', type: 'deal', relatedEntityId: newDeal.id);
-      
+
+      ActivityService.log(
+        title: 'Created deal: ${newDeal.title}',
+        activityType: 'deal',
+        relatedId: newDeal.id,
+      );
+
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'New Deal Created',
-        '$userName added a new deal: ${newDeal.title}',
-        type: 'deal_created',
-        relatedEntityId: newDeal.id,
-        relatedEntityType: 'deal',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'New Deal Created',
+            '$userName added a new deal: ${newDeal.title}',
+            activityType: 'deal_created',
+            relatedId: newDeal.id,
+            relatedEntityactivityType: 'deal',
+          );
     } catch (e) {
       rethrow;
     }
@@ -135,32 +149,39 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
     try {
       final updatedDeal = await _repository.updateDeal(deal);
       state.whenData((deals) {
-        final existingDeal = deals.firstWhere((d) => d.id == deal.id, orElse: () => deal);
-        
+        final existingDeal = deals.firstWhere(
+          (d) => d.id == deal.id,
+          orElse: () => deal,
+        );
+
         state = AsyncValue.data([
           for (final d in deals)
-            if (d.id == deal.id) updatedDeal else d
+            if (d.id == deal.id) updatedDeal else d,
         ]);
 
         final currentUser = _ref.read(currentUserProvider);
         final userName = currentUser?.name ?? 'Someone';
 
         if (existingDeal.stage != deal.stage) {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Deal Stage Updated',
-            '$userName moved deal ${deal.title} to ${deal.stage.label}',
-            type: 'deal_stage_updated',
-            relatedEntityId: deal.id,
-            relatedEntityType: 'deal',
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Deal Stage Updated',
+                '$userName moved deal ${deal.title} to ${deal.stage.label}',
+                activityType: 'deal_stage_updated',
+                relatedId: deal.id,
+                relatedEntityactivityType: 'deal',
+              );
         } else {
-          _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-            'Deal Updated',
-            '$userName updated deal: ${deal.title}',
-            type: 'deal_updated',
-            relatedEntityId: deal.id,
-            relatedEntityType: 'deal',
-          );
+          _ref
+              .read(notificationsProvider.notifier)
+              .pushNotificationLocally(
+                'Deal Updated',
+                '$userName updated deal: ${deal.title}',
+                activityType: 'deal_updated',
+                relatedId: deal.id,
+                relatedEntityactivityType: 'deal',
+              );
         }
       });
     } catch (e) {
@@ -174,19 +195,25 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       state.whenData((deals) {
         state = AsyncValue.data([
           for (final d in deals)
-            if (d.id != id) d
+            if (d.id != id) d,
         ]);
       });
-      ActivityService.log(title: 'Deleted a deal', type: 'deal', relatedEntityId: id);
+      ActivityService.log(
+        title: 'Deleted a deal',
+        activityType: 'deal',
+        relatedId: id,
+      );
 
       final currentUser = _ref.read(currentUserProvider);
       final userName = currentUser?.name ?? 'Someone';
-      _ref.read(notificationsProvider.notifier).pushNotificationLocally(
-        'Deal Deleted',
-        '$userName deleted a deal',
-        type: 'deal_deleted',
-        relatedEntityType: 'deal',
-      );
+      _ref
+          .read(notificationsProvider.notifier)
+          .pushNotificationLocally(
+            'Deal Deleted',
+            '$userName deleted a deal',
+            activityType: 'deal_deleted',
+            relatedEntityactivityType: 'deal',
+          );
     } catch (e) {
       // Handle error
     }
@@ -196,8 +223,8 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 // Deals List Provider
 final dealsProvider =
     StateNotifierProvider<DealNotifier, AsyncValue<List<DealModel>>>((ref) {
-  return DealNotifier(ref.watch(dealRepositoryProvider), ref);
-});
+      return DealNotifier(ref.watch(dealRepositoryProvider), ref);
+    });
 
 // Filtered Deals Provider
 final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
@@ -213,4 +240,3 @@ final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
     }).toList();
   });
 });
-

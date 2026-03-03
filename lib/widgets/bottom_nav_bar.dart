@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -29,6 +28,11 @@ class CustomBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.people_outlined),
           selectedIcon: Icon(Icons.people),
           label: 'Contacts',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.business_outlined),
+          selectedIcon: Icon(Icons.business),
+          label: 'Companies',
         ),
         NavigationDestination(
           icon: Icon(Icons.leaderboard_outlined),

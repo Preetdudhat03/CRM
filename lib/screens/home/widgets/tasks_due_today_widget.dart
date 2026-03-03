@@ -17,7 +17,9 @@ class TasksDueTodayWidget extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -34,9 +36,9 @@ class TasksDueTodayWidget extends ConsumerWidget {
             children: [
               Text(
                 'Tasks Due Today',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {
@@ -56,7 +58,9 @@ class TasksDueTodayWidget extends ConsumerWidget {
           metricsAsync.when(
             data: (metrics) {
               final tasksRaw = metrics['tasksDueToday'] as List<dynamic>? ?? [];
-              final dueTodayOrOverdue = tasksRaw.map((e) => TaskModel.fromJson(e)).toList();
+              final dueTodayOrOverdue = tasksRaw
+                  .map((e) => TaskModel.fromJson(e))
+                  .toList();
 
               if (dueTodayOrOverdue.isEmpty) {
                 return Padding(
@@ -64,7 +68,11 @@ class TasksDueTodayWidget extends ConsumerWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.check_circle_outline, size: 48, color: Colors.green.withOpacity(0.5)),
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 48,
+                          color: Colors.green.withOpacity(0.5),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'You\'re all caught up for today!',
@@ -94,31 +102,41 @@ class TasksDueTodayWidget extends ConsumerWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: isOverdue ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                        color: isOverdue
+                            ? Colors.red.withOpacity(0.1)
+                            : Colors.orange.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        isOverdue ? Icons.warning_amber_rounded : Icons.schedule,
+                        isOverdue
+                            ? Icons.warning_amber_rounded
+                            : Icons.schedule,
                         color: isOverdue ? Colors.red : Colors.orange,
                       ),
                     ),
                     title: Text(
                       task.title,
                       style: TextStyle(
-                         fontWeight: FontWeight.w600,
-                         decoration: task.status == TaskStatus.completed ? TextDecoration.lineThrough : null,
-                         color: task.status == TaskStatus.completed ? Colors.grey : null,
+                        fontWeight: FontWeight.w600,
+                        decoration: task.status == TaskStatus.completed
+                            ? TextDecoration.lineThrough
+                            : null,
+                        color: task.status == TaskStatus.completed
+                            ? Colors.grey
+                            : null,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      isOverdue 
-                        ? 'Overdue by ${now.difference(task.dueDate).inDays} days'
-                        : 'Due at ${DateFormat('hh:mm a').format(task.dueDate)}',
+                      isOverdue
+                          ? 'Overdue by ${now.difference(task.dueDate).inDays} days'
+                          : 'Due at ${DateFormat('hh:mm a').format(task.dueDate)}',
                       style: TextStyle(
                         color: isOverdue ? Colors.red : Colors.grey[600],
-                        fontWeight: isOverdue ? FontWeight.w500 : FontWeight.normal,
+                        fontWeight: isOverdue
+                            ? FontWeight.w500
+                            : FontWeight.normal,
                       ),
                     ),
                     trailing: Checkbox(
@@ -130,22 +148,30 @@ class TasksDueTodayWidget extends ConsumerWidget {
                           // ref.read(tasksProvider.notifier).updateTask(task.copyWith(status: ...));
                         }
                       },
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
                   );
                 },
               );
             },
-            loading: () => const Center(child: Padding(
-              padding: EdgeInsets.all(24.0),
-              child: CircularProgressIndicator(),
-            )),
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
             error: (error, __) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 24.0),
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.check_circle_outline, size: 48, color: Colors.green.withOpacity(0.5)),
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 48,
+                      color: Colors.green.withOpacity(0.5),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'You\'re all caught up for today!',

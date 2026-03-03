@@ -20,9 +20,16 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
   final ScrollController _scrollController = ScrollController();
   LeadStatus? _selectedStatusFilter;
   String? _selectedSourceFilter;
-  
+
   // Hardcoded for UI demo
-  final List<String> _sourceOptions = ['All', 'Website', 'Instagram', 'Referral', 'Cold Call', 'Other'];
+  final List<String> _sourceOptions = [
+    'All',
+    'Website',
+    'Instagram',
+    'Referral',
+    'Cold Call',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -37,12 +44,17 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
       ref.read(leadsProvider.notifier).loadMore();
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, LeadModel lead) {
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    LeadModel lead,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -57,9 +69,9 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
             onPressed: () {
               ref.read(leadsProvider.notifier).deleteLead(lead.id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${lead.name} deleted')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('${lead.name} deleted')));
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
@@ -89,14 +101,20 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
             final isSelected = _selectedStatusFilter == status;
 
             Color getBaseColor(LeadStatus s) {
-               switch (s) {
-                case LeadStatus.newLead: return Colors.blue;
-                case LeadStatus.contacted: return Colors.purple;
-                case LeadStatus.qualified: return Colors.teal;
-                case LeadStatus.lost: return Colors.red;
-                default: return Colors.grey;
-               }
+              switch (s) {
+                case LeadStatus.newLead:
+                  return Colors.blue;
+                case LeadStatus.contacted:
+                  return Colors.purple;
+                case LeadStatus.qualified:
+                  return Colors.teal;
+                case LeadStatus.lost:
+                  return Colors.red;
+                default:
+                  return Colors.grey;
+              }
             }
+
             final baseColor = getBaseColor(status);
 
             return Padding(
@@ -113,10 +131,18 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                   decoration: BoxDecoration(
                     color: isSelected ? baseColor : Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: isSelected ? baseColor : Colors.grey.shade300),
-                    boxShadow: isSelected ? [
-                      BoxShadow(color: baseColor.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
-                    ] : null,
+                    border: Border.all(
+                      color: isSelected ? baseColor : Colors.grey.shade300,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: baseColor.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
                   ),
                   alignment: Alignment.center,
                   child: Row(
@@ -126,14 +152,21 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
-                          color: isSelected ? Colors.white : Colors.grey.shade700,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.grey.shade700,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.grey.shade100,
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -141,7 +174,9 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.grey.shade700,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade700,
                           ),
                         ),
                       ),
@@ -158,7 +193,9 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final leadsAsync = ref.watch(filteredLeadsProvider); // Contains search filtered, unconverted leads
+    final leadsAsync = ref.watch(
+      filteredLeadsProvider,
+    ); // Contains search filtered, unconverted leads
     final user = ref.watch(currentUserProvider);
     final canCreate = PermissionService.canCreateLeads(user);
     final canEdit = PermissionService.canEditLeads(user);
@@ -167,15 +204,21 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Leads Pipeline', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
+        title: const Text(
+          'Leads Pipeline',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(160),
           child: Column(
             children: [
-               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -183,8 +226,14 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Search leads...',
-                          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                          prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.grey.shade500,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -195,14 +244,19 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                           filled: true,
                           fillColor: Colors.grey.shade50,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
                         ),
                         onChanged: (value) {
-                          ref.read(leadSearchQueryProvider.notifier).state = value;
+                          ref.read(leadSearchQueryProvider.notifier).state =
+                              value;
                         },
                       ),
                     ),
@@ -221,8 +275,15 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                           child: DropdownButton<String>(
                             isExpanded: true,
                             value: _selectedSourceFilter ?? 'All',
-                            icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
-                            style: TextStyle(color: Colors.grey.shade800, fontSize: 14, fontWeight: FontWeight.w500),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.grey.shade600,
+                            ),
+                            style: TextStyle(
+                              color: Colors.grey.shade800,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                             items: _sourceOptions.map((source) {
                               return DropdownMenuItem(
                                 value: source,
@@ -231,7 +292,9 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                             }).toList(),
                             onChanged: (val) {
                               setState(() {
-                                _selectedSourceFilter = val == 'All' ? null : val;
+                                _selectedSourceFilter = val == 'All'
+                                    ? null
+                                    : val;
                               });
                             },
                           ),
@@ -254,10 +317,18 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
           // Apply local UI filters
           var leads = unfilteredLeads;
           if (_selectedStatusFilter != null) {
-            leads = leads.where((l) => l.status == _selectedStatusFilter).toList();
+            leads = leads
+                .where((l) => l.status == _selectedStatusFilter)
+                .toList();
           }
           if (_selectedSourceFilter != null) {
-            leads = leads.where((l) => l.source.toLowerCase() == _selectedSourceFilter!.toLowerCase().replaceAll(' ', '_')).toList();
+            leads = leads
+                .where(
+                  (l) =>
+                      l.source.toLowerCase() ==
+                      _selectedSourceFilter!.toLowerCase().replaceAll(' ', '_'),
+                )
+                .toList();
           }
 
           return RefreshIndicator(
@@ -266,7 +337,7 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                 ? SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: SizedBox(
-                      height: MediaQuery.of(context).size.height - 250, 
+                      height: MediaQuery.of(context).size.height - 250,
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -277,18 +348,29 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                                 color: Colors.blue.withOpacity(0.05),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(Icons.group_add_outlined, size: 64, color: Colors.blue.shade300),
+                              child: Icon(
+                                Icons.group_add_outlined,
+                                size: 64,
+                                color: Colors.blue.shade300,
+                              ),
                             ),
                             const SizedBox(height: 24),
                             Text(
                               'No Leads Yet',
-                              style: TextStyle(color: Colors.grey.shade800, fontSize: 20, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.grey.shade800,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               "You haven't added any leads \nmatching the current filters.",
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                              ),
                             ),
                             const SizedBox(height: 24),
                             if (canCreate)
@@ -297,17 +379,23 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const AddEditLeadScreen(),
+                                      builder: (context) =>
+                                          const AddEditLeadScreen(),
                                     ),
                                   );
                                 },
                                 icon: const Icon(Icons.add),
                                 label: const Text('Add Lead'),
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                              )
+                              ),
                           ],
                         ),
                       ),
@@ -339,7 +427,8 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LeadDetailScreen(lead: lead),
+                                  builder: (context) =>
+                                      LeadDetailScreen(lead: lead),
                                 ),
                               );
                             },
@@ -348,13 +437,18 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => AddEditLeadScreen(lead: lead),
+                                        builder: (context) =>
+                                            AddEditLeadScreen(lead: lead),
                                       ),
                                     );
                                   }
                                 : null,
                             onDelete: canDelete
-                                ? () => _showDeleteConfirmation(context, ref, lead)
+                                ? () => _showDeleteConfirmation(
+                                    context,
+                                    ref,
+                                    lead,
+                                  )
                                 : null,
                           ),
                         ),
@@ -366,7 +460,7 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
         loading: () => ListView.builder(
           itemCount: 5,
           padding: const EdgeInsets.only(top: 8),
-          itemBuilder: (context, index) => const SkeletonCard(height: 140),
+          itemBuilder: (context, index) => SkeletonCard(height: 140),
         ),
         error: (error, stack) => Center(
           child: Column(
@@ -374,14 +468,17 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
             children: [
               Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
               const SizedBox(height: 16),
-              Text('Failed to load leads', style: TextStyle(color: Colors.grey.shade800, fontSize: 16)),
+              Text(
+                'Failed to load leads',
+                style: TextStyle(color: Colors.grey.shade800, fontSize: 16),
+              ),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () => ref.read(leadsProvider.notifier).refresh(),
                 child: const Text('Retry'),
-              )
+              ),
             ],
-          )
+          ),
         ),
       ),
       floatingActionButton: canCreate
@@ -397,7 +494,9 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
               },
               backgroundColor: Theme.of(context).primaryColor,
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,

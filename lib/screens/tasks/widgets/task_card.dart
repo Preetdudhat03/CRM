@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../../../models/task_model.dart';
 
@@ -21,15 +20,16 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isCompleted = task.status == TaskStatus.completed;
-    bool isOverdue = !isCompleted && 
-                     task.dueDate.isBefore(DateTime.now());
+    bool isOverdue = !isCompleted && task.dueDate.isBefore(DateTime.now());
 
     return Card(
       elevation: 1,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isOverdue ? const BorderSide(color: Colors.red, width: 1) : BorderSide.none,
+        side: isOverdue
+            ? const BorderSide(color: Colors.red, width: 1)
+            : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -44,7 +44,9 @@ class TaskCard extends StatelessWidget {
                   Checkbox(
                     value: isCompleted,
                     onChanged: onStatusChanged,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                   Expanded(
                     child: Column(
@@ -74,7 +76,10 @@ class TaskCard extends StatelessWidget {
                   ),
                   if (!isCompleted)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: task.priority.color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -93,14 +98,20 @@ class TaskCard extends StatelessWidget {
               const Divider(),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 14, color: isOverdue ? Colors.red : Colors.grey),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: isOverdue ? Colors.red : Colors.grey,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     task.dueDate.toIso8601String().split('T')[0],
                     style: TextStyle(
                       fontSize: 12,
                       color: isOverdue ? Colors.red : Colors.grey,
-                      fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isOverdue
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -112,7 +123,11 @@ class TaskCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   PopupMenuButton(
-                    icon: const Icon(Icons.more_vert, size: 18, color: Colors.grey),
+                    icon: const Icon(
+                      Icons.more_vert,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
                     padding: EdgeInsets.zero,
                     itemBuilder: (context) => [
                       if (onEdit != null)
@@ -133,7 +148,10 @@ class TaskCard extends StatelessWidget {
                             children: [
                               Icon(Icons.delete, size: 20, color: Colors.red),
                               SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ],
                           ),
                         ),
