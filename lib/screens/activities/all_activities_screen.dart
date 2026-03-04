@@ -112,7 +112,7 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
     final typeStr = item.activityType;
     final title = item.title;
     final createdBy = item.createdBy ?? '';
-    final description = item.description ?? '';
+    final description = item.description;
     final date = item.createdAt;
 
     return ListTile(

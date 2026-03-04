@@ -138,7 +138,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
             '$userName added a new deal: ${newDeal.title}',
             activityType: 'deal_created',
             relatedId: newDeal.id,
-            relatedEntityactivityType: 'deal',
+            relatedEntityType: 'deal',
           );
     } catch (e) {
       rethrow;
@@ -170,7 +170,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
                 '$userName moved deal ${deal.title} to ${deal.stage.label}',
                 activityType: 'deal_stage_updated',
                 relatedId: deal.id,
-                relatedEntityactivityType: 'deal',
+                relatedEntityType: 'deal',
               );
         } else {
           _ref
@@ -180,7 +180,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
                 '$userName updated deal: ${deal.title}',
                 activityType: 'deal_updated',
                 relatedId: deal.id,
-                relatedEntityactivityType: 'deal',
+                relatedEntityType: 'deal',
               );
         }
       });
@@ -212,7 +212,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
             'Deal Deleted',
             '$userName deleted a deal',
             activityType: 'deal_deleted',
-            relatedEntityactivityType: 'deal',
+            relatedEntityType: 'deal',
           );
     } catch (e) {
       // Handle error
@@ -240,6 +240,7 @@ final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
     }).toList();
   });
 });
+
 
 
 

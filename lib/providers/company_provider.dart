@@ -142,7 +142,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
             '$userName added a new company: ${newCompany.name}',
             activityType: 'company_created',
             relatedId: newCompany.id,
-            relatedEntityactivityType: 'company',
+            relatedEntityType: 'company',
             showOnDevice: false,
           );
     } catch (e) {
@@ -174,7 +174,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
             '$userName updated company: ${company.name}',
             activityType: 'company_updated',
             relatedId: company.id,
-            relatedEntityactivityType: 'company',
+            relatedEntityType: 'company',
             showOnDevice: false,
           );
     } catch (e) {
@@ -205,7 +205,7 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
             'Company Deleted',
             '$userName deleted a company',
             activityType: 'company_deleted',
-            relatedEntityactivityType: 'company',
+            relatedEntityType: 'company',
           );
     } catch (e) {
       // Handle error
@@ -236,6 +236,7 @@ final filteredCompaniesProvider = Provider<AsyncValue<List<CompanyModel>>>((
     }).toList();
   });
 });
+
 
 
 

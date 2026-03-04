@@ -158,16 +158,22 @@ class NotificationNotifier
     String title,
     String message, {
     String? type,
+    String? activityType,
     String? relatedEntityId,
+    String? relatedId,
     String? relatedEntityType,
     bool deduplicate = false,
     bool showOnDevice = false,
   }) async {
+    // Handle parameter aliases
+    final resolvedType = type ?? activityType;
+    final resolvedEntityId = relatedEntityId ?? relatedId;
+
     if (deduplicate) {
       bool exists = false;
       state.whenData((notifications) {
         exists = notifications.any(
-          (n) => n.title == title && n.relatedEntityId == relatedEntityId,
+          (n) => n.title == title && n.relatedEntityId == resolvedEntityId,
         );
       });
       if (exists) return;
@@ -192,9 +198,9 @@ class NotificationNotifier
       title: title,
       message: message,
       date: DateTime.now(),
-      relatedEntityId: relatedEntityId,
+      relatedEntityId: resolvedEntityId,
       relatedEntityType: encodedType,
-      type: type ?? 'general',
+      type: resolvedType ?? 'general',
       senderId: _currentUser?.id,
     );
 
@@ -227,6 +233,7 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
 List<String> getUpperRanks(Role role) {
   return Role.values.map((e) => e.name).toList();
 }
+
 
 
 

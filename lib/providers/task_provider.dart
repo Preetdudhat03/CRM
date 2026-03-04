@@ -90,7 +90,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
                 'Task "${t.title}" is due in less than 24 hours!',
                 activityType: 'task_overdue',
                 relatedId: t.id,
-                relatedEntityactivityType: 'task',
+                relatedEntityType: 'task',
                 deduplicate: true,
               );
         }
@@ -163,7 +163,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
             '$userName added a new task: ${newTask.title}',
             activityType: 'task_created',
             relatedId: newTask.id,
-            relatedEntityactivityType: 'task',
+            relatedEntityType: 'task',
             showOnDevice: false,
           );
     } catch (e) {
@@ -196,7 +196,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
                 '$userName marked the task ${task.title} as ${task.status.name}',
                 activityType: 'task_status_updated',
                 relatedId: task.id,
-                relatedEntityactivityType: 'task',
+                relatedEntityType: 'task',
                 showOnDevice: false,
               );
         } else {
@@ -207,7 +207,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
                 '$userName updated task: ${task.title}',
                 activityType: 'task_updated',
                 relatedId: task.id,
-                relatedEntityactivityType: 'task',
+                relatedEntityType: 'task',
                 showOnDevice: false,
               );
         }
@@ -240,7 +240,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
             'Task Deleted',
             '$userName deleted a task',
             activityType: 'task_deleted',
-            relatedEntityactivityType: 'task',
+            relatedEntityType: 'task',
           );
     } catch (e) {
       // Handle error
@@ -274,6 +274,7 @@ final filteredTasksProvider = Provider<AsyncValue<List<TaskModel>>>((ref) {
     }).toList();
   });
 });
+
 
 
 
