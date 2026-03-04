@@ -125,7 +125,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
 
       ActivityService.log(
         title: 'Created deal: ${newDeal.title}',
-        activityactivityType: 'deal',
+        activityType: 'deal',
         relatedId: newDeal.id,
       );
 
@@ -136,9 +136,9 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
           .pushNotificationLocally(
             'New Deal Created',
             '$userName added a new deal: ${newDeal.title}',
-            activityactivityType: 'deal_created',
+            activityType: 'deal_created',
             relatedId: newDeal.id,
-            relatedEntityactivityactivityType: 'deal',
+            relatedEntityactivityType: 'deal',
           );
     } catch (e) {
       rethrow;
@@ -168,9 +168,9 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
               .pushNotificationLocally(
                 'Deal Stage Updated',
                 '$userName moved deal ${deal.title} to ${deal.stage.label}',
-                activityactivityType: 'deal_stage_updated',
+                activityType: 'deal_stage_updated',
                 relatedId: deal.id,
-                relatedEntityactivityactivityType: 'deal',
+                relatedEntityactivityType: 'deal',
               );
         } else {
           _ref
@@ -178,9 +178,9 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
               .pushNotificationLocally(
                 'Deal Updated',
                 '$userName updated deal: ${deal.title}',
-                activityactivityType: 'deal_updated',
+                activityType: 'deal_updated',
                 relatedId: deal.id,
-                relatedEntityactivityactivityType: 'deal',
+                relatedEntityactivityType: 'deal',
               );
         }
       });
@@ -200,7 +200,7 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
       });
       ActivityService.log(
         title: 'Deleted a deal',
-        activityactivityType: 'deal',
+        activityType: 'deal',
         relatedId: id,
       );
 
@@ -211,8 +211,8 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
           .pushNotificationLocally(
             'Deal Deleted',
             '$userName deleted a deal',
-            activityactivityType: 'deal_deleted',
-            relatedEntityactivityactivityType: 'deal',
+            activityType: 'deal_deleted',
+            relatedEntityactivityType: 'deal',
           );
     } catch (e) {
       // Handle error
@@ -240,4 +240,6 @@ final filteredDealsProvider = Provider<AsyncValue<List<DealModel>>>((ref) {
     }).toList();
   });
 });
+
+
 

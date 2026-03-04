@@ -88,9 +88,9 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
               .pushNotificationLocally(
                 'Task Due Soon',
                 'Task "${t.title}" is due in less than 24 hours!',
-                activityactivityType: 'task_overdue',
+                activityType: 'task_overdue',
                 relatedId: t.id,
-                relatedEntityactivityactivityType: 'task',
+                relatedEntityactivityType: 'task',
                 deduplicate: true,
               );
         }
@@ -150,7 +150,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
 
       ActivityService.log(
         title: 'Created task: ${newTask.title}',
-        activityactivityType: 'task',
+        activityType: 'task',
         relatedId: newTask.id,
       );
 
@@ -161,9 +161,9 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
           .pushNotificationLocally(
             'New Task Created',
             '$userName added a new task: ${newTask.title}',
-            activityactivityType: 'task_created',
+            activityType: 'task_created',
             relatedId: newTask.id,
-            relatedEntityactivityactivityType: 'task',
+            relatedEntityactivityType: 'task',
             showOnDevice: false,
           );
     } catch (e) {
@@ -194,9 +194,9 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
               .pushNotificationLocally(
                 'Task Status Updated',
                 '$userName marked the task ${task.title} as ${task.status.name}',
-                activityactivityType: 'task_status_updated',
+                activityType: 'task_status_updated',
                 relatedId: task.id,
-                relatedEntityactivityactivityType: 'task',
+                relatedEntityactivityType: 'task',
                 showOnDevice: false,
               );
         } else {
@@ -205,9 +205,9 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
               .pushNotificationLocally(
                 'Task Updated',
                 '$userName updated task: ${task.title}',
-                activityactivityType: 'task_updated',
+                activityType: 'task_updated',
                 relatedId: task.id,
-                relatedEntityactivityactivityType: 'task',
+                relatedEntityactivityType: 'task',
                 showOnDevice: false,
               );
         }
@@ -228,7 +228,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
       });
       ActivityService.log(
         title: 'Deleted a task',
-        activityactivityType: 'task',
+        activityType: 'task',
         relatedId: id,
       );
 
@@ -239,8 +239,8 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
           .pushNotificationLocally(
             'Task Deleted',
             '$userName deleted a task',
-            activityactivityType: 'task_deleted',
-            relatedEntityactivityactivityType: 'task',
+            activityType: 'task_deleted',
+            relatedEntityactivityType: 'task',
           );
     } catch (e) {
       // Handle error
@@ -274,4 +274,6 @@ final filteredTasksProvider = Provider<AsyncValue<List<TaskModel>>>((ref) {
     }).toList();
   });
 });
+
+
 

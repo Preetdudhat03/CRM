@@ -68,6 +68,8 @@ class TaskModel {
   final String? relatedEntityType; // 'Contact', 'Lead', 'Deal'
   final String? relatedEntityName; // Denormalized name for UI
   final DateTime createdAt;
+  bool get isCompleted => status == TaskStatus.completed;
+
 
   const TaskModel({
     required this.id,

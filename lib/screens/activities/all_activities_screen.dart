@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../services/activity_service.dart';
+import '../../models/activity_model.dart';
 
 class AllActivitiesScreen extends StatefulWidget {
   const AllActivitiesScreen({super.key});
@@ -11,7 +12,7 @@ class AllActivitiesScreen extends StatefulWidget {
 
 class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
   final ActivityService _service = ActivityService();
-  final List<Map<String, dynamic>> _activities = [];
+  final List<ActivityModel> _activities = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -107,15 +108,12 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
     );
   }
 
-  Widget _buildActivityTile(BuildContext context, Map<String, dynamic> item) {
-    final typeStr = item['type'] ?? 'other';
-    final title = item['title'] ?? 'Activity';
-    final createdBy = item['created_by'] ?? '';
-    final description = item['description'] ?? '';
-    final dateStr = item['date'] ?? item['created_at'];
-    final date = dateStr != null
-        ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
-        : DateTime.now();
+  Widget _buildActivityTile(BuildContext context, ActivityModel item) {
+    final typeStr = item.activityType;
+    final title = item.title;
+    final createdBy = item.createdBy ?? '';
+    final description = item.description ?? '';
+    final date = item.createdAt;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),

@@ -131,7 +131,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
       ActivityService.log(
         title: 'Created contact: ${newContact.name}',
-        activityactivityType: 'contact',
+        activityType: 'contact',
         relatedId: newContact.id,
       );
 
@@ -142,9 +142,9 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
           .pushNotificationLocally(
             'New Contact Created',
             '$userName added a new contact: ${newContact.name}',
-            activityactivityType: 'contact_created',
+            activityType: 'contact_created',
             relatedId: newContact.id,
-            relatedEntityactivityactivityType: 'contact',
+            relatedEntityType: 'contact',
             showOnDevice: false,
           );
     } catch (e) {
@@ -163,7 +163,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       });
       ActivityService.log(
         title: 'Updated contact: ${contact.name}',
-        activityactivityType: 'contact',
+        activityType: 'contact',
         relatedId: contact.id,
       );
 
@@ -174,9 +174,9 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
           .pushNotificationLocally(
             'Contact Updated',
             '$userName updated contact: ${contact.name}',
-            activityactivityType: 'contact_updated',
+            activityType: 'contact_updated',
             relatedId: contact.id,
-            relatedEntityactivityactivityType: 'contact',
+            relatedEntityType: 'contact',
             showOnDevice: false,
           );
     } catch (e) {
@@ -195,7 +195,7 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       });
       ActivityService.log(
         title: 'Deleted a contact',
-        activityactivityType: 'contact',
+        activityType: 'contact',
         relatedId: id,
       );
 
@@ -206,8 +206,8 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
           .pushNotificationLocally(
             'Contact Deleted',
             '$userName deleted a contact',
-            activityactivityType: 'contact_deleted',
-            relatedEntityactivityactivityType: 'contact',
+            activityType: 'contact_deleted',
+            relatedEntityType: 'contact',
           );
     } catch (e) {
       // Handle error
@@ -290,4 +290,6 @@ final contactStatsProvider = Provider<AsyncValue<Map<String, dynamic>>>((ref) {
     };
   });
 });
+
+
 
