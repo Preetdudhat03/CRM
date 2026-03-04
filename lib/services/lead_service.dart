@@ -189,8 +189,6 @@ class LeadService {
                 .from('companies')
                 .insert({
                   'name': leadCompanyName,
-                  'assigned_to': leadMap['assigned_to'],
-                  'status': 'active',
                 })
                 .select('id')
                 .single();
