@@ -510,7 +510,6 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                                 ),
                               ),
                               items: ContactStatus.values
-                                  .where((s) => s != ContactStatus.lead)
                                   .map((status) {
                                     return DropdownMenuItem(
                                       value: status,
