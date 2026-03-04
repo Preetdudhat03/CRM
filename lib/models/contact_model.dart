@@ -94,6 +94,18 @@ class ContactModel {
   }
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
+    ContactStatus parsedStatus;
+    if (json['status'] != null) {
+      parsedStatus = ContactStatus.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => ContactStatus.lead,
+      );
+    } else {
+      parsedStatus = (json['is_customer'] == true)
+          ? ContactStatus.customer
+          : ContactStatus.lead;
+    }
+
     return ContactModel(
       id: json['id'],
       name:
@@ -108,10 +120,7 @@ class ContactModel {
       position: json['position'] ?? '',
       address: json['address'],
       notes: json['notes'],
-      status: (json['is_customer'] == false)
-          ? ContactStatus.lead
-          : ContactStatus
-                .customer, // Assume it's a customer by default if null or true
+      status: parsedStatus,
       createdAt: DateTime.parse(json['created_at']),
       lastContacted: json['last_contacted'] != null
           ? DateTime.parse(json['last_contacted'])
@@ -139,6 +148,7 @@ class ContactModel {
       'position': position,
       'address': address,
       'notes': notes,
+      'status': status.name,
       'is_customer':
           status == ContactStatus.customer || status == ContactStatus.churned,
       'created_at': createdAt.toIso8601String(),
