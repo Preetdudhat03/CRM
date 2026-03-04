@@ -205,7 +205,10 @@ class LeadService {
           'company_name': leadCompanyName ?? '',
           'company_id': companyId,
           'is_customer': false,
-          'assigned_to': leadMap['assigned_to'],
+          'assigned_to': (leadMap['assigned_to'] != null &&
+                  leadMap['assigned_to'].toString().isNotEmpty)
+              ? leadMap['assigned_to']
+              : null,
           'notes': leadMap['notes'],
           'created_from_lead': true,
           'source_lead_id': leadId,
