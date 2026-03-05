@@ -31,7 +31,7 @@ class ActivityService {
   Future<List<ActivityModel>> getGlobalActivities({int limit = 20}) async {
     final response = await _supabase
         .from('activities')
-        .select()
+        .select('*, profiles:created_by(name)')
         .order('created_at', ascending: false)
         .limit(limit);
 
@@ -56,7 +56,7 @@ class ActivityService {
 
     final response = await _supabase
         .from('activities')
-        .select()
+        .select('*, profiles:created_by(name)')
         .order('created_at', ascending: false)
         .range(start, end);
 
