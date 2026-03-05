@@ -16,7 +16,7 @@ class ActivityService {
 
     final response = await _supabase
         .from('activities')
-        .select()
+        .select('*, profiles:created_by(name)')
         .eq('related_type', relatedType)
         .eq('related_id', relatedId)
         .order('created_at', ascending: false)
