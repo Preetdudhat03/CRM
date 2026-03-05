@@ -56,6 +56,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
 
       final lead = LeadModel(
@@ -67,6 +68,7 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
         status: _status,
         assignedTo: _assignedTo,
         estimatedValue: _estimatedValue,
+        organizationId: widget.lead?.organizationId ?? currentUser?.organizationId,
         createdAt: widget.lead?.createdAt ?? DateTime.now(),
       );
 
