@@ -132,7 +132,7 @@ class LeadModel {
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
     return {
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'first_name': firstName,
       'last_name': lastName,
       'email': email,

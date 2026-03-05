@@ -156,7 +156,7 @@ class DealModel {
       (m) => '_${m.group(0)!.toLowerCase()}',
     );
     return {
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'title': title,
       'contact_id': contactId.isEmpty ? null : contactId,
       'company_name': companyName,
