@@ -29,6 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_files_organization_id ON files(organization_id);
 ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: Users can only see files in their organization
+DROP POLICY IF EXISTS "Users can view files in their organization" ON files;
 CREATE POLICY "Users can view files in their organization" ON files
   FOR SELECT USING (
     organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
@@ -37,6 +38,7 @@ CREATE POLICY "Users can view files in their organization" ON files
   );
 
 -- RLS policy: Users can insert files in their organization
+DROP POLICY IF EXISTS "Users can insert files in their organization" ON files;
 CREATE POLICY "Users can insert files in their organization" ON files
   FOR INSERT WITH CHECK (
     organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
@@ -45,6 +47,7 @@ CREATE POLICY "Users can insert files in their organization" ON files
   );
 
 -- RLS policy: Users can delete files in their organization
+DROP POLICY IF EXISTS "Users can delete files in their organization" ON files;
 CREATE POLICY "Users can delete files in their organization" ON files
   FOR DELETE USING (
     organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
@@ -61,6 +64,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Storage RLS Policies for 'crm-files' bucket
 -- Allow authenticated users to upload files to their organization's folders
 -- (Assuming folder structure: organization_id/...)
+DROP POLICY IF EXISTS "Allow authenticated uploads to crm-files" ON storage.objects;
 CREATE POLICY "Allow authenticated uploads to crm-files"
 ON storage.objects FOR INSERT
 TO authenticated
@@ -73,6 +77,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Allow authenticated downloads from crm-files" ON storage.objects;
 CREATE POLICY "Allow authenticated downloads from crm-files"
 ON storage.objects FOR SELECT
 TO authenticated
@@ -85,6 +90,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Allow authenticated deletion from crm-files" ON storage.objects;
 CREATE POLICY "Allow authenticated deletion from crm-files"
 ON storage.objects FOR DELETE
 TO authenticated
