@@ -96,7 +96,7 @@ class ActivityService {
         'description': description,
         'metadata': metadata,
         'created_by': userId,
-        'organization_id': organizationId,
+        'organization_id': (organizationId != null && organizationId.isEmpty) ? null : organizationId,
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
