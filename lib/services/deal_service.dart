@@ -54,6 +54,7 @@ class DealService {
       description:
           'Deal "${newDeal.title}" added for \$${newDeal.value.toStringAsFixed(2)}',
       metadata: {'value': newDeal.value, 'stage': newDeal.stage.name},
+      organizationId: newDeal.organizationId,
     );
 
     return newDeal;
@@ -85,6 +86,7 @@ class DealService {
       title: 'Deal Updated',
       description: 'Stage: ${updatedDeal.stage.displayName}',
       metadata: {'stage': updatedDeal.stage.name, 'value': updatedDeal.value},
+      organizationId: updatedDeal.organizationId,
     );
 
     return updatedDeal;
