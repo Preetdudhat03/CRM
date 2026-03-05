@@ -40,6 +40,7 @@ class AuthService {
               email.split('@')[0],
           email: profile['email'] ?? email,
           role: role,
+          organizationId: profile['organization_id'],
           avatarUrl: profile['avatar_url'],
         );
       } catch (e) {
@@ -100,6 +101,7 @@ class AuthService {
         name: profile['name'] ?? user.email?.split('@')[0] ?? 'User',
         email: profile['email'] ?? user.email ?? '',
         role: role,
+        organizationId: profile['organization_id'],
         avatarUrl: profile['avatar_url'],
       );
     } catch (e) {
