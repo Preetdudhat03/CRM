@@ -1,6 +1,6 @@
 class FileModel {
   final String id;
-  final String organizationId;
+  final String? organizationId;
   final String relatedType; // 'lead', 'contact', 'deal', 'company'
   final String relatedId;
   final String fileName;
@@ -12,7 +12,7 @@ class FileModel {
 
   FileModel({
     required this.id,
-    required this.organizationId,
+    this.organizationId,
     required this.relatedType,
     required this.relatedId,
     required this.fileName,
@@ -25,10 +25,10 @@ class FileModel {
 
   factory FileModel.fromJson(Map<String, dynamic> json) {
     return FileModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
-      relatedType: json['related_type'],
-      relatedId: json['related_id'],
+      relatedType: json['related_type'] ?? '',
+      relatedId: json['related_id'] ?? '',
       fileName: json['file_name'],
       fileUrl: json['file_url'],
       fileSize: json['file_size'],
@@ -43,7 +43,7 @@ class FileModel {
   Map<String, dynamic> toJson() {
     return {
       if (id.isNotEmpty) 'id': id,
-      'organization_id': organizationId.isEmpty ? null : organizationId,
+      'organization_id': organizationId,
       'related_type': relatedType,
       'related_id': relatedId,
       'file_name': fileName,
