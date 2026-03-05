@@ -49,6 +49,7 @@ class _AddEditCompanyScreenState extends ConsumerState<AddEditCompanyScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
       setState(() => _isLoading = true);
 
@@ -64,6 +65,7 @@ class _AddEditCompanyScreenState extends ConsumerState<AddEditCompanyScreen> {
           revenue: _revenue,
           employeeCount: _employeeCount,
           assignedTo: _assignedTo,
+          organizationId: widget.company?.organizationId ?? currentUser?.organizationId,
           createdAt: widget.company?.createdAt ?? DateTime.now(),
           updatedAt: DateTime.now(),
         );

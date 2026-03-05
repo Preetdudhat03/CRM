@@ -46,6 +46,7 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
+      final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
 
       final deal = DealModel(
@@ -60,6 +61,7 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
         assignedTo: _assignedTo,
         expectedCloseDate: _expectedCloseDate,
         notes: _notes,
+        organizationId: widget.deal?.organizationId ?? currentUser?.organizationId,
         createdAt: widget.deal?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );

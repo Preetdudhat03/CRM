@@ -69,6 +69,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
       setState(() => _isLoading = true);
 
@@ -115,6 +116,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
           createdFromLead: widget.contact?.createdFromLead ?? false,
           sourceLeadId: widget.contact?.sourceLeadId,
           companyId: _companyId,
+          organizationId: widget.contact?.organizationId ?? currentUser?.organizationId,
         );
 
         if (widget.contact == null) {
