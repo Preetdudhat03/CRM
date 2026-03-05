@@ -49,7 +49,9 @@ class ActivityModel {
       description: json['description'] ?? '',
       metadata: meta,
       createdBy: json['created_by'],
-      performerName: json['performer_name'] ?? json['performed_by'],
+      performerName: json['performer_name'] ??
+          json['performed_by'] ??
+          (json['profiles'] is Map ? json['profiles']['name'] : null),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),

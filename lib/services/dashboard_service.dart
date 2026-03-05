@@ -25,7 +25,7 @@ class DashboardService {
       _safeQuery(
         () => _supabase
             .from('activities')
-            .select()
+            .select('*, profiles:created_by(name)')
             .order('created_at', ascending: false)
             .limit(10),
         <dynamic>[],
