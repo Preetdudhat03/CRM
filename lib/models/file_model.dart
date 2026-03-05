@@ -43,7 +43,7 @@ class FileModel {
   Map<String, dynamic> toJson() {
     return {
       if (id.isNotEmpty) 'id': id,
-      'organization_id': organizationId,
+      'organization_id': organizationId.isEmpty ? null : organizationId,
       'related_type': relatedType,
       'related_id': relatedId,
       'file_name': fileName,

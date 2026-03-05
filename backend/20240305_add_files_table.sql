@@ -9,7 +9,7 @@ END $$;
 -- Create files table
 CREATE TABLE IF NOT EXISTS files (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  organization_id uuid NOT NULL,
+  organization_id uuid, -- Made nullable to avoid syntax errors with empty strings
   related_type text NOT NULL CHECK (related_type IN ('lead', 'contact', 'deal', 'company')),
   related_id uuid NOT NULL,
   file_name text NOT NULL,
