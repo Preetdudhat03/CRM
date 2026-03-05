@@ -183,6 +183,17 @@ class ActivityTimelineItem extends StatelessWidget {
                         fontSize: 13,
                       ),
                     ),
+                    if (activity.performerName != null && activity.performerName!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'by ${activity.performerName}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                     if (activity.metadata.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       _buildMetadataView(activity.metadata),
