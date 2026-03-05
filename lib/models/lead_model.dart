@@ -21,6 +21,7 @@ extension LeadStatusExtension on LeadStatus {
 
 class LeadModel {
   final String id;
+  final String? organizationId;
   final String name;
   final String email;
   final String phone;
@@ -40,6 +41,7 @@ class LeadModel {
 
   const LeadModel({
     required this.id,
+    this.organizationId,
     required this.name,
     required this.email,
     required this.phone,
@@ -55,6 +57,7 @@ class LeadModel {
 
   LeadModel copyWith({
     String? id,
+    String? organizationId,
     String? name,
     String? email,
     String? phone,
@@ -69,6 +72,7 @@ class LeadModel {
   }) {
     return LeadModel(
       id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
@@ -92,6 +96,7 @@ class LeadModel {
     );
     return LeadModel(
       id: json['id'],
+      organizationId: json['organization_id'],
       name:
           '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'
               .trim()
@@ -127,6 +132,7 @@ class LeadModel {
     final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
     return {
+      'organization_id': organizationId,
       'first_name': firstName,
       'last_name': lastName,
       'email': email,

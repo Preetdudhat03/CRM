@@ -65,7 +65,7 @@ class FileListView extends ConsumerWidget {
         leading: _getFileIcon(file.fileName),
         title: Text(file.fileName),
         subtitle: Text(
-          '${_formatFileSize(file.fileSize)} • ${DateFormat('MMM d, y`).format(file.createdAt)}',
+          '${_formatFileSize(file.fileSize)} • ${DateFormat('MMM d, y').format(file.createdAt)}',
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

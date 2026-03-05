@@ -49,6 +49,7 @@ extension DealStageExtension on DealStage {
 
 class DealModel {
   final String id;
+  final String? organizationId;
   final String title;
   final String contactId;
   final String contactName; // Denormalized for simpler UI
@@ -65,6 +66,7 @@ class DealModel {
 
   const DealModel({
     required this.id,
+    this.organizationId,
     required this.title,
     required this.contactId,
     required this.contactName,
@@ -81,6 +83,7 @@ class DealModel {
 
   DealModel copyWith({
     String? id,
+    String? organizationId,
     String? title,
     String? contactId,
     String? contactName,
@@ -96,6 +99,7 @@ class DealModel {
   }) {
     return DealModel(
       id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
       title: title ?? this.title,
       contactId: contactId ?? this.contactId,
       contactName: contactName ?? this.contactName,
@@ -120,6 +124,7 @@ class DealModel {
     );
     return DealModel(
       id: json['id'],
+      organizationId: json['organization_id'],
       title: json['title'] ?? '',
       contactId: json['contact_id'] ?? '',
       contactName: json['contact_name'] ?? '',
@@ -151,6 +156,7 @@ class DealModel {
       (m) => '_${m.group(0)!.toLowerCase()}',
     );
     return {
+      'organization_id': organizationId,
       'title': title,
       'contact_id': contactId.isEmpty ? null : contactId,
       'company_name': companyName,
