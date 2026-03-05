@@ -111,7 +111,7 @@ class ContactModel {
     }
 
     return ContactModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
       name:
           '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'

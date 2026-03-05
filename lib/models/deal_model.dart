@@ -123,7 +123,7 @@ class DealModel {
       (m) => m.group(1)!.toUpperCase(),
     );
     return DealModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
       title: json['title'] ?? '',
       contactId: json['contact_id'] ?? '',

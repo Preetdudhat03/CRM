@@ -63,7 +63,7 @@ class CompanyModel {
 
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
       name: json['name'] ?? '',
       industry: json['industry'],

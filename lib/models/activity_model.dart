@@ -39,7 +39,7 @@ class ActivityModel {
     }
 
     return ActivityModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
       relatedType:
           json['related_type'] ?? json['related_entity_type'] ?? 'other',
