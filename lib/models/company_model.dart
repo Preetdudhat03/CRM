@@ -86,7 +86,7 @@ class CompanyModel {
   Map<String, dynamic> toJson() {
     return {
       if (id.isNotEmpty) 'id': id,
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'name': name,
       'industry': industry,
       'website': website,

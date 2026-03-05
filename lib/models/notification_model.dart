@@ -68,7 +68,7 @@ class NotificationModel {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'title': title,
       'message': message,
       'is_read': isRead,
