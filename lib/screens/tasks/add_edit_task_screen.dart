@@ -5,6 +5,7 @@ import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_management_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
 class AddEditTaskScreen extends ConsumerStatefulWidget {
@@ -42,7 +43,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
     _relatedEntityName = widget.task?.relatedEntityName;
   }
 
-  void _submit() {
+    if (_formKey.currentState!.validate()) {
       final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
       final task = TaskModel(

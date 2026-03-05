@@ -10,6 +10,7 @@ import '../../services/storage_service.dart';
 import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
 import '../../widgets/pickers/company_picker.dart';
+import '../../providers/auth_provider.dart';
 
 class AddEditContactScreen extends ConsumerStatefulWidget {
   final ContactModel? contact;

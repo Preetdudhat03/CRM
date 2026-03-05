@@ -6,6 +6,7 @@ import '../../providers/contact_provider.dart';
 import '../../providers/user_management_provider.dart';
 import '../../widgets/pickers/company_picker.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import '../../providers/auth_provider.dart';
 
 class AddEditDealScreen extends ConsumerStatefulWidget {
   final DealModel? deal;

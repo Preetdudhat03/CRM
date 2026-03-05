@@ -7,6 +7,7 @@ import '../../widgets/animations/fade_in_slide.dart';
 import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
 import '../../models/user_model.dart';
+import '../../providers/auth_provider.dart';
 
 class AddEditCompanyScreen extends ConsumerStatefulWidget {
   final CompanyModel? company;

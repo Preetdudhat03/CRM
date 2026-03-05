@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import '../../models/lead_model.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/lead_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
