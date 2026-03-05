@@ -43,6 +43,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
     _relatedEntityName = widget.task?.relatedEntityName;
   }
 
+  void _submit() {
     if (_formKey.currentState!.validate()) {
       final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
