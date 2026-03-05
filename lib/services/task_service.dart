@@ -43,6 +43,7 @@ class TaskService {
           'task_id': newTask.id,
           'due_date': newTask.dueDate.toIso8601String(),
         },
+        organizationId: newTask.organizationId,
       );
     }
 
@@ -68,6 +69,7 @@ class TaskService {
         title: 'Task Completed',
         description: 'Task "${updatedTask.title}" marked as done.',
         metadata: {'task_id': updatedTask.id},
+        organizationId: updatedTask.organizationId,
       );
     }
 

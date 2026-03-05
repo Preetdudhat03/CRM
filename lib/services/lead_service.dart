@@ -113,6 +113,7 @@ class LeadService {
       title: 'Lead Created',
       description: 'New lead added: ${newLead.firstName} ${newLead.lastName}',
       metadata: {'source': newLead.leadSource, 'status': newLead.status},
+      organizationId: newLead.organizationId,
     );
 
     return newLead;
@@ -140,6 +141,7 @@ class LeadService {
       title: 'Lead Updated',
       description: 'Lead info or status changed.',
       metadata: {'status': updatedLead.status},
+      organizationId: updatedLead.organizationId,
     );
 
     return updatedLead;
@@ -240,6 +242,7 @@ class LeadService {
           title: 'Lead Converted',
           description: 'Lead converted to contact.',
           metadata: {'contact_id': contactId, 'company_id': companyId},
+          organizationId: leadMap['organization_id'],
         );
 
         // Also log for the new contact
@@ -250,6 +253,7 @@ class LeadService {
           title: 'Contact Created from Lead',
           description: 'Contact established via lead conversion.',
           metadata: {'source_lead_id': leadId},
+          organizationId: leadMap['organization_id'],
         );
 
         return contactId;
