@@ -58,6 +58,7 @@ extension TaskPriorityExtension on TaskPriority {
 
 class TaskModel {
   final String id;
+  final String? organizationId;
   final String title;
   final String description;
   final DateTime dueDate;
@@ -73,6 +74,7 @@ class TaskModel {
 
   const TaskModel({
     required this.id,
+    this.organizationId,
     required this.title,
     required this.description,
     required this.dueDate,
@@ -87,6 +89,7 @@ class TaskModel {
 
   TaskModel copyWith({
     String? id,
+    String? organizationId,
     String? title,
     String? description,
     DateTime? dueDate,
@@ -100,6 +103,7 @@ class TaskModel {
   }) {
     return TaskModel(
       id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
       title: title ?? this.title,
       description: description ?? this.description,
       dueDate: dueDate ?? this.dueDate,
@@ -116,6 +120,7 @@ class TaskModel {
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
       id: json['id'] ?? '',
+      organizationId: json['organization_id'],
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       dueDate: json['due_date'] != null
@@ -141,6 +146,7 @@ class TaskModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'organization_id': organizationId,
       'title': title,
       'description': description,
       'due_date': dueDate.toIso8601String(),
