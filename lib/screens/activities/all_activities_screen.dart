@@ -111,7 +111,7 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
   Widget _buildActivityTile(BuildContext context, ActivityModel item) {
     final typeStr = item.activityType;
     final title = item.title;
-    final createdBy = item.createdBy ?? '';
+    final performerName = item.performerName ?? item.createdBy ?? '';
     final description = item.description;
     final date = item.createdAt;
 
@@ -134,9 +134,9 @@ class _AllActivitiesScreenState extends State<AllActivitiesScreen> {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (createdBy.isNotEmpty)
+          if (performerName.isNotEmpty)
             Text(
-              'by $createdBy',
+              'by $performerName',
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.primary,

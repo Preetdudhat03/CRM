@@ -68,7 +68,7 @@ class RecentActivityList extends ConsumerWidget {
               final item = recentActivities[index];
               final typeStr = item['type'] ?? 'other';
               final title = item['title'] ?? 'Activity';
-              final createdBy = item['created_by'] ?? 'name';
+              final createdBy = (item['profiles'] as Map?)?['name'] ?? item['created_by'] ?? '';
               final dateStr = item['date'] ?? item['created_at'];
               final date = dateStr != null
                   ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
