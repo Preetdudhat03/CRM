@@ -33,8 +33,10 @@ CREATE POLICY "Users can delete files in their organization" ON files
   FOR DELETE USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
 -- Storage Configuration
--- Create a new bucket 'crm-files' (This usually needs to be done via Supabase dashboard or API, but we can set up policies)
--- Note: In a real migration, we might use a function to ensure bucket existence if supported.
+-- Create 'crm-files' bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('crm-files', 'crm-files', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS Policies for 'crm-files' bucket
 -- Allow authenticated users to upload files to their organization's folders
