@@ -95,7 +95,7 @@ class LeadModel {
       (m) => m.group(1)!.toUpperCase(),
     );
     return LeadModel(
-      id: json['id'],
+      id: json['id'] ?? '',
       organizationId: json['organization_id'],
       name:
           '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'
