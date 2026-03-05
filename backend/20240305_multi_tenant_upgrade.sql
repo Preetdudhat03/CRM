@@ -21,6 +21,9 @@ BEGIN
     LOOP
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = t AND column_name = 'organization_id') THEN
             EXECUTE format('ALTER TABLE %I ADD COLUMN organization_id UUID', t);
+        ELSE
+            -- Ensure it's nullable even if it existed before
+            EXECUTE format('ALTER TABLE %I ALTER COLUMN organization_id DROP NOT NULL', t);
         END IF;
     END LOOP;
 END $$;
@@ -38,6 +41,9 @@ CREATE TABLE IF NOT EXISTS files (
   uploaded_by uuid REFERENCES profiles(id),
   created_at timestamp with time zone DEFAULT now()
 );
+
+-- Ensure nullable for existing table
+ALTER TABLE files ALTER COLUMN organization_id DROP NOT NULL;
 
 -- 4. Enable RLS and Create Global Policies
 DO $$ 

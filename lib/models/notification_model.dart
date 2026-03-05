@@ -1,5 +1,6 @@
 class NotificationModel {
   final String id;
+  final String? organizationId;
   final String title;
   final String message;
   final DateTime date;
@@ -11,6 +12,7 @@ class NotificationModel {
 
   const NotificationModel({
     required this.id,
+    this.organizationId,
     required this.title,
     required this.message,
     required this.date,
@@ -23,6 +25,7 @@ class NotificationModel {
 
   NotificationModel copyWith({
     String? id,
+    String? organizationId,
     String? title,
     String? message,
     DateTime? date,
@@ -33,6 +36,7 @@ class NotificationModel {
   }) {
     return NotificationModel(
       id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
       title: title ?? this.title,
       message: message ?? this.message,
       date: date ?? this.date,
@@ -47,6 +51,7 @@ class NotificationModel {
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json['id']?.toString() ?? '',
+      organizationId: json['organization_id'],
       title: json['title'] ?? '',
       message: json['message'] ?? '',
       date: json['created_at'] != null
@@ -63,6 +68,7 @@ class NotificationModel {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
+      'organization_id': organizationId,
       'title': title,
       'message': message,
       'is_read': isRead,
