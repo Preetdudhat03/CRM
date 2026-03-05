@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/lead_model.dart';
 import '../../providers/lead_provider.dart';
 import '../../widgets/activity_timeline.dart';
+import '../widgets/files_list_view.dart';
 
 class LeadDetailScreen extends ConsumerStatefulWidget {
   final LeadModel lead;
@@ -21,7 +22,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -69,6 +70,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Activity'),
+            Tab(text: 'Files'),
           ],
         ),
       ),
@@ -77,6 +79,11 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
         children: [
           _buildOverviewTab(),
           ActivityTimeline(relatedType: 'lead', relatedId: widget.lead.id),
+          FileListView(
+            relatedType: 'lead',
+            relatedId: widget.lead.id,
+            organizationId: widget.lead.organizationId ?? '',
+          ),
         ],
       ),
       floatingActionButton: widget.lead.status != LeadStatus.converted

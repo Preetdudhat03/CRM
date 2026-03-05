@@ -6,6 +6,7 @@ import '../../models/contact_model.dart';
 import '../../core/services/permission_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/activity_timeline.dart';
+import '../widgets/files_list_view.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final ContactModel contact;
@@ -24,7 +25,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -80,6 +81,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Activity'),
+            Tab(text: 'Files'),
           ],
         ),
       ),
@@ -88,6 +90,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
         children: [
           _buildOverviewTab(context, contact),
           ActivityTimeline(relatedType: 'contact', relatedId: contact.id),
+          FileListView(
+            relatedType: 'contact',
+            relatedId: contact.id,
+            organizationId: contact.organizationId ?? '',
+          ),
         ],
       ),
     );

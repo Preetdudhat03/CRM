@@ -12,6 +12,7 @@ import 'add_edit_company_screen.dart';
 import 'package:intl/intl.dart';
 import '../../providers/user_management_provider.dart';
 import '../../widgets/activity_timeline.dart';
+import '../widgets/files_list_view.dart';
 
 class CompanyDetailScreen extends ConsumerStatefulWidget {
   final CompanyModel company;
@@ -30,7 +31,7 @@ class _CompanyDetailScreenState extends ConsumerState<CompanyDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -72,6 +73,7 @@ class _CompanyDetailScreenState extends ConsumerState<CompanyDetailScreen>
             Tab(text: 'Contacts'),
             Tab(text: 'Deals'),
             Tab(text: 'Activities'),
+            Tab(text: 'Files'),
           ],
         ),
       ),
@@ -82,6 +84,11 @@ class _CompanyDetailScreenState extends ConsumerState<CompanyDetailScreen>
           _buildContactsTab(company),
           _buildDealsTab(company),
           _buildActivitiesTab(company),
+          FileListView(
+            relatedType: 'company',
+            relatedId: company.id,
+            organizationId: company.organizationId ?? '',
+          ),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
 import '../../widgets/activity_timeline.dart';
+import '../widgets/files_list_view.dart';
 
 class DealDetailScreen extends ConsumerStatefulWidget {
   final DealModel deal;
@@ -20,7 +21,7 @@ class _DealDetailScreenState extends ConsumerState<DealDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -55,6 +56,7 @@ class _DealDetailScreenState extends ConsumerState<DealDetailScreen>
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Activity'),
+            Tab(text: 'Files'),
           ],
         ),
       ),
@@ -63,6 +65,11 @@ class _DealDetailScreenState extends ConsumerState<DealDetailScreen>
         children: [
           _buildOverviewTab(deal),
           ActivityTimeline(relatedType: 'deal', relatedId: deal.id),
+          FileListView(
+            relatedType: 'deal',
+            relatedId: deal.id,
+            organizationId: deal.organizationId ?? '',
+          ),
         ],
       ),
     );
