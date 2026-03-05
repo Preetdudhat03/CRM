@@ -27,7 +27,9 @@ class FileService {
       // 1. Upload to Storage
       // Path: organization_id/related_type/related_id/timestamp_filename
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final storagePath = '$organizationId/$relatedType/$relatedId/${timestamp}_$fileName';
+      final storagePath = organizationId.isEmpty
+          ? '$relatedType/$relatedId/${timestamp}_$fileName'
+          : '$organizationId/$relatedType/$relatedId/${timestamp}_$fileName';
       
       await _supabase.storage.from('crm-files').upload(
         storagePath,

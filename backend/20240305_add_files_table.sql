@@ -66,7 +66,11 @@ ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
   bucket_id = 'crm-files' AND
-  (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+  (
+    (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+    OR
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL
+  )
 );
 
 CREATE POLICY "Allow authenticated downloads from crm-files"
@@ -74,7 +78,11 @@ ON storage.objects FOR SELECT
 TO authenticated
 USING (
   bucket_id = 'crm-files' AND
-  (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+  (
+    (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+    OR
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL
+  )
 );
 
 CREATE POLICY "Allow authenticated deletion from crm-files"
@@ -82,5 +90,9 @@ ON storage.objects FOR DELETE
 TO authenticated
 USING (
   bucket_id = 'crm-files' AND
-  (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+  (
+    (storage.foldername(name))[1] = (SELECT organization_id::text FROM profiles WHERE id = auth.uid())
+    OR
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL
+  )
 );
