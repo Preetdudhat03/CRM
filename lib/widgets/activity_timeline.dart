@@ -211,6 +211,7 @@ class ActivityTimelineItem extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 2),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '${e.key.replaceAll('_', ' ')}: ',
@@ -220,9 +221,11 @@ class ActivityTimelineItem extends StatelessWidget {
                     color: Colors.grey,
                   ),
                 ),
-                Text(
-                  '${e.value}',
-                  style: const TextStyle(fontSize: 11, color: Colors.black87),
+                Expanded(
+                  child: Text(
+                    '${e.value}',
+                    style: const TextStyle(fontSize: 11, color: Colors.black87),
+                  ),
                 ),
               ],
             ),
