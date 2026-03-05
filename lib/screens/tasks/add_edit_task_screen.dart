@@ -43,7 +43,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
   }
 
   void _submit() {
-    if (_formKey.currentState!.validate()) {
+      final currentUser = ref.read(currentUserProvider);
       _formKey.currentState!.save();
       final task = TaskModel(
         id: widget.task?.id ?? '',
@@ -56,6 +56,7 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
         relatedEntityId: _relatedEntityId,
         relatedEntityType: _relatedEntityType,
         relatedEntityName: _relatedEntityName,
+        organizationId: widget.task?.organizationId ?? currentUser?.organizationId,
         createdAt: widget.task?.createdAt ?? DateTime.now(),
       );
 
