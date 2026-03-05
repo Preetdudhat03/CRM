@@ -146,7 +146,7 @@ class TaskModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'title': title,
       'description': description,
       'due_date': dueDate.toIso8601String(),

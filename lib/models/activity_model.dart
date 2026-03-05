@@ -59,7 +59,7 @@ class ActivityModel {
   Map<String, dynamic> toJson() {
     return {
       if (id.isNotEmpty) 'id': id,
-      'organization_id': organizationId,
+      'organization_id': (organizationId != null && organizationId!.isEmpty) ? null : organizationId,
       'related_type': relatedType,
       'related_id': relatedId,
       'activity_type': activityType,
