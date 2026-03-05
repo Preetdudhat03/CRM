@@ -6,6 +6,7 @@ class UserModel {
   final String name;
   final String email;
   final Role role;
+  final String? organizationId;
   final String? avatarUrl;
   final List<Permission>? customPermissions;
 
@@ -14,6 +15,7 @@ class UserModel {
     required this.name,
     required this.email,
     required this.role,
+    this.organizationId,
     this.avatarUrl,
     this.customPermissions,
   });
@@ -40,6 +42,7 @@ class UserModel {
       name: name ?? this.name,
       email: email ?? this.email,
       role: role ?? this.role,
+      organizationId: organizationId ?? this.organizationId,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       customPermissions: customPermissions ?? this.customPermissions,
     );
