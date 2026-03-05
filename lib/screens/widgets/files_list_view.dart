@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../providers/file_provider.dart';
 import '../../models/file_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/role_model.dart';
 
 class FileListView extends ConsumerWidget {
   final String relatedType;
@@ -23,9 +24,10 @@ class FileListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileState = ref.watch(fileProvider('$relatedType:$relatedId'));
-    final authState = ref.watch(authProvider);
-    final isAdminOrManager = authState.role == 'admin' || authState.role == 'manager';
-    final canUpload = authState.role != 'viewer';
+    final role = ref.watch(userRoleProvider);
+    
+    final isAdminOrManager = role == Role.admin || role == Role.manager || role == Role.superAdmin;
+    final canUpload = role != Role.viewer;
 
     return Column(
       children: [
