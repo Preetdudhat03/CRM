@@ -1,3 +1,11 @@
+-- Ensure organization_id exists in profiles for multi-tenancy
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='organization_id') THEN
+        ALTER TABLE profiles ADD COLUMN organization_id UUID;
+    END IF;
+END $$;
+
 -- Create files table
 CREATE TABLE IF NOT EXISTS files (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,15 +30,27 @@ ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: Users can only see files in their organization
 CREATE POLICY "Users can view files in their organization" ON files
-  FOR SELECT USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
+  FOR SELECT USING (
+    organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
+    OR 
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL -- Fallback for non-multi-tenant users
+  );
 
 -- RLS policy: Users can insert files in their organization
 CREATE POLICY "Users can insert files in their organization" ON files
-  FOR INSERT WITH CHECK (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
+  FOR INSERT WITH CHECK (
+    organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
+    OR
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL
+  );
 
 -- RLS policy: Users can delete files in their organization
 CREATE POLICY "Users can delete files in their organization" ON files
-  FOR DELETE USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
+  FOR DELETE USING (
+    organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
+    OR
+    (SELECT organization_id FROM profiles WHERE id = auth.uid()) IS NULL
+  );
 
 -- Storage Configuration
 -- Create 'crm-files' bucket
