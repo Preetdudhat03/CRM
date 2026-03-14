@@ -17,6 +17,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _orgNameController = TextEditingController();
   Role _selectedRole = Role.admin; // Default to Admin for first user
   bool _isLoading = false;
   bool _isPasswordVisible = false;
@@ -32,6 +33,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _passwordController.text.trim(),
         _nameController.text.trim(),
         _selectedRole,
+        organizationName: _orgNameController.text.trim(),
       );
 
       if (!mounted) return;
@@ -96,6 +98,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: 0.25,
+                  child: TextFormField(
+                    controller: _orgNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Organization Name',
+                      hintText: 'e.g. Acme Corp',
+                      prefixIcon: Icon(Icons.business_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
