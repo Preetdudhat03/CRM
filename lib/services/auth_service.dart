@@ -122,17 +122,26 @@ class AuthService {
     }
   }
 
-  // Helper to register a new user (optional, good to have)
+  // Register a new user with optional organization name
   Future<UserModel> register(
     String email,
     String password,
     String name,
-    Role role,
-  ) async {
+    Role role, {
+    String? organizationName,
+  }) async {
+    final metadata = <String, dynamic>{
+      'name': name,
+      'role': role.name,
+    };
+    if (organizationName != null && organizationName.isNotEmpty) {
+      metadata['organization_name'] = organizationName;
+    }
+
     final AuthResponse res = await _supabase.auth.signUp(
       email: email,
       password: password,
-      data: {'name': name, 'role': role.name},
+      data: metadata,
     );
 
     final User? user = res.user;
