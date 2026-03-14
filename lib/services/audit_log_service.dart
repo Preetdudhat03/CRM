@@ -17,7 +17,7 @@ class AuditLogService {
     final start = page * pageSize;
     final end = start + pageSize - 1;
 
-    var query = _supabase.from('audit_logs').select().order('created_at', ascending: false);
+    var query = _supabase.from('audit_logs').select();
 
     // Apply filters based on Supabase documentation - these return PostgrestFilterBuilder
     if (userId != null && userId.isNotEmpty) query = query.eq('user_id', userId);
@@ -26,7 +26,7 @@ class AuditLogService {
     if (startDate != null) query = query.gte('created_at', startDate.toIso8601String());
     if (endDate != null) query = query.lte('created_at', endDate.toIso8601String());
 
-    final response = await query.range(start, end);
+    final response = await query.order('created_at', ascending: false).range(start, end);
     return (response as List).map((json) => AuditLogModel.fromJson(json)).toList();
   }
 
