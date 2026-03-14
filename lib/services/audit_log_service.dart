@@ -19,6 +19,7 @@ class AuditLogService {
 
     var query = _supabase.from('audit_logs').select().order('created_at', ascending: false);
 
+    // Apply filters based on Supabase documentation - these return PostgrestFilterBuilder
     if (userId != null && userId.isNotEmpty) query = query.eq('user_id', userId);
     if (action != null && action.isNotEmpty && action != 'all') query = query.eq('action', action);
     if (entityType != null && entityType.isNotEmpty && entityType != 'all') query = query.eq('entity_type', entityType);
