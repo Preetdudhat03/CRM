@@ -6,7 +6,7 @@
 -- IMPORTANT: Run this AFTER 20240305_multi_tenant_upgrade.sql
 
 -- ============================================================
--- 1. ORGANIZATIONS TABLE
+-- 1. CREATE TABLES FIRST (no policies yet)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS organizations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -16,31 +16,6 @@ CREATE TABLE IF NOT EXISTS organizations (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
-
--- Org owners and members can view their org
-CREATE POLICY "Members can view their organization"
-  ON organizations FOR SELECT
-  USING (
-    id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = auth.uid()
-    )
-  );
-
--- Only the owner can update the org
-CREATE POLICY "Owner can update organization"
-  ON organizations FOR UPDATE
-  USING (owner_id = auth.uid());
-
--- Authenticated users can create organizations
-CREATE POLICY "Authenticated users can create organizations"
-  ON organizations FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
-
--- ============================================================
--- 2. ORGANIZATION MEMBERS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS organization_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -50,9 +25,33 @@ CREATE TABLE IF NOT EXISTS organization_members (
   UNIQUE(organization_id, user_id)
 );
 
+-- ============================================================
+-- 2. RLS ON ORGANIZATIONS (now that both tables exist)
+-- ============================================================
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Members can view their organization"
+  ON organizations FOR SELECT
+  USING (
+    id IN (
+      SELECT organization_id FROM organization_members
+      WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Owner can update organization"
+  ON organizations FOR UPDATE
+  USING (owner_id = auth.uid());
+
+CREATE POLICY "Authenticated users can create organizations"
+  ON organizations FOR INSERT
+  WITH CHECK (auth.role() = 'authenticated');
+
+-- ============================================================
+-- 3. RLS ON ORGANIZATION MEMBERS
+-- ============================================================
 ALTER TABLE organization_members ENABLE ROW LEVEL SECURITY;
 
--- Members can see other members in their org
 CREATE POLICY "Members can view org members"
   ON organization_members FOR SELECT
   USING (
@@ -62,7 +61,6 @@ CREATE POLICY "Members can view org members"
     )
   );
 
--- Org owners/admins can insert members
 CREATE POLICY "Owners can add members"
   ON organization_members FOR INSERT
   WITH CHECK (
@@ -76,7 +74,6 @@ CREATE POLICY "Owners can add members"
     )
   );
 
--- Owners can remove members
 CREATE POLICY "Owners can remove members"
   ON organization_members FOR DELETE
   USING (
@@ -86,7 +83,6 @@ CREATE POLICY "Owners can remove members"
     )
   );
 
--- Owners can update member roles
 CREATE POLICY "Owners can update member roles"
   ON organization_members FOR UPDATE
   USING (
@@ -97,7 +93,7 @@ CREATE POLICY "Owners can update member roles"
   );
 
 -- ============================================================
--- 3. UPGRADE RLS POLICIES ON ALL CRM TABLES
+-- 4. UPGRADE RLS POLICIES ON ALL CRM TABLES
 --    Replace weak profile-based policies with membership-based
 -- ============================================================
 DO $$
@@ -167,7 +163,7 @@ BEGIN
 END $$;
 
 -- ============================================================
--- 4. PERFORMANCE INDEXES
+-- 5. PERFORMANCE INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_leads_org_id ON leads(organization_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_org_id ON contacts(organization_id);
@@ -181,7 +177,7 @@ CREATE INDEX IF NOT EXISTS idx_org_members_org_id ON organization_members(organi
 CREATE INDEX IF NOT EXISTS idx_org_members_user_id ON organization_members(user_id);
 
 -- ============================================================
--- 5. HELPER FUNCTION: Create org + membership for a user
+-- 6. HELPER FUNCTION: Create org + membership for a user
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.create_organization_for_user(
     org_name text,
@@ -210,7 +206,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
--- 6. UPDATE handle_new_user TRIGGER
+-- 7. UPDATE handle_new_user TRIGGER
 --    Auto-create an organization for every new signup
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -250,7 +246,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
--- 7. BACKFILL: Create orgs for existing users without one
+-- 8. BACKFILL: Create orgs for existing users without one
 -- ============================================================
 DO $$
 DECLARE
