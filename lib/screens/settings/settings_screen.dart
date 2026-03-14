@@ -6,6 +6,7 @@ import '../../models/role_model.dart';
 import 'user_management/user_management_screen.dart';
 import 'profile_screen.dart';
 import 'roles_permissions_screen.dart';
+import 'organization_settings_screen.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../core/services/permission_service.dart';
@@ -144,6 +145,24 @@ class SettingsScreen extends ConsumerWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const ProfileScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            _buildAnimatedItem(
+              delay: 0.15,
+              child: ListTile(
+                leading: const Icon(Icons.business),
+                title: const Text('Organization'),
+                subtitle: const Text('Manage your team & tenant'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OrganizationSettingsScreen(),
                     ),
                   );
                 },
