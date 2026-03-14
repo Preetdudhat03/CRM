@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/lead_model.dart';
 import 'activity_service.dart';
+import 'audit_log_service.dart';
 
 class LeadService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -116,6 +117,14 @@ class LeadService {
       organizationId: newLead.organizationId,
     );
 
+    AuditLogService.log(
+      action: 'lead_created',
+      entityType: 'lead',
+      entityId: newLead.id,
+      newValues: newLead.toJson(),
+      organizationId: newLead.organizationId,
+    );
+
     return newLead;
   }
 
@@ -144,12 +153,33 @@ class LeadService {
       organizationId: updatedLead.organizationId,
     );
 
+    AuditLogService.log(
+      action: 'lead_updated',
+      entityType: 'lead',
+      entityId: updatedLead.id,
+      oldValues: lead.toJson(),
+      newValues: updatedLead.toJson(),
+      organizationId: updatedLead.organizationId,
+    );
+
     return updatedLead;
   }
 
   /// Delete a lead by ID
   Future<void> deleteLead(String id) async {
+    final oldRecord = await _supabase.from('leads').select().eq('id', id).maybeSingle();
+
     await _supabase.from('leads').delete().eq('id', id);
+
+    if (oldRecord != null) {
+      AuditLogService.log(
+        action: 'lead_deleted',
+        entityType: 'lead',
+        entityId: id,
+        oldValues: oldRecord,
+        organizationId: oldRecord['organization_id'],
+      );
+    }
   }
 
   /// Converts a Lead to a Contact using the Supabase RPC function, with a fallback if missing.
@@ -253,6 +283,15 @@ class LeadService {
           title: 'Contact Created from Lead',
           description: 'Contact established via lead conversion.',
           metadata: {'source_lead_id': leadId},
+          organizationId: leadMap['organization_id'],
+        );
+
+        // Audit Log for Conversion
+        AuditLogService.log(
+          action: 'lead_converted',
+          entityType: 'lead',
+          entityId: leadId,
+          newValues: {'converted_contact_id': contactId, 'company_id': companyId},
           organizationId: leadMap['organization_id'],
         );
 
