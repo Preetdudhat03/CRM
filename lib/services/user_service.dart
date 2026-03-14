@@ -2,6 +2,7 @@ import '../models/user_model.dart';
 import '../models/role_model.dart';
 import '../models/permission_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'audit_log_service.dart';
 
 class UserService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -68,6 +69,13 @@ class UserService {
   }
 
   Future<UserModel> updateUser(UserModel user) async {
+    Map<String, dynamic>? oldProfile;
+    try {
+      oldProfile = await _supabase.from('profiles').select().eq('id', user.id).maybeSingle();
+    } catch (_) {}
+
+    UserModel? resultUser;
+
     try {
       // Update the profile's role
       final response = await _supabase
@@ -83,7 +91,7 @@ class UserService {
           .select()
           .single();
 
-      return UserModel(
+      resultUser = UserModel(
         id: response['id'],
         name: response['name'],
         email: response['email'],
@@ -115,7 +123,7 @@ class UserService {
         // The SQL function returns the updated fields
         final data = response as Map<String, dynamic>;
 
-        return UserModel(
+        resultUser = UserModel(
           id: data['id'] ?? user.id,
           name: data['name'] ?? user.name,
           email: user.email, // Email usually doesn't change here
@@ -133,11 +141,36 @@ class UserService {
         throw e;
       }
     }
+
+    if (resultUser != null && oldProfile != null && oldProfile['role'] != resultUser.role.name) {
+      AuditLogService.log(
+        action: 'user_role_updated',
+        entityType: 'user',
+        entityId: resultUser.id,
+        oldValues: {'role': oldProfile['role']},
+        newValues: {'role': resultUser.role.name},
+        organizationId: oldProfile['organization_id'],
+      );
+    }
+
+    return resultUser ?? user;
   }
 
   Future<void> deleteUser(String id) async {
+    final oldRecord = await _supabase.from('profiles').select().eq('id', id).maybeSingle();
+
     // Soft delete or hard delete from profiles
     await _supabase.from('profiles').delete().eq('id', id);
     // Note: This doesn't delete from auth.users without a trigger/function.
+
+    if (oldRecord != null) {
+      AuditLogService.log(
+        action: 'user_removed',
+        entityType: 'user',
+        entityId: id,
+        oldValues: oldRecord,
+        organizationId: oldRecord['organization_id'],
+      );
+    }
   }
 }
