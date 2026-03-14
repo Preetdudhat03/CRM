@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/deal_model.dart';
 import 'activity_service.dart';
+import 'audit_log_service.dart';
 
 class DealService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -57,6 +58,15 @@ class DealService {
       organizationId: newDeal.organizationId,
     );
 
+    // Audit Log
+    AuditLogService.log(
+      action: 'deal_created',
+      entityType: 'deal',
+      entityId: newDeal.id,
+      newValues: newDeal.toJson(),
+      organizationId: newDeal.organizationId,
+    );
+
     return newDeal;
   }
 
@@ -89,10 +99,33 @@ class DealService {
       organizationId: updatedDeal.organizationId,
     );
 
+    // Audit Log
+    AuditLogService.log(
+      action: deal.stage != updatedDeal.stage ? 'deal_stage_changed' : 'deal_updated',
+      entityType: 'deal',
+      entityId: updatedDeal.id,
+      oldValues: deal.toJson(),
+      newValues: updatedDeal.toJson(),
+      organizationId: updatedDeal.organizationId,
+    );
+
     return updatedDeal;
   }
 
   Future<void> deleteDeal(String id) async {
+    // Fetch deal to get old values before deleting
+    final oldRecord = await _supabase.from('deals').select().eq('id', id).maybeSingle();
+    
     await _supabase.from('deals').delete().eq('id', id);
+
+    if (oldRecord != null) {
+      AuditLogService.log(
+        action: 'deal_deleted',
+        entityType: 'deal',
+        entityId: id,
+        oldValues: oldRecord,
+        organizationId: oldRecord['organization_id'],
+      );
+    }
   }
 }

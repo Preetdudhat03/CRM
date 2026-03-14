@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/contact_model.dart';
+import 'audit_log_service.dart';
 
 class ContactService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -69,7 +70,17 @@ class ContactService {
         .select()
         .single();
 
-    return ContactModel.fromJson(response);
+    final newContact = ContactModel.fromJson(response);
+
+    AuditLogService.log(
+      action: 'contact_created',
+      entityType: 'contact',
+      entityId: newContact.id,
+      newValues: newContact.toJson(),
+      organizationId: newContact.organizationId,
+    );
+
+    return newContact;
   }
 
   /// Update an existing contact
@@ -84,12 +95,35 @@ class ContactService {
         .select()
         .single();
 
-    return ContactModel.fromJson(response);
+    final updatedContact = ContactModel.fromJson(response);
+
+    AuditLogService.log(
+      action: 'contact_updated',
+      entityType: 'contact',
+      entityId: updatedContact.id,
+      oldValues: contact.toJson(),
+      newValues: updatedContact.toJson(),
+      organizationId: updatedContact.organizationId,
+    );
+
+    return updatedContact;
   }
 
   /// Delete a contact by ID
   Future<void> deleteContact(String id) async {
+    final oldRecord = await _supabase.from('contacts').select().eq('id', id).maybeSingle();
+
     await _supabase.from('contacts').delete().eq('id', id);
+
+    if (oldRecord != null) {
+      AuditLogService.log(
+        action: 'contact_deleted',
+        entityType: 'contact',
+        entityId: id,
+        oldValues: oldRecord,
+        organizationId: oldRecord['organization_id'],
+      );
+    }
   }
 
   /// Toggle the favorite status of a contact
