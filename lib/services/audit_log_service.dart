@@ -66,7 +66,7 @@ class AuditLogService {
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      print('[AuditLogService] Log failure: $e');
+      // Failed to log audit event, suppress throwing to avoid breaking app flow
     }
   }
 }
