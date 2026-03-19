@@ -7,7 +7,8 @@ import '../screens/settings/profile_screen.dart';
 import '../screens/settings/organization_settings_screen.dart';
 
 class OrgSwitcher extends ConsumerWidget {
-  const OrgSwitcher({super.key});
+  final bool isCompact;
+  const OrgSwitcher({super.key, this.isCompact = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,34 +67,36 @@ class OrgSwitcher extends ConsumerWidget {
                               )
                             : null,
                       ),
-                      const SizedBox(width: 8),
-                      // Org Info
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              currentOrg.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                      if (!isCompact) ...[
+                        const SizedBox(width: 8),
+                        // Org Info
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                currentOrg.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              user.name,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Theme.of(context).hintColor,
+                              Text(
+                                user.name,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
+                      ],
                     ],
                   ),
                 ),
