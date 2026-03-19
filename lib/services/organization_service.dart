@@ -97,27 +97,87 @@ class OrganizationService {
     return OrganizationModel.fromJson(response);
   }
 
-  /// List all members of an organization (with profile data)
-  Future<List<OrganizationMemberModel>> listMembers(String orgId) async {
-    final response = await _supabase
-        .from('organization_members')
-        .select('*, profiles:user_id(name, email)')
-        .eq('organization_id', orgId)
-        .order('joined_at', ascending: true);
+  /// List all organizations the current user belongs to
+  Future<List<OrganizationModel>> getUserOrganizations() async {
+    final userId = _currentUserId;
+    if (userId == null) return [];
 
-    return (response as List)
-        .map((json) => OrganizationMemberModel.fromJson(json))
-        .toList();
+    try {
+      final response = await _supabase
+          .from('organization_members')
+          .select('organizations(*)')
+          .eq('user_id', userId);
+
+      return (response as List)
+          .map((item) => OrganizationModel.fromJson(item['organizations']))
+          .toList();
+    } catch (e) {
+      print('[OrganizationService] Error fetching user orgs: $e');
+      return [];
+    }
   }
 
-  /// Invite a user to the organization by email
-  /// Returns the created membership or throws if user not found
+  /// Switch the active organization for the current user
+  Future<void> switchOrganization(String orgId) async {
+    try {
+      await _supabase.rpc('switch_active_organization', params: {'p_org_id': orgId});
+    } catch (e) {
+      print('[OrganizationService] Error switching org: $e');
+      rethrow;
+    }
+  }
+
+  /// List all pending and accepted invites for an organization
+  Future<List<Map<String, dynamic>>> getInvitations(String orgId) async {
+    try {
+      final response = await _supabase
+          .from('org_invites')
+          .select('*, inviter:inviter_id(name)')
+          .eq('organization_id', orgId)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('[OrganizationService] Error fetching invites: $e');
+      return [];
+    }
+  }
+
+  /// Create a new invitation for an organization
+  Future<void> createInvitation({
+    required String orgId,
+    required String email,
+    String role = 'member',
+  }) async {
+    final userId = _currentUserId;
+    if (userId == null) throw Exception('Not authenticated');
+
+    try {
+      await _supabase.from('org_invites').insert({
+        'organization_id': orgId,
+        'email': email,
+        'role': role,
+        'inviter_id': userId,
+      });
+    } catch (e) {
+      print('[OrganizationService] Error creating invite: $e');
+      rethrow;
+    }
+  }
+
+  /// Cancel/Delete an invitation
+  Future<void> deleteInvitation(String inviteId) async {
+    await _supabase.from('org_invites').delete().eq('id', inviteId);
+  }
+
+  /// Legacy: Invite a user to the organization by email (requires user to exist)
+  /// Note: Prefer createInvitation for SaaS flow
   Future<OrganizationMemberModel> inviteMember({
     required String orgId,
     required String email,
     String role = 'member',
   }) async {
-    // Look up the user by email in profiles
+    // Keep for backward compatibility if needed, but redirects to the existing logic
     final profileResponse = await _supabase
         .from('profiles')
         .select('id')
@@ -125,26 +185,14 @@ class OrganizationService {
         .maybeSingle();
 
     if (profileResponse == null) {
-      throw Exception(
-        'No user found with email $email. They must register first.',
-      );
+      // If user doesn't exist, use the new invitation system
+      await createInvitation(orgId: orgId, email: email, role: role);
+      throw Exception('User not found. An invitation email has been sent to $email instead.');
     }
 
     final userId = profileResponse['id'] as String;
 
-    // Check if already a member
-    final existing = await _supabase
-        .from('organization_members')
-        .select('id')
-        .eq('organization_id', orgId)
-        .eq('user_id', userId)
-        .maybeSingle();
-
-    if (existing != null) {
-      throw Exception('User is already a member of this organization.');
-    }
-
-    // Add membership
+    // Direct insert (admin only)
     final response = await _supabase
         .from('organization_members')
         .insert({
@@ -155,12 +203,6 @@ class OrganizationService {
         .select('*, profiles:user_id(name, email)')
         .single();
 
-    // Update the user's profile with this org
-    await _supabase
-        .from('profiles')
-        .update({'organization_id': orgId})
-        .eq('id', userId);
-
     return OrganizationMemberModel.fromJson(response);
   }
 
@@ -169,17 +211,33 @@ class OrganizationService {
     // Get the member info first to update their profile
     final member = await _supabase
         .from('organization_members')
-        .select('user_id')
+        .select('user_id, organization_id')
         .eq('id', memberId)
         .single();
 
     await _supabase.from('organization_members').delete().eq('id', memberId);
 
-    // Clear org from their profile
-    await _supabase
+    // If this was their active org, clear it (or set to another)
+    final profile = await _supabase
         .from('profiles')
-        .update({'organization_id': null})
-        .eq('id', member['user_id']);
+        .select('organization_id')
+        .eq('id', member['user_id'])
+        .single();
+
+    if (profile['organization_id'] == member['organization_id']) {
+      // Find another org they belong to
+      final otherMember = await _supabase
+          .from('organization_members')
+          .select('organization_id')
+          .eq('user_id', member['user_id'])
+          .limit(1)
+          .maybeSingle();
+
+      await _supabase
+          .from('profiles')
+          .update({'organization_id': otherMember?['organization_id']})
+          .eq('id', member['user_id']);
+    }
   }
 
   /// Update a member's role
