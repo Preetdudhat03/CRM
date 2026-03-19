@@ -35,7 +35,6 @@ class HomeScreen extends ConsumerWidget {
     final currentPeriod = ref.watch(dashboardPeriodProvider);
 
     return Scaffold(
-    return Scaffold(
       appBar: AppBar(
         leading: const OrgSwitcher(),
         leadingWidth: 180,
