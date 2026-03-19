@@ -219,7 +219,7 @@ class OrganizationService {
           'user_id': userId,
           'role': role,
         })
-        .select('*, profiles:user_id(name, email)')
+        .select('*, profiles!user_id(name, email)')
         .single();
 
     return OrganizationMemberModel.fromJson(response);
@@ -263,7 +263,7 @@ class OrganizationService {
   Future<List<OrganizationMemberModel>> listMembers(String orgId) async {
     final response = await _supabase
         .from('organization_members')
-        .select('*, profiles:user_id(name, email)')
+        .select('*, profiles!user_id(name, email)')
         .eq('organization_id', orgId)
         .order('joined_at', ascending: true);
 
