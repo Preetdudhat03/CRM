@@ -6,7 +6,14 @@ import '../../widgets/animations/fade_in_slide.dart';
 import '../../utils/error_handler.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  final String? inviteToken;
+  final String? inviteEmail;
+
+  const RegisterScreen({
+    super.key,
+    this.inviteToken,
+    this.inviteEmail,
+  });
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -21,6 +28,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Role _selectedRole = Role.admin; // Default to Admin for first user
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.inviteEmail != null) {
+      _emailController.text = widget.inviteEmail!;
+    }
+  }
 
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
