@@ -30,6 +30,7 @@ class _OrganizationSettingsScreenState
   Widget build(BuildContext context) {
     final orgAsync = ref.watch(currentOrganizationProvider);
     final membersAsync = ref.watch(organizationMembersProvider);
+    final invitesAsync = ref.watch(invitationsProvider);
     final currentUser = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
