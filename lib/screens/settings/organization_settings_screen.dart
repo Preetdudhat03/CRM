@@ -356,7 +356,114 @@ class _OrganizationSettingsScreenState
             );
           },
         ),
+
+        const SizedBox(height: 32),
+
+        // Invites Section
+        FadeInSlide(
+          delay: 0.3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Pending Invitations',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        invitesAsync.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (e, _) => Center(
+            child: Text('Error loading invites: ${ErrorHandler.formatError(e)}'),
+          ),
+          data: (invites) {
+            final pendingInvites = invites.where((i) => i['status'] == 'pending').toList();
+            if (pendingInvites.isEmpty) {
+              return FadeInSlide(
+                delay: 0.4,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Center(
+                      child: Text(
+                        'No pending invitations',
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(color: theme.hintColor),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: pendingInvites.map((invite) {
+                return _buildInviteTile(context, invite, isOwner);
+              }).toList(),
+            );
+          },
+        ),
       ],
+    );
+  }
+
+  Widget _buildInviteTile(BuildContext context, Map<String, dynamic> invite, bool isOwner) {
+    final theme = Theme.of(context);
+    final email = invite['email'] as String;
+    final role = invite['role'] as String;
+    final id = invite['id'] as String;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        title: Text(email, style: const TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: Text('Role: ${role.toUpperCase()}'),
+        trailing: isOwner
+            ? IconButton(
+                icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                onPressed: () => _showCancelInviteConfirmation(context, id, email),
+              )
+            : null,
+      ),
+    );
+  }
+
+  void _showCancelInviteConfirmation(BuildContext context, String inviteId, String email) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Invitation'),
+        content: Text('Are you sure you want to cancel the invitation for $email?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('No')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref.read(invitationsProvider.notifier).deleteInvitation(inviteId);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -516,8 +623,8 @@ class _OrganizationSettingsScreenState
                 Navigator.pop(ctx);
                 try {
                   await ref
-                      .read(organizationMembersProvider.notifier)
-                      .inviteMember(email, role: selectedRole);
+                      .read(invitationsProvider.notifier)
+                      .createInvitation(email, role: selectedRole);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Invited $email successfully!')),
