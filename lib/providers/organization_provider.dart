@@ -137,7 +137,7 @@ class OrganizationMembersNotifier
     }
   }
 
-  Future<void> inviteMember(String email, {String role = 'member'}) async {
+  Future<void> inviteMember(String email, {String role = 'employee'}) async {
     if (_orgId == null) throw Exception('No organization');
     final member = await _repository.inviteMember(
       orgId: _orgId,
@@ -208,7 +208,7 @@ class InvitationsNotifier extends StateNotifier<AsyncValue<List<Map<String, dyna
     }
   }
 
-  Future<void> createInvitation(String email, {String role = 'member'}) async {
+  Future<void> createInvitation(String email, {String role = 'employee'}) async {
     if (_orgId == null) throw Exception('No organization');
     await _repository.createInvitation(orgId: _orgId, email: email, role: role);
     await load();

@@ -704,7 +704,7 @@ class _OrganizationSettingsScreenState
 
   void _showInviteDialog(BuildContext context, String orgId) {
     final emailController = TextEditingController();
-    String selectedRole = 'member';
+    String selectedRole = 'employee';
 
     showDialog(
       context: context,
@@ -740,11 +740,12 @@ class _OrganizationSettingsScreenState
                 ),
                 items: const [
                   DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                  DropdownMenuItem(value: 'member', child: Text('Member')),
+                  DropdownMenuItem(value: 'manager', child: Text('Manager')),
+                  DropdownMenuItem(value: 'employee', child: Text('Employee')),
                   DropdownMenuItem(value: 'viewer', child: Text('Viewer')),
                 ],
                 onChanged: (v) =>
-                    setDialogState(() => selectedRole = v ?? 'member'),
+                    setDialogState(() => selectedRole = v ?? 'employee'),
               ),
             ],
           ),
@@ -811,7 +812,8 @@ class _OrganizationSettingsScreenState
             ),
             items: const [
               DropdownMenuItem(value: 'admin', child: Text('Admin')),
-              DropdownMenuItem(value: 'member', child: Text('Member')),
+              DropdownMenuItem(value: 'manager', child: Text('Manager')),
+              DropdownMenuItem(value: 'employee', child: Text('Employee')),
               DropdownMenuItem(value: 'viewer', child: Text('Viewer')),
             ],
             onChanged: (v) =>
@@ -919,7 +921,9 @@ class _OrganizationSettingsScreenState
         return Colors.amber.shade700;
       case 'admin':
         return Colors.blue;
-      case 'member':
+      case 'manager':
+        return Colors.teal;
+      case 'employee':
         return Colors.green;
       case 'viewer':
         return Colors.grey;

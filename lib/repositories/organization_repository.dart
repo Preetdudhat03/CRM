@@ -34,7 +34,7 @@ class OrganizationRepository {
   Future<void> createInvitation({
     required String orgId,
     required String email,
-    String role = 'member',
+    String role = 'employee',
   }) async {
     return _service.createInvitation(
       orgId: orgId,
@@ -54,7 +54,7 @@ class OrganizationRepository {
   Future<OrganizationMemberModel> inviteMember({
     required String orgId,
     required String email,
-    String role = 'member',
+    String role = 'employee',
   }) async {
     return _service.inviteMember(orgId: orgId, email: email, role: role);
   }

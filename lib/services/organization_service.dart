@@ -166,7 +166,7 @@ class OrganizationService {
   Future<void> createInvitation({
     required String orgId,
     required String email,
-    String role = 'member',
+    String role = 'employee',
   }) async {
     final userId = _currentUserId;
     if (userId == null) throw Exception('Not authenticated');
@@ -194,7 +194,7 @@ class OrganizationService {
   Future<OrganizationMemberModel> inviteMember({
     required String orgId,
     required String email,
-    String role = 'member',
+    String role = 'employee',
   }) async {
     // Keep for backward compatibility if needed, but redirects to the existing logic
     final profileResponse = await _supabase

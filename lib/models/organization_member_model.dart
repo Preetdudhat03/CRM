@@ -12,7 +12,7 @@ class OrganizationMemberModel {
     required this.id,
     required this.organizationId,
     required this.userId,
-    this.role = 'member',
+    this.role = 'employee',
     required this.joinedAt,
     this.userName,
     this.userEmail,
@@ -51,7 +51,7 @@ class OrganizationMemberModel {
       id: json['id'] ?? '',
       organizationId: json['organization_id'] ?? '',
       userId: json['user_id'] ?? '',
-      role: json['role'] ?? 'member',
+      role: json['role'] ?? 'employee',
       joinedAt: json['joined_at'] != null
           ? DateTime.parse(json['joined_at'])
           : DateTime.now(),
@@ -76,8 +76,8 @@ class OrganizationMemberModel {
         return 'Owner';
       case 'admin':
         return 'Admin';
-      case 'member':
-        return 'Member';
+      case 'employee':
+        return 'Employee';
       case 'viewer':
         return 'Viewer';
       default:
