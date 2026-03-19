@@ -36,6 +36,8 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const OrgSwitcher(),
+        leadingWidth: 200,
         title: Row(
           children: [
             CircleAvatar(
