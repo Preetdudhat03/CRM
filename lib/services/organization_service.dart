@@ -151,7 +151,7 @@ class OrganizationService {
     try {
       final response = await _supabase
           .from('org_invites')
-          .select('*, inviter:inviter_id(name)')
+          .select('*, inviter:profiles!inviter_id(name)')
           .eq('organization_id', orgId)
           .order('created_at', ascending: false);
 
