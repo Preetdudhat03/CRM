@@ -24,7 +24,9 @@ class AuthService {
             .from('profiles')
             .select()
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
+
+        if (profile == null) throw Exception('Profile not found');
 
         final roleString = profile['role'] as String? ?? 'viewer';
         final role = Role.values.firstWhere(
@@ -88,7 +90,9 @@ class AuthService {
           .from('profiles')
           .select()
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+
+      if (profile == null) throw Exception('Profile not found');
 
       final roleString = profile['role'] as String? ?? 'viewer';
       final role = Role.values.firstWhere(
@@ -166,7 +170,9 @@ class AuthService {
         })
         .eq('id', user.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Profile update failed');
 
     final roleString = response['role'] as String? ?? 'viewer';
     return user.copyWith(

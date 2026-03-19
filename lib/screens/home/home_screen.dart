@@ -19,6 +19,7 @@ import '../tasks/add_edit_task_screen.dart';
 import '../../providers/notification_provider.dart';
 import '../activities/all_activities_screen.dart';
 import '../../widgets/org_switcher.dart';
+import '../../providers/organization_provider.dart';
 
 import '../../core/services/permission_service.dart';
 
@@ -128,6 +129,7 @@ class HomeScreen extends ConsumerWidget {
               final mainContent = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildInvitationBanner(context, ref),
                   FadeInSlide(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -488,6 +490,102 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInvitationBanner(BuildContext context, WidgetRef ref) {
+    final invitesAsync = ref.watch(userInvitationsProvider);
+
+    return invitesAsync.when(
+      data: (invites) {
+        if (invites.isEmpty) return const SizedBox.shrink();
+
+        final invite = invites.first;
+        final orgName = (invite['organizations'] as Map?)?['name'] ?? 'an organization';
+        final inviteId = invite['id'] as String;
+
+        return FadeInSlide(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.group_add, color: Colors.white, size: 32),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'New Invitation!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        'You have been invited to join $orgName',
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Joining organization...')),
+                      );
+                      await ref.read(userInvitationsProvider.notifier).acceptInvitation(inviteId);
+                      await ref.read(currentOrganizationProvider.notifier).refresh();
+                      ref.invalidate(userOrganizationsProvider);
+                      
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Successfully joined!')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${e.toString()}')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Accept'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

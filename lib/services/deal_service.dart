@@ -37,7 +37,9 @@ class DealService {
         .from('deals')
         .insert(json)
         .select('*, contacts(name, company)')
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to create deal');
 
     final contact = response['contacts'];
     if (contact != null) {
@@ -79,7 +81,9 @@ class DealService {
         .update(json)
         .eq('id', deal.id)
         .select('*, contacts(name, company)')
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Deal not found or access denied');
 
     final contact = response['contacts'];
     if (contact != null) {

@@ -20,7 +20,9 @@ class FileRepository {
         .from('files')
         .insert(file.toJson())
         .select()
-        .single();
+        .maybeSingle();
+    
+    if (response == null) throw Exception('Failed to insert file record');
     
     return FileModel.fromJson(response);
   }

@@ -27,7 +27,9 @@ class TaskService {
         .from('tasks')
         .insert(json)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to create task');
 
     final newTask = TaskModel.fromJson(response);
 
@@ -56,7 +58,9 @@ class TaskService {
         .update(task.toJson())
         .eq('id', task.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Task not found or access denied');
 
     final updatedTask = TaskModel.fromJson(response);
 

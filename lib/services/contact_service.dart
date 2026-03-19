@@ -29,7 +29,9 @@ class ContactService {
         .from('contacts')
         .select()
         .eq('id', id)
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Contact not found');
 
     return ContactModel.fromJson(response);
   }
@@ -68,7 +70,9 @@ class ContactService {
         .from('contacts')
         .insert(json)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to create contact');
 
     final newContact = ContactModel.fromJson(response);
 
@@ -93,7 +97,9 @@ class ContactService {
         .update(json)
         .eq('id', contact.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Contact not found or access denied');
 
     final updatedContact = ContactModel.fromJson(response);
 

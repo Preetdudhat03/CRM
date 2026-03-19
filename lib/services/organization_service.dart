@@ -18,7 +18,9 @@ class OrganizationService {
           .from('profiles')
           .select('organization_id')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (profileResponse == null) return null;
 
       final orgId = profileResponse['organization_id'];
       if (orgId == null) {
@@ -48,7 +50,9 @@ class OrganizationService {
           .from('organizations')
           .select()
           .eq('id', orgId)
-          .single();
+          .maybeSingle();
+
+      if (orgResponse == null) return null;
 
       return OrganizationModel.fromJson(orgResponse);
     } catch (e) {
@@ -72,7 +76,9 @@ class OrganizationService {
           .from('organizations')
           .select()
           .eq('id', orgId)
-          .single();
+          .maybeSingle();
+
+      if (orgResponse == null) throw Exception('Failed to fetch created organization');
 
       return OrganizationModel.fromJson(orgResponse);
     } catch (e) {
@@ -82,7 +88,9 @@ class OrganizationService {
             .from('organizations')
             .insert({'name': name, 'owner_id': userId})
             .select()
-            .single();
+            .maybeSingle();
+
+        if (orgResponse == null) throw Exception('Failed to create organization');
 
         final org = OrganizationModel.fromJson(orgResponse);
 
@@ -111,7 +119,9 @@ class OrganizationService {
         .update({'name': org.name, 'plan': org.plan})
         .eq('id', org.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Organization not found or access denied');
 
     return OrganizationModel.fromJson(response);
   }
@@ -162,7 +172,6 @@ class OrganizationService {
     }
   }
 
-  /// Create a new invitation for an organization
   Future<void> createInvitation({
     required String orgId,
     required String email,
@@ -171,16 +180,26 @@ class OrganizationService {
     final userId = _currentUserId;
     if (userId == null) throw Exception('Not authenticated');
 
+    final cleanEmail = email.trim().toLowerCase();
+
     try {
       await _supabase.from('org_invites').insert({
         'organization_id': orgId,
-        'email': email,
+        'email': cleanEmail,
         'role': role,
         'inviter_id': userId,
       });
     } catch (e) {
       if (e is PostgrestException && e.code == '23505') {
-        throw Exception('An invitation has already been sent to $email');
+        // Achievement: Re-send logic
+        // Update the timestamp of the existing pending invite to 'bump' it
+        await _supabase
+            .from('org_invites')
+            .update({'created_at': DateTime.now().toIso8601String()})
+            .eq('organization_id', orgId)
+            .eq('email', email)
+            .eq('status', 'pending');
+        return;
       }
       print('[OrganizationService] Error creating invite: $e');
       rethrow;
@@ -194,7 +213,7 @@ class OrganizationService {
 
   /// Get invitations sent TO the current user
   Future<List<Map<String, dynamic>>> getUserInvitations() async {
-    final email = _supabase.auth.currentUser?.email;
+    final email = _supabase.auth.currentUser?.email?.toLowerCase();
     if (email == null) return [];
 
     final response = await _supabase
@@ -216,7 +235,9 @@ class OrganizationService {
         .from('org_invites')
         .select()
         .eq('id', inviteId)
-        .single();
+        .maybeSingle();
+    
+    if (invite == null) throw Exception('Invitation not found');
     
     if (invite['status'] != 'pending') {
       throw Exception('Invitation is no longer pending');
@@ -278,7 +299,9 @@ class OrganizationService {
           'role': role,
         })
         .select('*, profiles!user_id(name, email)')
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to invite member');
 
     return OrganizationMemberModel.fromJson(response);
   }
@@ -290,7 +313,9 @@ class OrganizationService {
         .from('organization_members')
         .select('user_id, organization_id')
         .eq('id', memberId)
-        .single();
+        .maybeSingle();
+    
+    if (member == null) throw Exception('Member not found');
 
     await _supabase.from('organization_members').delete().eq('id', memberId);
 
@@ -299,7 +324,9 @@ class OrganizationService {
         .from('profiles')
         .select('organization_id')
         .eq('id', member['user_id'])
-        .single();
+        .maybeSingle();
+    
+    if (profile == null) throw Exception('User profile not found');
 
     if (profile['organization_id'] == member['organization_id']) {
       // Find another org they belong to

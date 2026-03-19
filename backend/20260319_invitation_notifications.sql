@@ -65,14 +65,16 @@ BEGIN
         WHERE id = NEW.organization_id;
 
         INSERT INTO public.notifications (
+            type,
             title,
             message,
             receiver_id,
             sender_id,
             organization_id, -- Keep as NULL if we want them to see it WITHOUT being in the org yet
-            related_entity_id,
-            related_entity_type
+            related_id,
+            related_type
         ) VALUES (
+            'invitation',
             'Organization Invitation',
             'You have been invited to join ' || COALESCE(v_org_name, 'an organization'),
             v_target_user_id,

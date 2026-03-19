@@ -28,7 +28,9 @@ class CompanyService {
         .from('companies')
         .select()
         .eq('id', id)
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Company not found');
 
     return CompanyModel.fromJson(response);
   }
@@ -64,7 +66,9 @@ class CompanyService {
         .from('companies')
         .insert(json)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to create company');
 
     return CompanyModel.fromJson(response);
   }
@@ -79,7 +83,9 @@ class CompanyService {
         .update(json)
         .eq('id', company.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Company not found or access denied');
 
     return CompanyModel.fromJson(response);
   }

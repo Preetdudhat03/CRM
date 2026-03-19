@@ -88,7 +88,9 @@ class UserService {
           })
           .eq('id', user.id)
           .select()
-          .single();
+          .maybeSingle();
+
+      if (response == null) throw Exception('Profile update failed: user not found or access denied');
 
       resultUser = UserModel(
         id: response['id'],

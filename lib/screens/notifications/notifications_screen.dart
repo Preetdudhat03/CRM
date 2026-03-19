@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/notification_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../models/notification_model.dart';
+import '../../providers/organization_provider.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -99,7 +101,10 @@ class NotificationsScreen extends ConsumerWidget {
                           .read(notificationsProvider.notifier)
                           .markAsRead(notification.id);
                     }
-                    // Optionally navigate based on relatedEntityType and ID
+                    
+                    if (notification.relatedEntityType == 'invitation') {
+                      _showInvitationDialog(context, ref, notification);
+                    }
                   },
                 );
               },
@@ -116,6 +121,56 @@ class NotificationsScreen extends ConsumerWidget {
     if (type == 'task') return Icons.check_circle_outline;
     if (type == 'deal') return Icons.monetization_on_outlined;
     if (type == 'lead') return Icons.person_add_alt_1_outlined;
+    if (type == 'invitation') return Icons.group_add_outlined;
     return Icons.notifications_none;
+  }
+
+  void _showInvitationDialog(BuildContext context, WidgetRef ref, NotificationModel notification) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Organization Invitation'),
+        content: Text(notification.message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Later'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final inviteId = notification.relatedEntityId;
+              if (inviteId == null) return;
+
+              Navigator.pop(ctx);
+              try {
+                // Show loading
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Processing invitation...')),
+                );
+
+                await ref.read(userInvitationsProvider.notifier).acceptInvitation(inviteId);
+                
+                // Refresh both the current org and the list of user orgs
+                await ref.read(currentOrganizationProvider.notifier).refresh();
+                ref.invalidate(userOrganizationsProvider);
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Joined organization successfully!')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Accept & Join'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -30,7 +30,9 @@ class LeadService {
         .from('leads')
         .select()
         .eq('id', id)
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Lead not found');
 
     return LeadModel.fromJson(response);
   }
@@ -102,7 +104,9 @@ class LeadService {
         .from('leads')
         .insert(json)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Failed to create lead');
 
     final newLead = LeadModel.fromJson(response);
 
@@ -138,7 +142,9 @@ class LeadService {
         .update(json)
         .eq('id', lead.id)
         .select()
-        .single();
+        .maybeSingle();
+
+    if (response == null) throw Exception('Lead not found or access denied');
 
     final updatedLead = LeadModel.fromJson(response);
 
@@ -200,7 +206,9 @@ class LeadService {
             .from('leads')
             .select()
             .eq('id', leadId)
-            .single();
+            .maybeSingle();
+        
+        if (leadMap == null) throw Exception('Lead not found for conversion');
         final String? leadCompanyName = leadMap['company'];
         String? companyId;
 
@@ -223,7 +231,9 @@ class LeadService {
                   'name': leadCompanyName,
                 })
                 .select('id')
-                .single();
+                .maybeSingle();
+            
+            if (newCompany == null) throw Exception('Failed to create company for lead');
             companyId = newCompany['id'];
           }
         }
@@ -250,7 +260,9 @@ class LeadService {
             .from('contacts')
             .insert(contactData)
             .select('id')
-            .single();
+            .maybeSingle();
+        
+        if (contactRes == null) throw Exception('Failed to create contact from lead');
         final contactId = contactRes['id'] as String;
 
         // 4. Update lead
