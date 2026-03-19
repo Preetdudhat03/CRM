@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/audit_log_provider.dart';
 import '../../models/audit_log_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
+import '../../widgets/org_switcher.dart';
 
 class AuditLogsScreen extends ConsumerStatefulWidget {
   const AuditLogsScreen({super.key});
@@ -38,7 +39,9 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Audit Logs'),
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('Audit Logs'),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

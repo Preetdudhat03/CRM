@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/storage_service.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../../utils/error_handler.dart';
+import '../../widgets/org_switcher.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -104,13 +105,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
+      appBar: AppBar(
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('Edit Profile'),
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FadeInSlide(
@@ -370,7 +378,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                   ),
                 ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),

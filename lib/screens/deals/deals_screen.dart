@@ -11,6 +11,7 @@ import 'deal_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
 import '../../widgets/skeleton_loading.dart';
+import '../../widgets/org_switcher.dart';
 
 class DealsScreen extends ConsumerStatefulWidget {
   const DealsScreen({super.key});
@@ -142,10 +143,12 @@ class _DealsScreenState extends ConsumerState<DealsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
-          'Deals Pipeline',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-        ),
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text(
+        //   'Deals Pipeline',
+        //   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+        // ),
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(

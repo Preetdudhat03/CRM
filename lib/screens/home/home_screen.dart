@@ -25,6 +25,29 @@ import '../../core/services/permission_service.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  Widget _buildRecentActivityHeader(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Recent Activity',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AllActivitiesScreen(),
+              ),
+            );
+          },
+          child: const Text('View All'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
@@ -38,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: const OrgSwitcher(),
         leadingWidth: 180,
-        title: const Text('Dashboard'),
+        //title: const Text('Dashboard'),
         actions: [
           Stack(
             alignment: Alignment.center,
@@ -98,225 +121,187 @@ class HomeScreen extends ConsumerWidget {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeInSlide(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Dashboard Overview',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    DropdownButton<DashboardPeriod>(
-                      value: currentPeriod,
-                      underline: const SizedBox(),
-                      icon: const Icon(Icons.arrow_drop_down),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      items: DashboardPeriod.values.map((period) {
-                        return DropdownMenuItem(
-                          value: period,
-                          child: Text(period.label),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref.read(dashboardPeriodProvider.notifier).state =
-                              value;
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = 2;
-                  if (constraints.maxWidth > 1200) {
-                    crossAxisCount = 4;
-                  } else if (constraints.maxWidth > 800) {
-                    crossAxisCount = 3;
-                  }
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 1024;
 
-                  return GridView.count(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio:
-                        1.2, // Adjust aspect ratio for better look on wide screens
-                    children: [
-                      // Dynamic Stats Cards
-                      FadeInSlide(
-                        delay: 0.1,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Total Contacts',
-                          icon: Icons.people_outline,
-                          color: Colors.blue,
-                          valueKey: 'totalContacts',
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state =
-                                1; // Contacts Tab
-                          },
-                        ),
-                      ),
-                      FadeInSlide(
-                        delay: 0.2,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Total Leads',
-                          icon: Icons.leaderboard_outlined,
-                          color: Colors.orange,
-                          valueKey: 'totalLeads',
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state =
-                                2; // Leads Tab
-                          },
-                        ),
-                      ),
-                      FadeInSlide(
-                        delay: 0.3,
-                        child: _buildStatCard(
-                          dashboardMetrics,
-                          title: 'Active Deals',
-                          valueKey: 'totalDeals',
-                          icon: Icons.handshake_outlined,
-                          color: Colors.purple,
-                          onTap: () {
-                            ref.read(bottomNavIndexProvider.notifier).state =
-                                3; // Deals Tab
-                          },
-                        ),
-                      ),
-                      // Revenue Card - Restricted Access
-                      if (canViewAnalytics)
-                        FadeInSlide(
-                          delay: 0.4,
-                          child: _buildStatCard(
-                            dashboardMetrics,
-                            title: 'Revenue (Won)',
-                            valueKey: 'revenueWon',
-                            icon: Icons.attach_money,
-                            color: Colors.green,
-                            isCurrency: true,
-                            onTap: () {
-                              ref.read(bottomNavIndexProvider.notifier).state =
-                                  3;
-                            },
-                          ),
-                        )
-                      else
-                        FadeInSlide(
-                          delay: 0.4,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Theme.of(context).dividerColor,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.lock_outline, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text('Access Restricted'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
-
-              // Tasks Due Today Snapshot
-              const FadeInSlide(delay: 0.4, child: TasksDueTodayWidget()),
-              const SizedBox(height: 32),
-
-              // Deal Pipeline Horizontal Snapshot
-              FadeInSlide(
-                delay: 0.45,
-                child: dashboardMetrics.when(
-                  data: (stats) {
-                    final rawPipeline =
-                        stats['rawPipeline'] as Map<String, int>? ?? {};
-                    if (rawPipeline.isEmpty) return const SizedBox();
-
-                    final Map<DealStage, int> pipeline = {};
-                    for (var stage in DealStage.values) {
-                      // Check both camelCase (e.g. closedWon) and snake_case (closed_won)
-                      final snakeName = stage.name.replaceAllMapped(
-                        RegExp(r'[A-Z]'),
-                        (m) => '_${m.group(0)!.toLowerCase()}',
-                      );
-                      pipeline[stage] =
-                          (rawPipeline[stage.name] ?? 0) +
-                          (rawPipeline[snakeName] ?? 0);
-                    }
-
-                    if (pipeline.values.every((val) => val == 0))
-                      return const SizedBox();
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              final mainContent = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeInSlide(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        PipelineWidget(pipelineData: pipeline),
-                        const SizedBox(height: 32),
+                        Text(
+                          'Dashboard Overview',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        DropdownButton<DashboardPeriod>(
+                          value: currentPeriod,
+                          underline: const SizedBox(),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                          items: DashboardPeriod.values.map((period) {
+                            return DropdownMenuItem(
+                              value: period,
+                              child: Text(period.label),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              ref.read(dashboardPeriodProvider.notifier).state =
+                                  value;
+                            }
+                          },
+                        ),
                       ],
-                    );
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, __) => Text('Error loading pipeline: $error'),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Revenue Trend Chart (only if user has analytics permission)
-              if (canViewAnalytics)
-                const FadeInSlide(delay: 0.48, child: RevenueTrendChart()),
-              if (canViewAnalytics) const SizedBox(height: 32),
-
-              FadeInSlide(
-                delay: 0.5,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Recent Activity',
-                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AllActivitiesScreen(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Stats Grid
+                  LayoutBuilder(
+                    builder: (context, gridConstraints) {
+                      int crossAxisCount = isWide ? 4 : (gridConstraints.maxWidth > 800 ? 3 : 2);
+                      return GridView.count(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        childAspectRatio: isWide ? 1.4 : 1.2,
+                        children: [
+                          _buildStatCard(
+                            dashboardMetrics,
+                            title: 'Total Contacts',
+                            icon: Icons.people_outline,
+                            color: Colors.blue,
+                            valueKey: 'totalContacts',
+                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 1,
                           ),
+                          _buildStatCard(
+                            dashboardMetrics,
+                            title: 'Total Leads',
+                            icon: Icons.leaderboard_outlined,
+                            color: Colors.orange,
+                            valueKey: 'totalLeads',
+                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 2,
+                          ),
+                          _buildStatCard(
+                            dashboardMetrics,
+                            title: 'Active Deals',
+                            valueKey: 'totalDeals',
+                            icon: Icons.handshake_outlined,
+                            color: Colors.purple,
+                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 3,
+                          ),
+                          if (canViewAnalytics)
+                            _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Revenue (Won)',
+                              valueKey: 'revenueWon',
+                              icon: Icons.attach_money,
+                              color: Colors.green,
+                              isCurrency: true,
+                              onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 3,
+                            ),
+                          if (!canViewAnalytics)
+                            FadeInSlide(
+                              delay: 0.4,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.lock_outline, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text('Access Restricted'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Pipeline
+                  FadeInSlide(
+                    delay: 0.2,
+                    child: dashboardMetrics.when(
+                      data: (stats) {
+                        final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
+                        if (rawPipeline.isEmpty) return const SizedBox();
+                        final Map<DealStage, int> pipeline = {};
+                        for (var stage in DealStage.values) {
+                          final snakeName = stage.name.replaceAllMapped(RegExp(r'[A-Z]'), (m) => '_${m.group(0)!.toLowerCase()}');
+                          pipeline[stage] = (rawPipeline[stage.name] ?? 0) + (rawPipeline[snakeName] ?? 0);
+                        }
+                        if (pipeline.values.every((val) => val == 0))
+                          return const SizedBox();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PipelineWidget(pipelineData: pipeline),
+                            const SizedBox(height: 32),
+                          ],
                         );
                       },
-                      child: const Text('View All'),
+                      loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+                      error: (_, __) => const SizedBox(),
+                    ),
+                  ),
+                  // Revenue Trend Chart
+                  if (canViewAnalytics) ...[
+                    const FadeInSlide(delay: 0.3, child: RevenueTrendChart()),
+                    const SizedBox(height: 32),
+                  ],
+                  if (!isWide) ...[
+                    const FadeInSlide(delay: 0.4, child: TasksDueTodayWidget()),
+                    const SizedBox(height: 32),
+                    _buildRecentActivityHeader(context, ref),
+                    const SizedBox(height: 8),
+                    const FadeInSlide(delay: 0.5, child: RecentActivityList()),
+                  ],
+                ],
+              );
+
+              if (isWide) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 2, child: mainContent),
+                    const SizedBox(width: 32),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const FadeInSlide(delay: 0.1, child: TasksDueTodayWidget()),
+                          const SizedBox(height: 32),
+                          _buildRecentActivityHeader(context, ref),
+                          const SizedBox(height: 12),
+                          const FadeInSlide(delay: 0.2, child: RecentActivityList()),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              FadeInSlide(delay: 0.6, child: const RecentActivityList()),
-            ],
+                );
+              }
+              return mainContent;
+            },
           ),
         ),
       ),

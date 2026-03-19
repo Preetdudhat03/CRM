@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/organization_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/organization_model.dart';
+import '../../widgets/org_switcher.dart';
 import '../../models/organization_member_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../../utils/error_handler.dart';
@@ -36,7 +37,9 @@ class _OrganizationSettingsScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Organization'),
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('Organization Settings'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -70,10 +73,14 @@ class _OrganizationSettingsScreenState
             ),
           ),
           data: (org) {
-            if (org == null) {
-              return _buildNoOrganization(context);
-            }
-            return _buildOrganizationDetails(context, org, membersAsync, invitesAsync, currentUser);
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: org == null 
+                  ? _buildNoOrganization(context)
+                  : _buildOrganizationDetails(context, org, membersAsync, invitesAsync, currentUser),
+              ),
+            );
           },
         ),
       ),

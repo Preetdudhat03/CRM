@@ -9,6 +9,7 @@ import 'task_detail_screen.dart';
 
 import '../../core/services/permission_service.dart';
 import '../../utils/error_handler.dart';
+import '../../widgets/org_switcher.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -49,7 +50,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('Tasks'),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

@@ -5,6 +5,7 @@ import '../../../providers/user_management_provider.dart';
 import 'add_edit_user_screen.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
 import '../../../utils/error_handler.dart';
+import '../../../widgets/org_switcher.dart';
 
 class UserManagementScreen extends ConsumerWidget {
   const UserManagementScreen({super.key});
@@ -14,7 +15,11 @@ class UserManagementScreen extends ConsumerWidget {
     final usersAsync = ref.watch(userManagementProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Management')),
+      appBar: AppBar(
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('User Management'),
+      ),
       body: usersAsync.when(
         data: (users) => RefreshIndicator(
           onRefresh: () => ref.read(userManagementProvider.notifier).getUsers(),

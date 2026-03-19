@@ -8,6 +8,7 @@ import 'add_edit_contact_screen.dart';
 import 'contact_detail_screen.dart';
 import '../../core/services/permission_service.dart';
 import '../../widgets/skeleton_loading.dart';
+import '../../widgets/org_switcher.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -189,10 +190,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
-          'Contacts',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-        ),
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text(
+        //   'Contacts',
+        //   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+        // ),
         backgroundColor: Colors.white,
         elevation: 0,
         bottom: PreferredSize(

@@ -11,6 +11,7 @@ import 'audit_logs_screen.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../core/services/permission_service.dart';
+import '../../widgets/org_switcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -24,7 +25,11 @@ class SettingsScreen extends ConsumerWidget {
     final notificationsEnabled = ref.watch(notificationSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        leading: const OrgSwitcher(),
+        leadingWidth: 180,
+        // title: const Text('Settings'),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(currentUserProvider.notifier).refreshUser();
