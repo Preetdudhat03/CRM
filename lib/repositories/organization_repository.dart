@@ -48,13 +48,7 @@ class OrganizationRepository {
   }
 
   Future<List<OrganizationMemberModel>> listMembers(String orgId) async {
-    // Note: OrganizationService was updated but listMembers was indirectly removed/replaced by listing logic.
-    // I will re-implement a standard listMembers if needed or use the new listing logic.
-    // For now, I'll assume listMembers still works as it used to or was updated in the service.
-    // Wait, I replaced the whole block in OrganizationService. Let me check if I kept listMembers.
-    // I didn't keep listMembers in my previous replace_file_content! I should add it back or fix it.
-    final response = await _service.listMembers(orgId);
-    return response;
+    return _service.listMembers(orgId);
   }
 
   Future<OrganizationMemberModel> inviteMember({
