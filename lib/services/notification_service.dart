@@ -82,6 +82,11 @@ class NotificationService {
         }
       }
 
+      // Handle receiver_id if present in the model
+      if (notification.receiverId != null) {
+        data['receiver_id'] = notification.receiverId;
+      }
+
       await _supabase.from('notifications').insert(data);
     } catch (e) {
       print('[NotificationService] INSERT ERROR: $e');

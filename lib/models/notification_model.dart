@@ -9,6 +9,7 @@ class NotificationModel {
   final String? relatedEntityType;
   final String type;
   final String? senderId;
+  final String? receiverId;
 
   const NotificationModel({
     required this.id,
@@ -21,6 +22,7 @@ class NotificationModel {
     this.relatedEntityId,
     this.relatedEntityType,
     this.senderId,
+    this.receiverId,
   });
 
   NotificationModel copyWith({
@@ -33,6 +35,7 @@ class NotificationModel {
     String? relatedEntityType,
     String? type,
     String? senderId,
+    String? receiverId,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -45,6 +48,7 @@ class NotificationModel {
       relatedEntityType: relatedEntityType ?? this.relatedEntityType,
       type: type ?? this.type,
       senderId: senderId ?? this.senderId,
+      receiverId: receiverId ?? this.receiverId,
     );
   }
 
@@ -63,6 +67,7 @@ class NotificationModel {
           ?.toString(),
       relatedEntityType: json['related_type'] ?? json['related_entity_type'],
       senderId: json['sender_id']?.toString(),
+      receiverId: json['receiver_id']?.toString(),
     );
   }
 
@@ -84,6 +89,7 @@ class NotificationModel {
       json['related_entity_type'] = relatedEntityType;
     }
     if (senderId != null) json['sender_id'] = senderId;
+    if (receiverId != null) json['receiver_id'] = receiverId;
 
     return json;
   }
