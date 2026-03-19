@@ -73,7 +73,7 @@ class _OrganizationSettingsScreenState
             if (org == null) {
               return _buildNoOrganization(context);
             }
-            return _buildOrganizationDetails(context, org, membersAsync, currentUser);
+            return _buildOrganizationDetails(context, org, membersAsync, invitesAsync, currentUser);
           },
         ),
       ),
@@ -167,6 +167,7 @@ class _OrganizationSettingsScreenState
     BuildContext context,
     OrganizationModel org,
     AsyncValue<List<OrganizationMemberModel>> membersAsync,
+    AsyncValue<List<Map<String, dynamic>>> invitesAsync,
     dynamic currentUser,
   ) {
     final theme = Theme.of(context);
