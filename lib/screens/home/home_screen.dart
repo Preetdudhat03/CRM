@@ -35,41 +35,11 @@ class HomeScreen extends ConsumerWidget {
     final currentPeriod = ref.watch(dashboardPeriodProvider);
 
     return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: const OrgSwitcher(),
-        leadingWidth: 200,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage:
-                  (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
-                  ? NetworkImage(user.avatarUrl!)
-                  : null,
-              radius: 18,
-              backgroundColor: Theme.of(context).primaryColor,
-              child: (user?.avatarUrl == null || user!.avatarUrl!.isEmpty)
-                  ? Text(
-                      (user?.name ?? 'G').substring(0, 1).toUpperCase(),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello, ${user?.name ?? "Guest"}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  user?.role.displayName ?? "Viewer",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ],
-        ),
+        leadingWidth: 180,
+        title: const Text('Dashboard'),
         actions: [
           Stack(
             alignment: Alignment.center,
