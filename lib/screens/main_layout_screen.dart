@@ -60,7 +60,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                     ref.read(bottomNavIndexProvider.notifier).state = index;
                   },
                   labelType: NavigationRailLabelType.all,
-                  leading: const OrgSwitcher(),
+                  leading: const OrgSwitcher(isCompact: true),
                   destinations: const [
                     NavigationRailDestination(
                       icon: Icon(Icons.dashboard_outlined),
