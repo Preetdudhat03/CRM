@@ -64,6 +64,28 @@ class OrganizationNotifier extends StateNotifier<AsyncValue<OrganizationModel?>>
     }
   }
 
+  Future<void> deleteOrganization(String orgId) async {
+    try {
+      state = const AsyncValue.loading();
+      await _repository.deleteOrganization(orgId);
+      await refresh();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> leaveOrganization(String orgId) async {
+    try {
+      state = const AsyncValue.loading();
+      await _repository.leaveOrganization(orgId);
+      await refresh();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> refresh() async {
     try {
       final org = await _repository.getCurrentOrganization();

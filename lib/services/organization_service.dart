@@ -279,4 +279,24 @@ class OrganizationService {
         .update({'role': newRole})
         .eq('id', memberId);
   }
+
+  /// Delete an entire organization (Owner only)
+  Future<void> deleteOrganization(String orgId) async {
+    try {
+      await _supabase.rpc('delete_organization', params: {'p_org_id': orgId});
+    } catch (e) {
+      print('[OrganizationService] Error deleting org: $e');
+      rethrow;
+    }
+  }
+
+  /// Leave an organization
+  Future<void> leaveOrganization(String orgId) async {
+    try {
+      await _supabase.rpc('leave_organization', params: {'p_org_id': orgId});
+    } catch (e) {
+      print('[OrganizationService] Error leaving org: $e');
+      rethrow;
+    }
+  }
 }

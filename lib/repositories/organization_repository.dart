@@ -66,4 +66,12 @@ class OrganizationRepository {
   Future<void> updateMemberRole(String memberId, String newRole) async {
     return _service.updateMemberRole(memberId, newRole);
   }
+
+  Future<void> deleteOrganization(String orgId) async {
+    return _service.deleteOrganization(orgId);
+  }
+
+  Future<void> leaveOrganization(String orgId) async {
+    return _service.leaveOrganization(orgId);
+  }
 }

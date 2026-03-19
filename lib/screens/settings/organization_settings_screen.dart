@@ -420,7 +420,141 @@ class _OrganizationSettingsScreenState
             );
           },
         ),
+
+        const SizedBox(height: 48),
+        const Divider(color: Colors.red, thickness: 0.5),
+        const SizedBox(height: 16),
+        Text(
+          'Danger Zone',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.red.withOpacity(0.2)),
+          ),
+          color: Colors.red.withOpacity(0.02),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.exit_to_app, color: Colors.orange),
+                title: const Text('Leave Organization'),
+                subtitle: const Text('You will lose access to all data in this organization.'),
+                onTap: () => _showLeaveConfirmation(context, org),
+              ),
+              if (isOwner) ...[
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.red),
+                  title: const Text('Delete Organization'),
+                  subtitle: const Text('Permanently delete this organization and all its data.'),
+                  onTap: () => _showDeleteOrgConfirmation(context, org),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 40),
       ],
+    );
+  }
+
+  void _showLeaveConfirmation(BuildContext context, OrganizationModel org) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Leave Organization'),
+        content: Text('Are you sure you want to leave ${org.name}? You will need a new invitation to rejoin.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref.read(currentOrganizationProvider.notifier).leaveOrganization(org.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Left ${org.name}')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteOrgConfirmation(BuildContext context, OrganizationModel org) {
+    final confirmController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Organization'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This action is PERMANENT. All contacts, deals, tasks, and data will be deleted forever.',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            Text('Type "${org.name}" to confirm:'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: confirmController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () async {
+              if (confirmController.text != org.name) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Name does not match')),
+                );
+                return;
+              }
+              Navigator.pop(ctx);
+              try {
+                await ref.read(currentOrganizationProvider.notifier).deleteOrganization(org.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Deleted ${org.name}')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${ErrorHandler.formatError(e)}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
     );
   }
 
