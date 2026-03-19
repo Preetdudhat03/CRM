@@ -13,17 +13,37 @@ class OrganizationService {
     if (userId == null) return null;
 
     try {
-      // Find the user's membership, then fetch the org
-      final membershipResponse = await _supabase
-          .from('organization_members')
+      // 1. Get the active organication ID from the user's profile
+      final profileResponse = await _supabase
+          .from('profiles')
           .select('organization_id')
-          .eq('user_id', userId)
-          .limit(1)
-          .maybeSingle();
+          .eq('id', userId)
+          .single();
 
-      if (membershipResponse == null) return null;
+      final orgId = profileResponse['organization_id'];
+      if (orgId == null) {
+        // Fallback: If no active org is set, try to find any membership
+        final membershipResponse = await _supabase
+            .from('organization_members')
+            .select('organization_id')
+            .eq('user_id', userId)
+            .limit(1)
+            .maybeSingle();
+        
+        if (membershipResponse == null) return null;
+        return _fetchOrgDetails(membershipResponse['organization_id']);
+      }
 
-      final orgId = membershipResponse['organization_id'];
+      return _fetchOrgDetails(orgId);
+    } catch (e) {
+      print('[OrganizationService] Error fetching org: $e');
+      return null;
+    }
+  }
+
+  /// Helper to fetch organization details by ID
+  Future<OrganizationModel?> _fetchOrgDetails(String orgId) async {
+    try {
       final orgResponse = await _supabase
           .from('organizations')
           .select()
@@ -32,7 +52,6 @@ class OrganizationService {
 
       return OrganizationModel.fromJson(orgResponse);
     } catch (e) {
-      print('[OrganizationService] Error fetching org: $e');
       return null;
     }
   }
