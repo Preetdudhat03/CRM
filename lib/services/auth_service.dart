@@ -122,13 +122,14 @@ class AuthService {
     }
   }
 
-  // Register a new user with optional organization name
+  // Register a new user with optional organization name or invite token
   Future<UserModel> register(
     String email,
     String password,
     String name,
     Role role, {
     String? organizationName,
+    String? inviteToken,
   }) async {
     final metadata = <String, dynamic>{
       'name': name,
@@ -136,6 +137,9 @@ class AuthService {
     };
     if (organizationName != null && organizationName.isNotEmpty) {
       metadata['organization_name'] = organizationName;
+    }
+    if (inviteToken != null && inviteToken.isNotEmpty) {
+      metadata['invite_token'] = inviteToken;
     }
 
     final AuthResponse res = await _supabase.auth.signUp(
