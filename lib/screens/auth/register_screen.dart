@@ -48,7 +48,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _passwordController.text.trim(),
         _nameController.text.trim(),
         _selectedRole,
-        organizationName: _orgNameController.text.trim(),
+        organizationName: widget.inviteToken != null ? null : _orgNameController.text.trim(),
+        inviteToken: widget.inviteToken,
       );
 
       if (!mounted) return;
@@ -93,7 +94,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 FadeInSlide(
                   delay: 0.1,
                   child: Text(
-                    'Join Field CRM',
+                    widget.inviteToken != null ? 'Join Organization' : 'Join Field CRM',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -115,21 +116,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                 ),
-                const SizedBox(height: 16),
-                FadeInSlide(
-                  delay: 0.25,
-                  child: TextFormField(
-                    controller: _orgNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Organization Name',
-                      hintText: 'e.g. Acme Corp',
-                      prefixIcon: Icon(Icons.business_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                if (widget.inviteToken == null) ...[
+                  const SizedBox(height: 16),
+                  FadeInSlide(
+                    delay: 0.25,
+                    child: TextFormField(
+                      controller: _orgNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Organization Name',
+                        hintText: 'e.g. Acme Corp',
+                        prefixIcon: Icon(Icons.business_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
                       ),
+                      validator: (v) => (widget.inviteToken == null && v!.isEmpty) ? 'Required' : null,
                     ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 16),
                 FadeInSlide(
                   delay: 0.3,
