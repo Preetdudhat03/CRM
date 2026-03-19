@@ -240,6 +240,19 @@ class OrganizationService {
     }
   }
 
+  /// List all members of an organization (with profile data)
+  Future<List<OrganizationMemberModel>> listMembers(String orgId) async {
+    final response = await _supabase
+        .from('organization_members')
+        .select('*, profiles:user_id(name, email)')
+        .eq('organization_id', orgId)
+        .order('joined_at', ascending: true);
+
+    return (response as List)
+        .map((json) => OrganizationMemberModel.fromJson(json))
+        .toList();
+  }
+
   /// Update a member's role
   Future<void> updateMemberRole(String memberId, String newRole) async {
     await _supabase

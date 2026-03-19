@@ -53,6 +53,17 @@ class OrganizationNotifier extends StateNotifier<AsyncValue<OrganizationModel?>>
     }
   }
 
+  Future<void> switchOrganization(String orgId) async {
+    try {
+      await _repository.switchOrganization(orgId);
+      // After switching, we need to refresh the current organization
+      await refresh();
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> refresh() async {
     try {
       final org = await _repository.getCurrentOrganization();
@@ -71,8 +82,15 @@ final currentOrganizationProvider =
 );
 
 // ============================================================
-// Organization Members
+// All User Organizations
 // ============================================================
+final userOrganizationsProvider = FutureProvider<List<OrganizationModel>>((ref) {
+  return ref.watch(organizationRepositoryProvider).getUserOrganizations();
+});
+
+// ============================================================
+// Organization Members
+// ============================================
 class OrganizationMembersNotifier
     extends StateNotifier<AsyncValue<List<OrganizationMemberModel>>> {
   final OrganizationRepository _repository;
@@ -137,6 +155,56 @@ final organizationMembersProvider = StateNotifierProvider<
   final orgAsync = ref.watch(currentOrganizationProvider);
   final orgId = orgAsync.valueOrNull?.id;
   return OrganizationMembersNotifier(
+    ref.watch(organizationRepositoryProvider),
+    orgId,
+  );
+});
+
+// ============================================================
+// Organization Invitations
+// ============================================================
+class InvitationsNotifier extends StateNotifier<AsyncValue<List<Map<String, dynamic>>>> {
+  final OrganizationRepository _repository;
+  final String? _orgId;
+
+  InvitationsNotifier(this._repository, this._orgId)
+      : super(const AsyncValue.loading()) {
+    if (_orgId != null) load();
+  }
+
+  Future<void> load() async {
+    if (_orgId == null) {
+      state = const AsyncValue.data([]);
+      return;
+    }
+    try {
+      state = const AsyncValue.loading();
+      final invites = await _repository.getInvitations(_orgId);
+      state = AsyncValue.data(invites);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> createInvitation(String email, {String role = 'member'}) async {
+    if (_orgId == null) throw Exception('No organization');
+    await _repository.createInvitation(orgId: _orgId, email: email, role: role);
+    await load();
+  }
+
+  Future<void> deleteInvitation(String inviteId) async {
+    await _repository.deleteInvitation(inviteId);
+    await load();
+  }
+
+  Future<void> refresh() async => load();
+}
+
+final invitationsProvider = StateNotifierProvider<InvitationsNotifier,
+    AsyncValue<List<Map<String, dynamic>>>>((ref) {
+  final orgAsync = ref.watch(currentOrganizationProvider);
+  final orgId = orgAsync.valueOrNull?.id;
+  return InvitationsNotifier(
     ref.watch(organizationRepositoryProvider),
     orgId,
   );
