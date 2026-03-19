@@ -11,6 +11,7 @@ import 'tasks/tasks_screen.dart';
 
 import '../services/push_notification_service.dart';
 import '../widgets/animations/animated_indexed_stack.dart';
+import '../widgets/org_switcher.dart';
 
 // State provider for the current bottom nav index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
@@ -59,6 +60,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                     ref.read(bottomNavIndexProvider.notifier).state = index;
                   },
                   labelType: NavigationRailLabelType.all,
+                  leading: const OrgSwitcher(),
                   destinations: const [
                     NavigationRailDestination(
                       icon: Icon(Icons.dashboard_outlined),

@@ -18,6 +18,7 @@ import '../deals/add_edit_deal_screen.dart';
 import '../tasks/add_edit_task_screen.dart';
 import '../../providers/notification_provider.dart';
 import '../activities/all_activities_screen.dart';
+import '../../widgets/org_switcher.dart';
 
 import '../../core/services/permission_service.dart';
 
