@@ -7,6 +7,18 @@ class OrganizationRepository {
 
   OrganizationRepository(this._service);
 
+  Future<OrganizationModel?> getCurrentOrganization() async {
+    return _service.getCurrentOrganization();
+  }
+
+  Future<OrganizationModel> createOrganization(String name) async {
+    return _service.createOrganization(name);
+  }
+
+  Future<OrganizationModel> updateOrganization(OrganizationModel org) async {
+    return _service.updateOrganization(org);
+  }
+
   Future<List<OrganizationModel>> getUserOrganizations() async {
     return _service.getUserOrganizations();
   }
