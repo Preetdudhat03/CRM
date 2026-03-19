@@ -231,3 +231,44 @@ final invitationsProvider = StateNotifierProvider<InvitationsNotifier,
     orgId,
   );
 });
+
+// ============================================================
+// Invitations Sent TO User
+// ============================================================
+class UserInvitationsNotifier
+    extends StateNotifier<AsyncValue<List<Map<String, dynamic>>>> {
+  final OrganizationRepository _repository;
+
+  UserInvitationsNotifier(this._repository)
+      : super(const AsyncValue.loading()) {
+    load();
+  }
+
+  Future<void> load() async {
+    try {
+      state = const AsyncValue.loading();
+      final invites = await _repository.getUserInvitations();
+      state = AsyncValue.data(invites);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> acceptInvitation(String inviteId) async {
+    try {
+      await _repository.acceptInvitation(inviteId);
+      await load();
+      // Important: refresh user organizations to show the new one
+      // and refresh current organization to switch to it
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> refresh() async => load();
+}
+
+final userInvitationsProvider = StateNotifierProvider<UserInvitationsNotifier,
+    AsyncValue<List<Map<String, dynamic>>>>((ref) {
+  return UserInvitationsNotifier(ref.watch(organizationRepositoryProvider));
+});

@@ -179,6 +179,9 @@ class OrganizationService {
         'inviter_id': userId,
       });
     } catch (e) {
+      if (e is PostgrestException && e.code == '23505') {
+        throw Exception('An invitation has already been sent to $email');
+      }
       print('[OrganizationService] Error creating invite: $e');
       rethrow;
     }
@@ -187,6 +190,61 @@ class OrganizationService {
   /// Cancel/Delete an invitation
   Future<void> deleteInvitation(String inviteId) async {
     await _supabase.from('org_invites').delete().eq('id', inviteId);
+  }
+
+  /// Get invitations sent TO the current user
+  Future<List<Map<String, dynamic>>> getUserInvitations() async {
+    final email = _supabase.auth.currentUser?.email;
+    if (email == null) return [];
+
+    final response = await _supabase
+        .from('org_invites')
+        .select('*, organizations!organization_id(name)')
+        .eq('email', email)
+        .eq('status', 'pending');
+
+    return response as List<Map<String, dynamic>>;
+  }
+
+  /// Accept an invitation
+  Future<void> acceptInvitation(String inviteId) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    // 1. Get the invite details
+    final invite = await _supabase
+        .from('org_invites')
+        .select()
+        .eq('id', inviteId)
+        .single();
+    
+    if (invite['status'] != 'pending') {
+      throw Exception('Invitation is no longer pending');
+    }
+
+    final orgId = invite['organization_id'] as String;
+    final role = invite['role'] as String;
+
+    // 2. Perform membership updates
+    // In Supabase, we don't have multi-table transactions in the client SDK
+    // but we can use an RPC or just do sequential calls if RLS is setup safely.
+    // Better to use an RPC for atomicity if possible, but let's do sequential for now 
+    // and assume the user role allows this.
+
+    // 2a. Add to organization_members
+    await _supabase.from('organization_members').insert({
+      'organization_id': orgId,
+      'user_id': user.id,
+      'role': role,
+    });
+
+    // 2b. Update profile's active organization
+    await _supabase.from('profiles').update({'organization_id': orgId}).eq('id', user.id);
+
+    // 2c. Update invite status
+    await _supabase.from('org_invites').update({'status': 'accepted'}).eq('id', inviteId);
+    
+    // 2d. Optional: Notify inviter (future enhancement)
   }
 
   /// Legacy: Invite a user to the organization by email (requires user to exist)

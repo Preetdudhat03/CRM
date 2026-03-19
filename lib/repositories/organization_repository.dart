@@ -59,6 +59,14 @@ class OrganizationRepository {
     return _service.inviteMember(orgId: orgId, email: email, role: role);
   }
 
+  Future<List<Map<String, dynamic>>> getUserInvitations() async {
+    return _service.getUserInvitations();
+  }
+
+  Future<void> acceptInvitation(String inviteId) async {
+    return _service.acceptInvitation(inviteId);
+  }
+
   Future<void> removeMember(String memberId) async {
     return _service.removeMember(memberId);
   }
