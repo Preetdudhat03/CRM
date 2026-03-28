@@ -246,26 +246,23 @@ class OrganizationService {
     final orgId = invite['organization_id'] as String;
     final role = invite['role'] as String;
 
-    // 2. Perform membership updates
-    // In Supabase, we don't have multi-table transactions in the client SDK
-    // but we can use an RPC or just do sequential calls if RLS is setup safely.
-    // Better to use an RPC for atomicity if possible, but let's do sequential for now 
-    // and assume the user role allows this.
-
-    // 2a. Add to organization_members (use upsert to handle "already a member" cases)
-    await _supabase.from('organization_members').upsert({
-      'organization_id': orgId,
-      'user_id': user.id,
-      'role': role,
-    }, onConflict: 'organization_id, user_id');
-
-    // 2b. Update profile's active organization
-    await _supabase.from('profiles').update({'organization_id': orgId}).eq('id', user.id);
-
-    // 2c. Update invite status
-    await _supabase.from('org_invites').update({'status': 'accepted'}).eq('id', inviteId);
+    // 2. Perform membership updates atomically using RPC
+    // Since Supabase RLS causes issues when cross-evaluating permissions across 
+    // organization_members, org_invites, and profiles simultaneously during a join,
+    // we use a PostgreSQL SECURITY DEFINER function to handle this transaction safely.
+    try {
+      await _supabase.rpc('accept_invitation', params: {
+        'p_invite_id': inviteId,
+      });
+    } on PostgrestException catch (e) {
+      if (e.message.contains('already a member') || e.code == '23505') {
+        // Silently handle if they bypassed and already exist
+      } else {
+        rethrow;
+      }
+    }
     
-    // 2d. Optional: Notify inviter (future enhancement)
+    // 3. Optional: Notify inviter (future enhancement)
   }
 
   /// Legacy: Invite a user to the organization by email (requires user to exist)
