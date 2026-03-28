@@ -13,7 +13,7 @@ class OrganizationService {
     if (userId == null) return null;
 
     try {
-      // 1. Get the active organication ID from the user's profile
+      // 1. Get the active organization ID from the user's profile
       final profileResponse = await _supabase
           .from('profiles')
           .select('organization_id')
@@ -191,13 +191,12 @@ class OrganizationService {
       });
     } catch (e) {
       if (e is PostgrestException && e.code == '23505') {
-        // Achievement: Re-send logic
-        // Update the timestamp of the existing pending invite to 'bump' it
+        // Re-send logic: Update the timestamp of the existing pending invite to 'bump' it
         await _supabase
             .from('org_invites')
             .update({'created_at': DateTime.now().toIso8601String()})
             .eq('organization_id', orgId)
-            .eq('email', email)
+            .eq('email', cleanEmail)
             .eq('status', 'pending');
         return;
       }
@@ -221,16 +220,13 @@ class OrganizationService {
         .select('*, organizations!organization_id(name)')
         .ilike('email', email)
         .eq('status', 'pending');
-
+    
     return response as List<Map<String, dynamic>>;
   }
 
   /// Accept an invitation
   Future<void> acceptInvitation(String inviteId) async {
     // 1. Perform membership updates atomically using RPC
-    // Since Supabase RLS causes issues when cross-evaluating permissions across 
-    // organization_members, org_invites, and profiles simultaneously during a join,
-    // we use a PostgreSQL SECURITY DEFINER function to handle this transaction safely.
     try {
       await _supabase.rpc('accept_invitation', params: {
         'p_invite_id': inviteId,
@@ -242,7 +238,6 @@ class OrganizationService {
         rethrow;
       }
     }
-    // 3. Optional: Notify inviter (future enhancement)
   }
 
   /// Legacy: Invite a user to the organization by email (requires user to exist)
@@ -267,7 +262,7 @@ class OrganizationService {
 
     final userId = profileResponse['id'] as String;
 
-    // Direct upsert (admin only)
+    // Direct insert (admin only)
     final response = await _supabase
         .from('organization_members')
         .upsert({
