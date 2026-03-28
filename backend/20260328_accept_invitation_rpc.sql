@@ -21,7 +21,7 @@ BEGIN
     SELECT * INTO v_invite
     FROM public.org_invites
     WHERE id = p_invite_id
-      AND email = (auth.jwt() ->> 'email')
+      AND lower(email) = lower(auth.jwt() ->> 'email')
       AND status = 'pending';
 
     IF v_invite IS NULL THEN
