@@ -219,7 +219,7 @@ class OrganizationService {
     final response = await _supabase
         .from('org_invites')
         .select('*, organizations!organization_id(name)')
-        .eq('email', email)
+        .ilike('email', email)
         .eq('status', 'pending');
 
     return response as List<Map<String, dynamic>>;
@@ -227,26 +227,7 @@ class OrganizationService {
 
   /// Accept an invitation
   Future<void> acceptInvitation(String inviteId) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) throw Exception('Not authenticated');
-
-    // 1. Get the invite details
-    final invite = await _supabase
-        .from('org_invites')
-        .select()
-        .eq('id', inviteId)
-        .maybeSingle();
-    
-    if (invite == null) throw Exception('Invitation not found');
-    
-    if (invite['status'] != 'pending') {
-      throw Exception('Invitation is no longer pending');
-    }
-
-    final orgId = invite['organization_id'] as String;
-    final role = invite['role'] as String;
-
-    // 2. Perform membership updates atomically using RPC
+    // 1. Perform membership updates atomically using RPC
     // Since Supabase RLS causes issues when cross-evaluating permissions across 
     // organization_members, org_invites, and profiles simultaneously during a join,
     // we use a PostgreSQL SECURITY DEFINER function to handle this transaction safely.
@@ -261,7 +242,6 @@ class OrganizationService {
         rethrow;
       }
     }
-    
     // 3. Optional: Notify inviter (future enhancement)
   }
 

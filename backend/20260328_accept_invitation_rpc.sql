@@ -39,10 +39,12 @@ BEGIN
     SET organization_id = v_invite.organization_id
     WHERE id = v_user_id;
 
-    -- 4. Mark the invitation as accepted
+    -- 4. Mark ALL pending invitations for this user and organization as accepted
     UPDATE public.org_invites
     SET status = 'accepted'
-    WHERE id = p_invite_id;
+    WHERE lower(email) = lower(v_invite.email)
+      AND organization_id = v_invite.organization_id
+      AND status = 'pending';
 
     RETURN true;
 END;
