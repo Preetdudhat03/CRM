@@ -252,12 +252,12 @@ class OrganizationService {
     // Better to use an RPC for atomicity if possible, but let's do sequential for now 
     // and assume the user role allows this.
 
-    // 2a. Add to organization_members
-    await _supabase.from('organization_members').insert({
+    // 2a. Add to organization_members (use upsert to handle "already a member" cases)
+    await _supabase.from('organization_members').upsert({
       'organization_id': orgId,
       'user_id': user.id,
       'role': role,
-    });
+    }, onConflict: 'organization_id, user_id');
 
     // 2b. Update profile's active organization
     await _supabase.from('profiles').update({'organization_id': orgId}).eq('id', user.id);
@@ -290,14 +290,14 @@ class OrganizationService {
 
     final userId = profileResponse['id'] as String;
 
-    // Direct insert (admin only)
+    // Direct upsert (admin only)
     final response = await _supabase
         .from('organization_members')
-        .insert({
+        .upsert({
           'organization_id': orgId,
           'user_id': userId,
           'role': role,
-        })
+        }, onConflict: 'organization_id, user_id')
         .select('*, profiles!user_id(name, email)')
         .maybeSingle();
 
