@@ -150,9 +150,9 @@ class NotificationsScreen extends ConsumerWidget {
 
                 await ref.read(userInvitationsProvider.notifier).acceptInvitation(inviteId);
                 
-                // Refresh both the current org and the list of user orgs
                 await ref.read(currentOrganizationProvider.notifier).refresh();
                 ref.invalidate(userOrganizationsProvider);
+                ref.invalidate(userInvitationsProvider);
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

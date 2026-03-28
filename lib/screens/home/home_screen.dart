@@ -556,6 +556,7 @@ class HomeScreen extends ConsumerWidget {
                       await ref.read(userInvitationsProvider.notifier).acceptInvitation(inviteId);
                       await ref.read(currentOrganizationProvider.notifier).refresh();
                       ref.invalidate(userOrganizationsProvider);
+                      ref.invalidate(userInvitationsProvider);
                       
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
