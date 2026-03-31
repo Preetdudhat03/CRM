@@ -1,14 +1,11 @@
 -- =====================================================================================
--- PHASE 10: FULL SECURITY LOCKDOWN (GRANULAR PERMISSIONS + ORG ISOLATION)
+-- PHASE 11: GLOBAL SECURITY PURGE & GRANULAR LOCKDOWN
 -- =====================================================================================
 
 -- 1. ADD CUSTOM PERMISSIONS COLUMN TO PROFILES
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS custom_permissions TEXT[];
 
 -- 2. CREATE HELPER FUNCTION TO CHECK GRANULAR PERMISSIONS
--- This function checks if a user has a permission based on:
--- a) Their custom_permissions (if set)
--- b) Their default role permissions (if custom_permissions is NULL)
 CREATE OR REPLACE FUNCTION public.has_permission(requested_permission TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -17,7 +14,7 @@ DECLARE
     v_role_perms TEXT[];
 BEGIN
     -- Get user's role and custom permissions
-    SELECT role, custom_permissions INTO v_user_role, v_custom_perms
+    SELECT LOWER(role), custom_permissions INTO v_user_role, v_custom_perms
     FROM public.profiles
     WHERE id = auth.uid();
 
@@ -33,9 +30,8 @@ BEGIN
     END IF;
 
     -- Case 2: No custom permissions, fallback to Role Defaults
-    -- Mapping roles to permissions (Matching Dart RoleExtension logic)
     CASE v_user_role
-        WHEN 'superAdmin' THEN 
+        WHEN 'superadmin' THEN 
             RETURN TRUE; -- All access
         WHEN 'admin' THEN
             v_role_perms := ARRAY[
@@ -85,7 +81,7 @@ DECLARE
     v_updated_profile JSONB;
 BEGIN
     -- Check if the caller is an admin or superAdmin
-    SELECT (role = 'admin' OR role = 'superAdmin') INTO v_is_authorized
+    SELECT (LOWER(role) = 'admin' OR LOWER(role) = 'superadmin') INTO v_is_authorized
     FROM public.profiles
     WHERE id = auth.uid();
 
@@ -111,104 +107,112 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. SYSTEMATICALLY DROP ALL LEGACY CRM POLICIES
--- This ensures no "leaky" policies remain that bypass our new checks.
+-- 4. AGGRESSIVE DYNAMIC POLICY PURGE
+-- This queries the database for EVERY policy on the target tables and DROPS them.
 DO $$
 DECLARE
+    r record;
+    tables_to_purge text[] := ARRAY['contacts', 'leads', 'deals', 'tasks', 'activities', 'notifications', 'companies', 'files'];
     t text;
 BEGIN
-    FOR t IN SELECT unnest(ARRAY['contacts', 'leads', 'deals', 'tasks', 'activities', 'notifications', 'companies', 'files'])
+    FOREACH t IN ARRAY tables_to_purge
     LOOP
-        -- Drop old name patterns (mt_*, Leads access policy, tenant_*, etc.)
-        EXECUTE format('DROP POLICY IF EXISTS "Leads access policy" ON %I', t);
-        EXECUTE format('DROP POLICY IF EXISTS "Contacts access policy" ON %I', t);
-        EXECUTE format('DROP POLICY IF EXISTS mt_select_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS mt_insert_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS mt_update_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS mt_delete_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS tenant_view_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS tenant_insert_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS tenant_update_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS tenant_delete_%s ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS "Permission-based creation of %s" ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS "Permission-based update of %s" ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS "Permission-based deletion of %s" ON %I', t, t);
-        EXECUTE format('DROP POLICY IF EXISTS "Permission-based management of %s" ON %I', t, t);
+        -- Find all policies for the table and drop them
+        FOR r IN (
+            SELECT policyname 
+            FROM pg_policies 
+            WHERE schemaname = 'public' 
+            AND tablename = t
+        ) LOOP
+            EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', r.policyname, t);
+        END LOOP;
         
-        -- Enable RLS
-        EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+        -- Disable and then Re-Enable RLS to clear the "dirty" state
+        EXECUTE format('ALTER TABLE public.%I DISABLE ROW LEVEL SECURITY', t);
+        EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+        EXECUTE format('ALTER TABLE public.%I FORCE ROW LEVEL SECURITY', t);
     END LOOP;
 END $$;
 
--- 5. IMPLEMENT NEW ORG + PERMISSION POLICIES
-
--- Helper to check Org Isolation AND Permission
--- Standardize mapping for tables that don't have explicit Permissions (like Companies)
--- Using 'viewContacts' as proxy for 'companies' and 'files'.
+-- 5. IMPLEMENT NEW ORG + PERMISSION POLICIES (THE LOCKDOWN)
 
 -- CONTACTS
-CREATE POLICY "Contacts Select" ON contacts FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
-CREATE POLICY "Contacts Insert" ON contacts FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
-CREATE POLICY "Contacts Update" ON contacts FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
-CREATE POLICY "Contacts Delete" ON contacts FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
+CREATE POLICY "SECURE_SELECT_contacts" ON contacts FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "SECURE_INSERT_contacts" ON contacts FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "SECURE_UPDATE_contacts" ON contacts FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
+CREATE POLICY "SECURE_DELETE_contacts" ON contacts FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
 -- LEADS
-CREATE POLICY "Leads Select" ON leads FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewLeads'));
-CREATE POLICY "Leads Insert" ON leads FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createLeads'));
-CREATE POLICY "Leads Update" ON leads FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editLeads'));
-CREATE POLICY "Leads Delete" ON leads FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteLeads'));
+CREATE POLICY "SECURE_SELECT_leads" ON leads FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewLeads'));
+CREATE POLICY "SECURE_INSERT_leads" ON leads FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createLeads'));
+CREATE POLICY "SECURE_UPDATE_leads" ON leads FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editLeads'));
+CREATE POLICY "SECURE_DELETE_leads" ON leads FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteLeads'));
 
 -- DEALS
-CREATE POLICY "Deals Select" ON deals FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewDeals'));
-CREATE POLICY "Deals Insert" ON deals FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createDeals'));
-CREATE POLICY "Deals Update" ON deals FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editDeals'));
-CREATE POLICY "Deals Delete" ON deals FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteDeals'));
+CREATE POLICY "SECURE_SELECT_deals" ON deals FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewDeals'));
+CREATE POLICY "SECURE_INSERT_deals" ON deals FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createDeals'));
+CREATE POLICY "SECURE_UPDATE_deals" ON deals FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editDeals'));
+CREATE POLICY "SECURE_DELETE_deals" ON deals FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteDeals'));
 
 -- TASKS
-CREATE POLICY "Tasks Select" ON tasks FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewTasks'));
-CREATE POLICY "Tasks Insert" ON tasks FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createTasks'));
-CREATE POLICY "Tasks Update" ON tasks FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editTasks'));
-CREATE POLICY "Tasks Delete" ON tasks FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteTasks'));
+CREATE POLICY "SECURE_SELECT_tasks" ON tasks FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewTasks'));
+CREATE POLICY "SECURE_INSERT_tasks" ON tasks FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createTasks'));
+CREATE POLICY "SECURE_UPDATE_tasks" ON tasks FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editTasks'));
+CREATE POLICY "SECURE_DELETE_tasks" ON tasks FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteTasks'));
 
--- COMPANIES (Using Contacts Permissions as Proxy)
-CREATE POLICY "Companies Select" ON companies FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
-CREATE POLICY "Companies Insert" ON companies FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
-CREATE POLICY "Companies Update" ON companies FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
-CREATE POLICY "Companies Delete" ON companies FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
+-- COMPANIES
+CREATE POLICY "SECURE_SELECT_companies" ON companies FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "SECURE_INSERT_companies" ON companies FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "SECURE_UPDATE_companies" ON companies FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
+CREATE POLICY "SECURE_DELETE_companies" ON companies FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
 -- ACTIVITIES
-CREATE POLICY "Activities Select" ON activities FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
-CREATE POLICY "Activities Insert" ON activities FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND (public.has_permission('createLeads') OR public.has_permission('createContacts') OR public.has_permission('createTasks')));
+CREATE POLICY "SECURE_SELECT_activities" ON activities FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
+CREATE POLICY "SECURE_INSERT_activities" ON activities FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND (public.has_permission('createLeads') OR public.has_permission('createContacts') OR public.has_permission('createTasks')));
 
 -- FILES (Using Contacts Permissions as Proxy)
-CREATE POLICY "Files Select" ON files FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
-CREATE POLICY "Files Insert" ON files FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
-CREATE POLICY "Files Delete" ON files FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
+CREATE POLICY "SECURE_SELECT_files" ON files FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "SECURE_INSERT_files" ON files FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "SECURE_DELETE_files" ON files FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
 -- 6. PROFILES TABLE REFINEMENT
-DROP POLICY IF EXISTS "Users update self or admins update any" ON profiles;
-DROP POLICY IF EXISTS "Users update self or admins manage others" ON profiles;
-DROP POLICY IF EXISTS "All users can view profiles" ON profiles;
+-- Purge existing profiles policies
+DO $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN (SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = 'profiles') LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.profiles', r.policyname);
+    END LOOP;
+END $$;
 
-CREATE POLICY "Profiles Select" ON profiles FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
-CREATE POLICY "Profiles Update Self or Admin" ON profiles FOR UPDATE USING (id = auth.uid() OR public.has_permission('manageUsers'));
+CREATE POLICY "SECURE_SELECT_profiles" ON profiles FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
+CREATE POLICY "SECURE_UPDATE_profiles_self_or_admin" ON profiles FOR UPDATE USING (id = auth.uid() OR public.has_permission('manageUsers'));
 
--- Final Check for RLS
+-- Final Security check
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles FORCE ROW LEVEL SECURITY;
 
--- Ensure schema cache is refreshed
+-- 7. DEBUGGING TOOL
+-- Run `SELECT * FROM public.check_my_security_status();`
+CREATE OR REPLACE FUNCTION public.check_my_security_status()
+RETURNS TABLE (
+    table_name text,
+    rls_enabled boolean,
+    policies_count bigint
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        t.tablename::text,
+        t.relrowsecurity,
+        (SELECT count(*) FROM pg_policies p WHERE p.tablename = t.tablename AND p.schemaname = 'public')
+    FROM pg_tables t
+    JOIN pg_class c ON c.relname = t.tablename
+    WHERE t.schemaname = 'public' 
+    AND t.tablename IN ('contacts', 'leads', 'deals', 'tasks', 'activities', 'companies', 'profiles');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Refresh PostgREST cache
 NOTIFY pgrst, 'reload schema';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
