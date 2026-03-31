@@ -106,6 +106,28 @@ class PermissionService {
     return user.hasPermission(Permission.deleteTasks);
   }
 
+  // --- Files ---
+  static bool canViewFiles(UserModel? user) {
+    if (user == null) return false;
+    return user.hasPermission(Permission.viewFiles);
+  }
+
+  static bool canUploadFiles(UserModel? user) {
+    if (user == null) return false;
+    return user.hasPermission(Permission.uploadFiles);
+  }
+
+  static bool canDeleteFiles(UserModel? user) {
+    if (user == null) return false;
+    return user.hasPermission(Permission.deleteFiles);
+  }
+
+  // --- Activities ---
+  static bool canViewActivities(UserModel? user) {
+    if (user == null) return false;
+    return user.hasPermission(Permission.viewActivities);
+  }
+
   // --- Analytics ---
   static bool canViewAnalytics(UserModel? user) {
     if (user == null) return false;

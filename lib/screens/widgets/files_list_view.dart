@@ -6,8 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../../providers/file_provider.dart';
 import '../../models/file_model.dart';
-import '../../providers/auth_provider.dart';
-import '../../models/role_model.dart';
+import '../../core/services/permission_service.dart';
 
 class FileListView extends ConsumerWidget {
   final String relatedType;
@@ -24,10 +23,15 @@ class FileListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileState = ref.watch(fileProvider('$relatedType:$relatedId'));
-    final role = ref.watch(userRoleProvider);
+    final user = ref.watch(currentUserProvider);
     
-    final isAdminOrManager = role == Role.admin || role == Role.manager || role == Role.superAdmin;
-    final canUpload = role != Role.viewer;
+    final canUpload = PermissionService.canUploadFiles(user);
+    final canDelete = PermissionService.canDeleteFiles(user);
+    final canView = PermissionService.canViewFiles(user);
+
+    if (!canView) {
+      return const Center(child: Text('You do not have permission to view files.'));
+    }
 
     return Column(
       children: [
@@ -47,14 +51,14 @@ class FileListView extends ConsumerWidget {
           child: fileState.isLoading && fileState.files.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : fileState.files.isEmpty
-                  ? const Center(child: Text('No files attached'))
-                  : ListView.builder(
-                      itemCount: fileState.files.length,
-                      itemBuilder: (context, index) {
-                        final file = fileState.files[index];
-                        return _buildFileCard(context, ref, file, isAdminOrManager);
-                      },
-                    ),
+                      ? const Center(child: Text('No files attached'))
+                      : ListView.builder(
+                          itemCount: fileState.files.length,
+                          itemBuilder: (context, index) {
+                            final file = fileState.files[index];
+                            return _buildFileCard(context, ref, file, canDelete);
+                          },
+                        ),
         ),
       ],
     );
