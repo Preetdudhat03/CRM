@@ -12,6 +12,8 @@ import 'tasks/tasks_screen.dart';
 import '../services/push_notification_service.dart';
 import '../widgets/animations/animated_indexed_stack.dart';
 import '../widgets/org_switcher.dart';
+import '../providers/auth_provider.dart';
+import '../core/constants/navigation_items.dart';
 
 // State provider for the current bottom nav index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
