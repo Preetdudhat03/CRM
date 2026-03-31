@@ -60,9 +60,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
           _isConverting = false;
         });
       }
-    }
-  }
-
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final canEdit = PermissionService.canEditLeads(user);
 

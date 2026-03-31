@@ -17,4 +17,8 @@ enum Permission {
   deleteTasks, // Added
   viewAnalytics,
   manageUsers,
+  viewFiles, // Added
+  uploadFiles, // Added
+  deleteFiles, // Added
+  viewActivities, // Added
 }
