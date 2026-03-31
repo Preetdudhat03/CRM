@@ -4,6 +4,9 @@ import '../../models/lead_model.dart';
 import '../../providers/lead_provider.dart';
 import '../../widgets/activity_timeline.dart';
 import '../widgets/files_list_view.dart';
+import '../../core/services/permission_service.dart';
+import '../../providers/auth_provider.dart';
+import 'add_edit_lead_screen.dart';
 
 class LeadDetailScreen extends ConsumerStatefulWidget {
   final LeadModel lead;
@@ -60,11 +63,26 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+    final user = ref.watch(currentUserProvider);
+    final canEdit = PermissionService.canEditLeads(user);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.lead.name),
+        actions: [
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditLeadScreen(lead: widget.lead),
+                  ),
+                );
+              },
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -86,7 +104,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
           ),
         ],
       ),
-      floatingActionButton: widget.lead.status != LeadStatus.converted
+      floatingActionButton: (widget.lead.status != LeadStatus.converted && canEdit)
           ? FloatingActionButton.extended(
               onPressed: _isConverting ? null : _convertLead,
               label: const Text('Convert'),

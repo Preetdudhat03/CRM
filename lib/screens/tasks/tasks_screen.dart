@@ -152,14 +152,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           ),
                         );
                       },
-                      onStatusChanged: (value) {
-                        final newStatus = value == true
-                            ? TaskStatus.completed
-                            : TaskStatus.pending;
-                        ref
-                            .read(tasksProvider.notifier)
-                            .updateTask(task.copyWith(status: newStatus));
-                      },
+                      onStatusChanged: canEdit
+                          ? (value) {
+                              final newStatus = value == true
+                                  ? TaskStatus.completed
+                                  : TaskStatus.pending;
+                              ref.read(tasksProvider.notifier).updateTask(
+                                    task.copyWith(status: newStatus),
+                                  );
+                            }
+                          : null,
                       onEdit: canEdit
                           ? () {
                               Navigator.push(

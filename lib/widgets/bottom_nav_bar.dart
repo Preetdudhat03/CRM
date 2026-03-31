@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import '../core/constants/navigation_items.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final List<NavItem> items;
 
   const CustomBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.items,
   });
 
   @override
@@ -18,43 +21,13 @@ class CustomBottomNavBar extends StatelessWidget {
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       backgroundColor: Theme.of(context).cardColor,
       surfaceTintColor: Colors.transparent,
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          selectedIcon: Icon(Icons.dashboard),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.people_outlined),
-          selectedIcon: Icon(Icons.people),
-          label: 'Contacts',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.business_outlined),
-          selectedIcon: Icon(Icons.business),
-          label: 'Companies',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.leaderboard_outlined),
-          selectedIcon: Icon(Icons.leaderboard),
-          label: 'Leads',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.handshake_outlined),
-          selectedIcon: Icon(Icons.handshake),
-          label: 'Deals',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.task_alt_outlined),
-          selectedIcon: Icon(Icons.task_alt),
-          label: 'Tasks',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.settings_outlined),
-          selectedIcon: Icon(Icons.settings),
-          label: 'Settings',
-        ),
-      ],
+      destinations: items.map((item) {
+        return NavigationDestination(
+          icon: Icon(item.icon),
+          selectedIcon: Icon(item.selectedIcon),
+          label: item.label,
+        );
+      }).toList(),
     );
   }
 }
