@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../providers/file_provider.dart';
 import '../../models/file_model.dart';
 import '../../core/services/permission_service.dart';
+import '../../providers/auth_provider.dart';
 
 class FileListView extends ConsumerWidget {
   final String relatedType;
