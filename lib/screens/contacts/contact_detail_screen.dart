@@ -38,6 +38,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final canEdit = PermissionService.canEditContacts(user);
+    final canDelete = PermissionService.canDeleteContacts(user);
 
     final contactsAsync = ref.watch(contactsProvider);
     final contact =
@@ -74,6 +75,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
                   ),
                 );
               },
+            ),
+          if (canDelete)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => _showDeleteConfirmation(context, ref, contact),
             ),
         ],
         bottom: TabBar(
@@ -253,5 +259,36 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen>
       case ContactStatus.churned:
         return Colors.red;
     }
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    ContactModel contact,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Contact'),
+        content: Text('Are you sure you want to delete ${contact.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(contactsProvider.notifier).deleteContact(contact.id);
+              Navigator.pop(context);
+              Navigator.pop(context); // Back to list
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('${contact.name} deleted')));
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }

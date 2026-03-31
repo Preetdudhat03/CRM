@@ -4,6 +4,9 @@ import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
 import '../../widgets/activity_timeline.dart';
 import '../widgets/files_list_view.dart';
+import '../../core/services/permission_service.dart';
+import '../../providers/auth_provider.dart';
+import 'add_edit_deal_screen.dart';
 
 class DealDetailScreen extends ConsumerStatefulWidget {
   final DealModel deal;
@@ -40,16 +43,31 @@ class _DealDetailScreenState extends ConsumerState<DealDetailScreen>
         ) ??
         widget.deal;
 
+    final user = ref.watch(currentUserProvider);
+    final canEdit = PermissionService.canEditDeals(user);
+    final canDelete = PermissionService.canDeleteDeals(user);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(deal.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {
-              // Navigate to edit
-            },
-          ),
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditDealScreen(deal: deal),
+                  ),
+                );
+              },
+            ),
+          if (canDelete)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => _showDeleteConfirmation(context, ref, deal),
+            ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -177,6 +195,37 @@ class _DealDetailScreenState extends ConsumerState<DealDetailScreen>
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    DealModel deal,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Deal'),
+        content: Text('Are you sure you want to delete ${deal.title}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(dealsProvider.notifier).deleteDeal(deal.id);
+              Navigator.pop(context);
+              Navigator.pop(context); // Back to list
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('${deal.title} deleted')));
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
