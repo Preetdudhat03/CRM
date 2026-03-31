@@ -36,16 +36,18 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(bottomNavIndexProvider);
+    final user = ref.watch(currentUserProvider);
 
-    final List<Widget> screens = [
-      const HomeScreen(),
-      const ContactsScreen(),
-      const CompaniesScreen(),
-      const LeadsScreen(),
-      const DealsScreen(),
-      const TasksScreen(),
-      const SettingsScreen(),
-    ];
+    // Filter navigation items based on current user permissions
+    final filteredItems = navigationItems
+        .where((item) => item.checkPermission(user))
+        .toList();
+
+    // Safety check for index out of bounds after permission change
+    final safeIndex = currentIndex >= filteredItems.length ? 0 : currentIndex;
+
+    final List<Widget> screens =
+        filteredItems.map((item) => item.screen).toList();
 
     return Scaffold(
       body: LayoutBuilder(
@@ -55,54 +57,24 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             return Row(
               children: [
                 NavigationRail(
-                  selectedIndex: currentIndex,
+                  selectedIndex: safeIndex,
                   onDestinationSelected: (index) {
                     ref.read(bottomNavIndexProvider.notifier).state = index;
                   },
                   labelType: NavigationRailLabelType.all,
                   leading: const OrgSwitcher(isCompact: true),
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.dashboard_outlined),
-                      selectedIcon: Icon(Icons.dashboard),
-                      label: Text('Home'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.people_outlined),
-                      selectedIcon: Icon(Icons.people),
-                      label: Text('Contacts'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.business_outlined),
-                      selectedIcon: Icon(Icons.business),
-                      label: Text('Companies'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.leaderboard_outlined),
-                      selectedIcon: Icon(Icons.leaderboard),
-                      label: Text('Leads'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.handshake_outlined),
-                      selectedIcon: Icon(Icons.handshake),
-                      label: Text('Deals'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.task_alt_outlined),
-                      selectedIcon: Icon(Icons.task_alt),
-                      label: Text('Tasks'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.settings_outlined),
-                      selectedIcon: Icon(Icons.settings),
-                      label: Text('Settings'),
-                    ),
-                  ],
+                  destinations: filteredItems.map((item) {
+                    return NavigationRailDestination(
+                      icon: Icon(item.icon),
+                      selectedIcon: Icon(item.selectedIcon),
+                      label: Text(item.label),
+                    );
+                  }).toList(),
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
                 Expanded(
                   child: AnimatedIndexedStack(
-                    index: currentIndex,
+                    index: safeIndex,
                     children: screens,
                   ),
                 ),
@@ -110,17 +82,18 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             );
           } else {
             // Mobile/Tablet Portrait: Show BottomNavigationBar
-            return AnimatedIndexedStack(index: currentIndex, children: screens);
+            return AnimatedIndexedStack(index: safeIndex, children: screens);
           }
         },
       ),
       bottomNavigationBar: MediaQuery.of(context).size.width > 800
           ? null
           : CustomBottomNavBar(
-              currentIndex: currentIndex,
+              currentIndex: safeIndex,
               onTap: (index) {
                 ref.read(bottomNavIndexProvider.notifier).state = index;
               },
+              items: filteredItems,
             ),
     );
   }
