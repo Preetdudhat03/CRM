@@ -258,3 +258,18 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Ensure schema cache is refreshed
 NOTIFY pgrst, 'reload schema';
+
+
+-- 6. PROFILES TABLE REFINEMENT
+DROP POLICY IF EXISTS "Users update self or admins update any" ON profiles;
+DROP POLICY IF EXISTS "Users update self or admins manage others" ON profiles;
+DROP POLICY IF EXISTS "All users can view profiles" ON profiles;
+
+CREATE POLICY "Profiles Select" ON profiles FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
+CREATE POLICY "Profiles Update Self or Admin" ON profiles FOR UPDATE USING (id = auth.uid() OR public.has_permission('manageUsers'));
+
+-- Final Check for RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Ensure schema cache is refreshed
+NOTIFY pgrst, 'reload schema';
