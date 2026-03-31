@@ -1,5 +1,5 @@
 -- =====================================================================================
--- PHASE 10: CUSTOM PERMISSIONS & SECURE ADMIN UPDATES
+-- PHASE 10: FULL SECURITY LOCKDOWN (GRANULAR PERMISSIONS + ORG ISOLATION)
 -- =====================================================================================
 
 -- 1. ADD CUSTOM PERMISSIONS COLUMN TO PROFILES
@@ -73,7 +73,6 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 3. CREATE SECURE ADMIN RPC FOR UPDATING PROFILES
--- This uses SECURITY DEFINER to allow admins to update other users' metadata.
 CREATE OR REPLACE FUNCTION public.admin_update_profile(
     target_user_id UUID,
     new_name TEXT,
@@ -99,7 +98,7 @@ BEGIN
     SET 
         name = COALESCE(new_name, name),
         role = COALESCE(new_role, role),
-        custom_permissions = new_custom_permissions, -- NULL means reset to role defaults
+        custom_permissions = new_custom_permissions,
         updated_at = NOW()
     WHERE id = target_user_id
     RETURNING to_jsonb(public.profiles.*) INTO v_updated_profile;
@@ -112,84 +111,90 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. UPDATE RLS POLICIES TO USE GRANULAR PERMISSIONS
--- We drop old role-based policies and replace them with permission-based ones.
+-- 4. SYSTEMATICALLY DROP ALL LEGACY CRM POLICIES
+-- This ensures no "leaky" policies remain that bypass our new checks.
+DO $$
+DECLARE
+    t text;
+BEGIN
+    FOR t IN SELECT unnest(ARRAY['contacts', 'leads', 'deals', 'tasks', 'activities', 'notifications', 'companies', 'files'])
+    LOOP
+        -- Drop old name patterns (mt_*, Leads access policy, tenant_*, etc.)
+        EXECUTE format('DROP POLICY IF EXISTS "Leads access policy" ON %I', t);
+        EXECUTE format('DROP POLICY IF EXISTS "Contacts access policy" ON %I', t);
+        EXECUTE format('DROP POLICY IF EXISTS mt_select_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS mt_insert_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS mt_update_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS mt_delete_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS tenant_view_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS tenant_insert_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS tenant_update_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS tenant_delete_%s ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS "Permission-based creation of %s" ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS "Permission-based update of %s" ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS "Permission-based deletion of %s" ON %I', t, t);
+        EXECUTE format('DROP POLICY IF EXISTS "Permission-based management of %s" ON %I', t, t);
+        
+        -- Enable RLS
+        EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+    END LOOP;
+END $$;
+
+-- 5. IMPLEMENT NEW ORG + PERMISSION POLICIES
+
+-- Helper to check Org Isolation AND Permission
+-- Standardize mapping for tables that don't have explicit Permissions (like Companies)
+-- Using 'viewContacts' as proxy for 'companies' and 'files'.
 
 -- CONTACTS
-DROP POLICY IF EXISTS "Employees and above can create contacts" ON contacts;
-DROP POLICY IF EXISTS "Employees and above can update contacts" ON contacts;
-DROP POLICY IF EXISTS "Only admins can delete contacts" ON contacts;
-
-CREATE POLICY "Permission-based creation of contacts" ON contacts
-  FOR INSERT WITH CHECK (public.has_permission('createContacts'));
-
-CREATE POLICY "Permission-based update of contacts" ON contacts
-  FOR UPDATE USING (public.has_permission('editContacts'));
-
-CREATE POLICY "Permission-based deletion of contacts" ON contacts
-  FOR DELETE USING (public.has_permission('deleteContacts'));
+CREATE POLICY "Contacts Select" ON contacts FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "Contacts Insert" ON contacts FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "Contacts Update" ON contacts FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
+CREATE POLICY "Contacts Delete" ON contacts FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
 -- LEADS
-DROP POLICY IF EXISTS "Employees and above can create leads" ON leads;
-DROP POLICY IF EXISTS "Employees and above can update leads" ON leads;
-DROP POLICY IF EXISTS "Only admins can delete leads" ON leads;
-
-CREATE POLICY "Permission-based creation of leads" ON leads
-  FOR INSERT WITH CHECK (public.has_permission('createLeads'));
-
-CREATE POLICY "Permission-based update of leads" ON leads
-  FOR UPDATE USING (public.has_permission('editLeads'));
-
-CREATE POLICY "Permission-based deletion of leads" ON leads
-  FOR DELETE USING (public.has_permission('deleteLeads'));
+CREATE POLICY "Leads Select" ON leads FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewLeads'));
+CREATE POLICY "Leads Insert" ON leads FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createLeads'));
+CREATE POLICY "Leads Update" ON leads FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editLeads'));
+CREATE POLICY "Leads Delete" ON leads FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteLeads'));
 
 -- DEALS
-DROP POLICY IF EXISTS "Employees and above can create deals" ON deals;
-DROP POLICY IF EXISTS "Employees and above can update deals" ON deals;
-DROP POLICY IF EXISTS "Only admins can delete deals" ON deals;
-
-CREATE POLICY "Permission-based creation of deals" ON deals
-  FOR INSERT WITH CHECK (public.has_permission('createDeals'));
-
-CREATE POLICY "Permission-based update of deals" ON deals
-  FOR UPDATE USING (public.has_permission('editDeals'));
-
-CREATE POLICY "Permission-based deletion of deals" ON deals
-  FOR DELETE USING (public.has_permission('deleteDeals'));
+CREATE POLICY "Deals Select" ON deals FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewDeals'));
+CREATE POLICY "Deals Insert" ON deals FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createDeals'));
+CREATE POLICY "Deals Update" ON deals FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editDeals'));
+CREATE POLICY "Deals Delete" ON deals FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteDeals'));
 
 -- TASKS
-DROP POLICY IF EXISTS "Employees and above can create tasks" ON tasks;
-DROP POLICY IF EXISTS "Employees and above can update tasks" ON tasks;
-DROP POLICY IF EXISTS "Managers and above can delete tasks" ON tasks;
+CREATE POLICY "Tasks Select" ON tasks FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewTasks'));
+CREATE POLICY "Tasks Insert" ON tasks FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createTasks'));
+CREATE POLICY "Tasks Update" ON tasks FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editTasks'));
+CREATE POLICY "Tasks Delete" ON tasks FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteTasks'));
 
-CREATE POLICY "Permission-based creation of tasks" ON tasks
-  FOR INSERT WITH CHECK (public.has_permission('createTasks'));
-
-CREATE POLICY "Permission-based update of tasks" ON tasks
-  FOR UPDATE USING (public.has_permission('editTasks'));
-
-CREATE POLICY "Permission-based deletion of tasks" ON tasks
-  FOR DELETE USING (public.has_permission('deleteTasks'));
+-- COMPANIES (Using Contacts Permissions as Proxy)
+CREATE POLICY "Companies Select" ON companies FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "Companies Insert" ON companies FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "Companies Update" ON companies FOR UPDATE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('editContacts'));
+CREATE POLICY "Companies Delete" ON companies FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
 -- ACTIVITIES
-DROP POLICY IF EXISTS "Employees and above can manage activities" ON activities;
+CREATE POLICY "Activities Select" ON activities FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
+CREATE POLICY "Activities Insert" ON activities FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND (public.has_permission('createLeads') OR public.has_permission('createContacts') OR public.has_permission('createTasks')));
 
-CREATE POLICY "Permission-based management of activities" ON activities
-  FOR ALL USING (public.has_permission('editTasks') OR public.has_permission('createTasks')); 
-  -- Activities often follow Task/Contact permissions. Given the system, we simplify to 'editTasks' or 'createTasks' for basic management.
+-- FILES (Using Contacts Permissions as Proxy)
+CREATE POLICY "Files Select" ON files FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('viewContacts'));
+CREATE POLICY "Files Insert" ON files FOR INSERT WITH CHECK (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('createContacts'));
+CREATE POLICY "Files Delete" ON files FOR DELETE USING (organization_id IN (SELECT public.get_user_org_ids()) AND public.has_permission('deleteContacts'));
 
--- ==================== PROFILES POLICIES (Refinement) ====================
--- Ensure we don't lock ourselves out.
+-- 6. PROFILES TABLE REFINEMENT
 DROP POLICY IF EXISTS "Users update self or admins update any" ON profiles;
+DROP POLICY IF EXISTS "Users update self or admins manage others" ON profiles;
+DROP POLICY IF EXISTS "All users can view profiles" ON profiles;
 
--- VIEW: Everyone can view profiles (needed for assigning users to tasks/leads)
--- (Already defined in 20240502_enforce_iam_rls.sql, but we ensure it remains for SELECT)
+CREATE POLICY "Profiles Select" ON profiles FOR SELECT USING (organization_id IN (SELECT public.get_user_org_ids()));
+CREATE POLICY "Profiles Update Self or Admin" ON profiles FOR UPDATE USING (id = auth.uid() OR public.has_permission('manageUsers'));
 
--- UPDATE: Self OR Admin/SuperAdmin (using manageUsers permission)
-CREATE POLICY "Users update self or admins manage others" ON profiles
-  FOR UPDATE USING (
-    id = auth.uid() OR public.has_permission('manageUsers')
-  );
+-- Final Check for RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Ensure schema cache is refreshed
 NOTIFY pgrst, 'reload schema';
