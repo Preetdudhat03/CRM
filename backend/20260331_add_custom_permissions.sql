@@ -193,3 +193,7 @@ CREATE POLICY "Users update self or admins manage others" ON profiles
 
 -- Ensure schema cache is refreshed
 NOTIFY pgrst, 'reload schema';
+
+
+
+....................
