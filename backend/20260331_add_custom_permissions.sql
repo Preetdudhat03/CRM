@@ -258,5 +258,3 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Ensure schema cache is refreshed
 NOTIFY pgrst, 'reload schema';
-
-
