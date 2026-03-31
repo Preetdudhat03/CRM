@@ -6,6 +6,7 @@ import '../../../providers/user_management_provider.dart';
 import '../../../widgets/org_switcher.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
 import '../../../utils/error_handler.dart';
+import '../../../models/role_model.dart';
 import 'add_edit_user_screen.dart';
 
 class UserManagementScreen extends ConsumerWidget {
