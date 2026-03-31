@@ -53,6 +53,18 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final canViewAnalytics = PermissionService.canViewAnalytics(user);
+    final canViewContacts = PermissionService.canViewContacts(user);
+    final canViewLeads = PermissionService.canViewLeads(user);
+    final canViewDeals = PermissionService.canViewDeals(user);
+    final canViewTasks = PermissionService.canViewTasks(user);
+    final canViewActivities = PermissionService.canViewActivities(user);
+
+    final canCreateContacts = PermissionService.canCreateContacts(user);
+    final canCreateLeads = PermissionService.canCreateLeads(user);
+    final canCreateDeals = PermissionService.canCreateDeals(user);
+    final canCreateTasks = PermissionService.canCreateTasks(user);
+
+    final canCreateAnything = canCreateContacts || canCreateLeads || canCreateDeals || canCreateTasks;
 
     final dashboardMetrics = ref.watch(dashboardMetricsProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
@@ -108,13 +120,21 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'home_fab',
-        onPressed: () {
-          _showQuickAddMenu(context);
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canCreateAnything
+          ? FloatingActionButton(
+              heroTag: 'home_fab',
+              onPressed: () {
+                _showQuickAddMenu(
+                  context,
+                  canCreateContacts: canCreateContacts,
+                  canCreateLeads: canCreateLeads,
+                  canCreateDeals: canCreateDeals,
+                  canCreateTasks: canCreateTasks,
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(dashboardMetricsProvider);
@@ -135,7 +155,7 @@ class HomeScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Dashboard Overview',
+                          '${user?.role.displayName ?? 'Dashboard'} Overview',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         DropdownButton<DashboardPeriod>(
@@ -175,30 +195,33 @@ class HomeScreen extends ConsumerWidget {
                         physics: const NeverScrollableScrollPhysics(),
                         childAspectRatio: isWide ? 1.4 : 1.2,
                         children: [
-                          _buildStatCard(
-                            dashboardMetrics,
-                            title: 'Total Contacts',
-                            icon: Icons.people_outline,
-                            color: Colors.blue,
-                            valueKey: 'totalContacts',
-                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 1,
-                          ),
-                          _buildStatCard(
-                            dashboardMetrics,
-                            title: 'Total Leads',
-                            icon: Icons.leaderboard_outlined,
-                            color: Colors.orange,
-                            valueKey: 'totalLeads',
-                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 2,
-                          ),
-                          _buildStatCard(
-                            dashboardMetrics,
-                            title: 'Active Deals',
-                            valueKey: 'totalDeals',
-                            icon: Icons.handshake_outlined,
-                            color: Colors.purple,
-                            onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 3,
-                          ),
+                          if (canViewContacts)
+                            _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Total Contacts',
+                              icon: Icons.people_outline,
+                              color: Colors.blue,
+                              valueKey: 'totalContacts',
+                              onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 1,
+                            ),
+                          if (canViewLeads)
+                            _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Total Leads',
+                              icon: Icons.leaderboard_outlined,
+                              color: Colors.orange,
+                              valueKey: 'totalLeads',
+                              onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 2,
+                            ),
+                          if (canViewDeals)
+                            _buildStatCard(
+                              dashboardMetrics,
+                              title: 'Active Deals',
+                              valueKey: 'totalDeals',
+                              icon: Icons.handshake_outlined,
+                              color: Colors.purple,
+                              onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 3,
+                            ),
                           if (canViewAnalytics)
                             _buildStatCard(
                               dashboardMetrics,
@@ -240,8 +263,9 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 32),
                   // Pipeline
-                  FadeInSlide(
-                    delay: 0.2,
+                  if (canViewDeals)
+                    FadeInSlide(
+                      delay: 0.2,
                     child: dashboardMetrics.when(
                       data: (stats) {
                         final rawPipeline = stats['rawPipeline'] as Map<String, int>? ?? {};
@@ -271,11 +295,15 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(height: 32),
                   ],
                   if (!isWide) ...[
-                    const FadeInSlide(delay: 0.4, child: TasksDueTodayWidget()),
-                    const SizedBox(height: 32),
-                    _buildRecentActivityHeader(context, ref),
-                    const SizedBox(height: 8),
-                    const FadeInSlide(delay: 0.5, child: RecentActivityList()),
+                    if (canViewTasks) ...[
+                      const FadeInSlide(delay: 0.4, child: TasksDueTodayWidget()),
+                      const SizedBox(height: 32),
+                    ],
+                    if (canViewActivities) ...[
+                      _buildRecentActivityHeader(context, ref),
+                      const SizedBox(height: 8),
+                      const FadeInSlide(delay: 0.5, child: RecentActivityList()),
+                    ],
                   ],
                 ],
               );
@@ -291,11 +319,15 @@ class HomeScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const FadeInSlide(delay: 0.1, child: TasksDueTodayWidget()),
-                          const SizedBox(height: 32),
-                          _buildRecentActivityHeader(context, ref),
-                          const SizedBox(height: 12),
-                          const FadeInSlide(delay: 0.2, child: RecentActivityList()),
+                          if (canViewTasks) ...[
+                            const FadeInSlide(delay: 0.1, child: TasksDueTodayWidget()),
+                            const SizedBox(height: 32),
+                          ],
+                          if (canViewActivities) ...[
+                            _buildRecentActivityHeader(context, ref),
+                            const SizedBox(height: 12),
+                            const FadeInSlide(delay: 0.2, child: RecentActivityList()),
+                          ],
                         ],
                       ),
                     ),
@@ -364,7 +396,13 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showQuickAddMenu(BuildContext context) {
+  void _showQuickAddMenu(
+    BuildContext context, {
+    required bool canCreateContacts,
+    required bool canCreateLeads,
+    required bool canCreateDeals,
+    required bool canCreateTasks,
+  }) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -388,66 +426,70 @@ class HomeScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _quickActionBtn(
-                    context,
-                    icon: Icons.person_add_alt_1,
-                    label: 'Contact',
-                    color: Colors.blue,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddEditContactScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _quickActionBtn(
-                    context,
-                    icon: Icons.leaderboard,
-                    label: 'Lead',
-                    color: Colors.orange,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddEditLeadScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _quickActionBtn(
-                    context,
-                    icon: Icons.handshake,
-                    label: 'Deal',
-                    color: Colors.purple,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddEditDealScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _quickActionBtn(
-                    context,
-                    icon: Icons.check_circle_outline,
-                    label: 'Task',
-                    color: Colors.green,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddEditTaskScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  if (canCreateContacts)
+                    _quickActionBtn(
+                      context,
+                      icon: Icons.person_add_alt_1,
+                      label: 'Contact',
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddEditContactScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (canCreateLeads)
+                    _quickActionBtn(
+                      context,
+                      icon: Icons.leaderboard,
+                      label: 'Lead',
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddEditLeadScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (canCreateDeals)
+                    _quickActionBtn(
+                      context,
+                      icon: Icons.handshake,
+                      label: 'Deal',
+                      color: Colors.purple,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddEditDealScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  if (canCreateTasks)
+                    _quickActionBtn(
+                      context,
+                      icon: Icons.check_circle_outline,
+                      label: 'Task',
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddEditTaskScreen(),
+                          ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ],
