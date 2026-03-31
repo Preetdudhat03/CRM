@@ -50,21 +50,31 @@ class _CompanyDetailScreenState extends ConsumerState<CompanyDetailScreen>
         ) ??
         widget.company;
 
+    final user = ref.watch(currentUserProvider);
+    final canEdit = PermissionService.canEditContacts(user); // Companies use contact perms
+    final canDelete = PermissionService.canDeleteContacts(user);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(company.name),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddEditCompanyScreen(company: company),
-                ),
-              );
-            },
-          ),
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditCompanyScreen(company: company),
+                  ),
+                );
+              },
+            ),
+          if (canDelete)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => _showDeleteConfirmation(context, ref, company),
+            ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -323,5 +333,36 @@ class _CompanyDetailScreenState extends ConsumerState<CompanyDetailScreen>
 
   Widget _buildActivitiesTab(CompanyModel company) {
     return ActivityTimeline(relatedType: 'company', relatedId: company.id);
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    CompanyModel company,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Company'),
+        content: Text('Are you sure you want to delete ${company.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(companiesProvider.notifier).deleteCompany(company.id);
+              Navigator.pop(context);
+              Navigator.pop(context); // Back to list
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('${company.name} deleted')));
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }
