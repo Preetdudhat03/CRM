@@ -195,4 +195,3 @@ CREATE POLICY "Users update self or admins manage others" ON profiles
 NOTIFY pgrst, 'reload schema';
 
 
-
