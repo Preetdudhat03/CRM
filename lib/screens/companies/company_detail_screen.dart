@@ -13,6 +13,8 @@ import 'package:intl/intl.dart';
 import '../../providers/user_management_provider.dart';
 import '../../widgets/activity_timeline.dart';
 import '../widgets/files_list_view.dart';
+import '../../providers/auth_provider.dart';
+import '../../core/services/permission_service.dart';
 
 class CompanyDetailScreen extends ConsumerStatefulWidget {
   final CompanyModel company;
