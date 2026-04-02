@@ -12,6 +12,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../core/services/permission_service.dart';
 import '../../widgets/org_switcher.dart';
+import '../../providers/app_info_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -23,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
     final canManageUsers = PermissionService.canManageUsers(user);
     final themeMode = ref.watch(themeModeProvider);
     final notificationsEnabled = ref.watch(notificationSettingsProvider);
+    final appInfo = ref.watch(appInfoProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -270,7 +272,11 @@ class SettingsScreen extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.info_outlined),
                 title: const Text('About App'),
-                subtitle: const Text('Version 1.0.0'),
+                subtitle: appInfo.when(
+                  data: (info) => Text('Version ${info.version}+${info.buildNumber}'),
+                  loading: () => const Text('Version ...'),
+                  error: (e, s) => const Text('Version 1.4.0'),
+                ),
               ),
             ),
 
