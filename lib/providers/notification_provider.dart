@@ -10,6 +10,8 @@ import '../services/local_notification_service.dart';
 import 'auth_provider.dart';
 import 'package:uuid/uuid.dart';
 import '../services/push_notification_service.dart';
+import '../core/services/supabase_health_service.dart';
+import 'supabase_health_provider.dart';
 
 final notificationSettingsProvider =
     StateNotifierProvider<NotificationSettingsNotifier, bool>((ref) {
@@ -107,8 +109,12 @@ class NotificationNotifier
     try {
       state = const AsyncValue.loading();
       final notifications = await _repository.getNotifications();
+      ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(notifications);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }
