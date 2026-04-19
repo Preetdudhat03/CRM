@@ -220,7 +220,15 @@ class RevenueTrendChart extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, __) => Center(child: Text('Error: $error')),
+              error: (error, __) {
+                final isPaused = SupabaseHealthService.isProjectPaused(error);
+                return Center(
+                  child: Text(
+                    isPaused ? 'Database Paused' : 'Error: $error',
+                    style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                  ),
+                );
+              },
             ),
           ),
         ],
