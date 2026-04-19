@@ -162,25 +162,28 @@ class TasksDueTodayWidget extends ConsumerWidget {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (error, __) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 48,
-                      color: Colors.green.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'You\'re all caught up for today!',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
+            error: (error, __) {
+              final isPaused = SupabaseHealthService.isProjectPaused(error);
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24.0),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        isPaused ? Icons.cloud_off_rounded : Icons.check_circle_outline,
+                        size: 48,
+                        color: isPaused ? Colors.orange.withOpacity(0.5) : Colors.green.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        isPaused ? 'Database Paused' : 'You\'re all caught up for today!',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
