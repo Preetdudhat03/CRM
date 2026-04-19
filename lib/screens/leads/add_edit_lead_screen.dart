@@ -8,6 +8,7 @@ import '../../widgets/animations/fade_in_slide.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 
 class AddEditLeadScreen extends ConsumerStatefulWidget {
   final LeadModel? lead;
@@ -283,7 +284,13 @@ class _AddEditLeadScreenState extends ConsumerState<AddEditLeadScreen> {
                           padding: EdgeInsets.symmetric(vertical: 16.0),
                           child: Center(child: CircularProgressIndicator()),
                         ),
-                        error: (_, __) => const Text('Failed to load users'),
+                        error: (error, __) {
+                          final isPaused = SupabaseHealthService.isProjectPaused(error);
+                          return Text(
+                            isPaused ? 'Database Paused' : 'Failed to load users',
+                            style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                          );
+                        },
                       );
                     },
                   ),
