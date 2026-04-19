@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
-import '../../providers/contact_provider.dart';
+import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import '../../widgets/pickers/company_picker.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../../providers/auth_provider.dart';
@@ -159,7 +160,13 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                           value == null ? 'Please select a contact' : null,
                     ),
                     loading: () => const LinearProgressIndicator(),
-                    error: (_, __) => const Text('Error loading contacts'),
+                    error: (error, __) {
+                      final isPaused = SupabaseHealthService.isProjectPaused(error);
+                      return Text(
+                        isPaused ? 'Database Paused' : 'Error loading contacts',
+                        style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -260,7 +267,13 @@ class _AddEditDealScreenState extends ConsumerState<AddEditDealScreen> {
                         },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
-                        error: (_, __) => const Text('Failed to load users'),
+                        error: (error, __) {
+                          final isPaused = SupabaseHealthService.isProjectPaused(error);
+                          return Text(
+                            isPaused ? 'Database Paused' : 'Failed to load users',
+                            style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                          );
+                        },
                       );
                     },
                   ),
