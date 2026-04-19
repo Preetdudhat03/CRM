@@ -152,7 +152,6 @@ class HomeScreen extends ConsumerWidget {
               final mainContent = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const DatabasePausedBanner(),
                   _buildInvitationBanner(context, ref),
                   FadeInSlide(
                     child: Row(
