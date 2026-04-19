@@ -9,6 +9,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import '../../services/storage_service.dart';
 import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import '../../widgets/pickers/company_picker.dart';
 import '../../providers/auth_provider.dart';
 
@@ -488,8 +489,13 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                                   loading: () => const Center(
                                     child: CircularProgressIndicator(),
                                   ),
-                                  error: (_, __) =>
-                                      const Text('Failed to load users'),
+                                  error: (error, __) {
+                                    final isPaused = SupabaseHealthService.isProjectPaused(error);
+                                    return Text(
+                                      isPaused ? 'Database Paused' : 'Failed to load users',
+                                      style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                                    );
+                                  },
                                 );
                               },
                             ),
