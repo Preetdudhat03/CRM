@@ -4,6 +4,8 @@ import '../../providers/notification_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../models/notification_model.dart';
 import '../../providers/organization_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../widgets/supabase_error_widget.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -112,7 +114,11 @@ class NotificationsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, __) => Center(child: Text('Error: $error')),
+        error: (error, __) => SupabaseErrorWidget(
+          error: error,
+          title: 'Failed to load notifications',
+          onRetry: () => ref.read(notificationsProvider.notifier).getNotifications(),
+        ),
       ),
     );
   }
