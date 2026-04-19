@@ -407,40 +407,63 @@ class _DealsScreenState extends ConsumerState<DealsScreen> {
           padding: const EdgeInsets.only(top: 8),
           itemBuilder: (context, index) => SkeletonCard(height: 140),
         ),
-        error: (error, stack) => RefreshIndicator(
-          onRefresh: () => ref.read(dealsProvider.notifier).refresh(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height - 200,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Colors.red.shade300,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Failed to load deals',
-                      style: TextStyle(
-                        color: Colors.grey.shade800,
-                        fontSize: 16,
+        error: (error, stack) {
+          final isPaused = error.toString().toLowerCase().contains('paused') ||
+              error.toString().toLowerCase().contains('unavailable');
+          return RefreshIndicator(
+            onRefresh: () => ref.read(dealsProvider.notifier).loadInitial(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height - 200,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isPaused ? Icons.cloud_off_rounded : Icons.error_outline,
+                        size: 48,
+                        color: isPaused ? Colors.orange.shade400 : Colors.red.shade300,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () => ref.read(dealsProvider.notifier).refresh(),
-                      child: const Text('Retry'),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      Text(
+                        isPaused
+                            ? 'Database is Paused'
+                            : 'Failed to load deals',
+                        style: TextStyle(
+                          color: Colors.grey.shade800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (isPaused) ...[
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            'Your Supabase project is paused due to inactivity. '
+                            'Please resume it from the Supabase dashboard.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => ref.read(dealsProvider.notifier).loadInitial(),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton(
