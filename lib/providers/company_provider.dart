@@ -4,8 +4,10 @@ import '../models/company_model.dart';
 import '../repositories/company_repository.dart';
 import '../services/company_service.dart';
 import '../services/activity_service.dart';
+import '../core/services/supabase_health_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'supabase_health_provider.dart';
 
 // Service Provider
 final companyServiceProvider = Provider<CompanyService>(
@@ -73,8 +75,12 @@ class CompanyNotifier extends StateNotifier<AsyncValue<List<CompanyModel>>> {
       if (companies.length < _pageSize) {
         _hasMore = false;
       }
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(companies);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }
