@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/supabase_health_provider.dart';
 import '../../core/services/supabase_health_service.dart';
+import '../../widgets/supabase_error_widget.dart';
 import 'widgets/contact_card.dart';
 import 'add_edit_contact_screen.dart';
 import 'contact_detail_screen.dart';
@@ -462,54 +463,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           padding: const EdgeInsets.only(top: 8),
           itemBuilder: (context, index) => SkeletonCard(height: 100),
         ),
-        error: (error, stack) {
-          final isPaused = ref.read(isSupabasePausedProvider) ||
-              SupabaseHealthService.isProjectPaused(error);
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isPaused ? Icons.cloud_off_rounded : Icons.error_outline,
-                  size: 48,
-                  color: isPaused ? Colors.orange.shade400 : Colors.red.shade300,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  isPaused
-                      ? 'Database is Paused'
-                      : 'Failed to load contacts',
-                  style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (isPaused) ...[
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Text(
-                      'Your Supabase project is paused due to inactivity. '
-                      'Please resume it from the Supabase dashboard.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () => ref.read(contactsProvider.notifier).loadInitial(),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        },
+        error: (error, stack) => SupabaseErrorWidget(
+          error: error,
+          title: 'Failed to load contacts',
+          onRetry: () => ref.read(contactsProvider.notifier).loadInitial(),
+        ),
       ),
       floatingActionButton: canCreate
           ? FloatingActionButton(
