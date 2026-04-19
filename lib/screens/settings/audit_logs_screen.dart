@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../providers/audit_log_provider.dart';
 import '../../models/audit_log_model.dart';
+import '../../providers/audit_log_provider.dart';
+import '../../widgets/supabase_error_widget.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../../widgets/org_switcher.dart';
 
@@ -101,7 +102,11 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, __) => Center(child: Text('Error loading logs: \$error')),
+        error: (error, __) => SupabaseErrorWidget(
+          error: error,
+          title: 'Failed to load audit logs',
+          onRetry: () => ref.read(auditLogsProvider.notifier).loadInitial(),
+        ),
       ),
     );
   }
