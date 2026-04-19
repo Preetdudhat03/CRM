@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/task_model.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
-import '../../providers/task_provider.dart';
+import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 
@@ -213,7 +214,13 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                       );
                     },
                     loading: () => const LinearProgressIndicator(),
-                    error: (_, __) => const Text('Error loading users'),
+                    error: (error, __) {
+                      final isPaused = SupabaseHealthService.isProjectPaused(error);
+                      return Text(
+                        isPaused ? 'Database Paused' : 'Error loading users',
+                        style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -371,7 +378,13 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                                       },
                                     ),
                                 loading: () => const LinearProgressIndicator(),
-                                error: (_, __) => const Text('Error'),
+                                error: (error, __) {
+                                  final isPaused = SupabaseHealthService.isProjectPaused(error);
+                                  return Text(
+                                    isPaused ? 'Database Paused' : 'Error',
+                                    style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                                  );
+                                },
                               )
                             : _relatedEntityType == 'Deal'
                             ? dealsAsync.when(
@@ -413,7 +426,13 @@ class _AddEditTaskScreenState extends ConsumerState<AddEditTaskScreen> {
                                       },
                                     ),
                                 loading: () => const LinearProgressIndicator(),
-                                error: (_, __) => const Text('Error'),
+                                error: (error, __) {
+                                  final isPaused = SupabaseHealthService.isProjectPaused(error);
+                                  return Text(
+                                    isPaused ? 'Database Paused' : 'Error',
+                                    style: TextStyle(color: isPaused ? Colors.orange : Colors.red),
+                                  );
+                                },
                               )
                             : Container(),
                       ),
