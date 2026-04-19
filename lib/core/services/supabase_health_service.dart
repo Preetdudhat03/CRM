@@ -58,17 +58,22 @@ class SupabaseHealthService {
       'project has been paused',
       'project_paused',
       'database is paused',
+      'project is not active',
+      'project is in the process of being paused',
 
       // PostgREST errors
       'pgrst000',
       'pgrst001',
+      'pgrst_error',
 
       // HTTP status errors
+      'status 404', // Often happens when the DNS/API URL is taken down
       'status 503',
       'status 502',
       'status 500',
       '503 service unavailable',
       '502 bad gateway',
+      '404 not found',
 
       // Connection / network errors
       'connection refused',
@@ -92,6 +97,9 @@ class SupabaseHealthService {
       'fetcherror',
       'networkerror',
       'failed to fetch',
+      'invalid request', // Common on browser when URL is invalid/down
+      'xmlhttprequest.onerror',
+      'access-control-allow-origin', // Sometimes happens when API is down and CORS fails
 
       // Timeout
       'timeoutexception',
@@ -108,10 +116,12 @@ class SupabaseHealthService {
       'remaining connection slots are reserved',
       'server closed the connection unexpectedly',
 
-      // Generic
+      // Generic / JS-specific
       'result is not ok',
       'service unavailable',
       'bad gateway',
+      'null is not an object', // Common JS error when response is nil due to network failure
+      'undefined is not an object',
     ];
 
     for (final pattern in patterns) {
