@@ -5,8 +5,10 @@ import '../models/user_model.dart';
 import '../repositories/lead_repository.dart';
 import '../services/lead_service.dart';
 import '../services/activity_service.dart';
+import '../core/services/supabase_health_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'supabase_health_provider.dart';
 
 // Service Provider
 final leadServiceProvider = Provider<LeadService>((ref) => LeadService());
@@ -72,8 +74,12 @@ class LeadNotifier extends StateNotifier<AsyncValue<List<LeadModel>>> {
         pageSize: _pageSize,
       );
       if (leads.length < _pageSize) _hasMore = false;
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(leads);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }

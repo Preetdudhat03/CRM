@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/dashboard_service.dart';
+import '../core/services/supabase_health_service.dart';
+import 'supabase_health_provider.dart';
 
 enum DashboardPeriod { today, quarter, thisYear, allTime }
 
@@ -89,7 +91,22 @@ final dashboardMetricsProvider = FutureProvider<Map<String, dynamic>>((
   ref,
 ) async {
   final service = ref.watch(dashboardServiceProvider);
-  return await service.fetchDashboardMetrics();
+  try {
+    final metrics = await service.fetchDashboardMetrics();
+    // If we get here, the project is healthy
+    ref.read(supabaseHealthProvider.notifier).reportHealthy();
+    return metrics;
+  } on SupabasePausedException {
+    // Report paused state so the banner shows across the app
+    ref.read(supabaseHealthProvider.notifier).reportPaused();
+    rethrow;
+  } catch (e) {
+    // Check if this is a paused error we didn't catch specifically
+    if (SupabaseHealthService.isProjectPaused(e)) {
+      ref.read(supabaseHealthProvider.notifier).reportPaused();
+    }
+    rethrow;
+  }
 });
 
 

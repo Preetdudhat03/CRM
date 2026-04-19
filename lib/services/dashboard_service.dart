@@ -1,9 +1,15 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/services/supabase_health_service.dart';
 
 class DashboardService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  /// Tracks whether any query in this batch hit a paused-project error.
+  bool _detectedPaused = false;
+
   Future<Map<String, dynamic>> fetchDashboardMetrics() async {
+    _detectedPaused = false;
+
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -45,6 +51,14 @@ class DashboardService {
       _safeQuery(() => _supabase.from('deals').select('stage'), <dynamic>[]),
     ]);
 
+    // If any query detected the project is paused, throw so the provider
+    // can surface it properly instead of showing zeros.
+    if (_detectedPaused) {
+      throw const SupabasePausedException(
+        'Database is currently unavailable. Your Supabase project may be paused.',
+      );
+    }
+
     // Process revenue
     double revenueWon = 0.0;
     final wonDeals = results[3] as List<dynamic>;
@@ -76,7 +90,8 @@ class DashboardService {
     };
   }
 
-  /// Runs a query with error handling — returns fallback on failure
+  /// Runs a query with error handling — returns fallback on transient failures,
+  /// but flags paused-project errors so they can be surfaced to the user.
   Future<dynamic> _safeQuery(
     Future<dynamic> Function() query,
     dynamic fallback,
@@ -85,6 +100,10 @@ class DashboardService {
       return await query();
     } catch (e) {
       print('[Dashboard] query error: $e');
+      // Detect if this is a paused-project error
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _detectedPaused = true;
+      }
       return fallback;
     }
   }
