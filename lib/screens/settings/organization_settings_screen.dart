@@ -7,6 +7,7 @@ import '../../widgets/org_switcher.dart';
 import '../../models/organization_member_model.dart';
 import '../../widgets/animations/fade_in_slide.dart';
 import '../../utils/error_handler.dart';
+import '../../widgets/supabase_error_widget.dart';
 
 class OrganizationSettingsScreen extends ConsumerStatefulWidget {
   const OrganizationSettingsScreen({super.key});
@@ -57,20 +58,10 @@ class _OrganizationSettingsScreenState
         },
         child: orgAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-                const SizedBox(height: 16),
-                Text('Error: ${ErrorHandler.formatError(e)}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.read(currentOrganizationProvider.notifier).refresh(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          error: (e, _) => SupabaseErrorWidget(
+            error: e,
+            title: 'Failed to load organization',
+            onRetry: () => ref.read(currentOrganizationProvider.notifier).refresh(),
           ),
           data: (org) {
             return Center(
@@ -331,8 +322,13 @@ class _OrganizationSettingsScreenState
               child: CircularProgressIndicator(),
             ),
           ),
-          error: (e, _) => Center(
-            child: Text('Error loading members: ${ErrorHandler.formatError(e)}'),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            child: SupabaseErrorWidget(
+              error: e,
+              title: 'Error loading members',
+              onRetry: () => ref.read(organizationMembersProvider.notifier).refresh(),
+            ),
           ),
           data: (members) {
             if (members.isEmpty) {
@@ -391,8 +387,13 @@ class _OrganizationSettingsScreenState
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-          error: (e, _) => Center(
-            child: Text('Error loading invites: ${ErrorHandler.formatError(e)}'),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            child: SupabaseErrorWidget(
+              error: e,
+              title: 'Error loading invites',
+              onRetry: () => ref.read(invitationsProvider.notifier).refresh(),
+            ),
           ),
           data: (invites) {
             final pendingInvites = invites.where((i) => i['status'] == 'pending').toList();
