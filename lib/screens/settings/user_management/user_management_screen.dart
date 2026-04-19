@@ -7,6 +7,7 @@ import '../../../widgets/org_switcher.dart';
 import '../../../widgets/animations/fade_in_slide.dart';
 import '../../../utils/error_handler.dart';
 import '../../../models/role_model.dart';
+import '../../../widgets/supabase_error_widget.dart';
 import 'add_edit_user_screen.dart';
 
 class UserManagementScreen extends ConsumerWidget {
@@ -189,17 +190,10 @@ class UserManagementScreen extends ConsumerWidget {
                 ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => RefreshIndicator(
-          onRefresh: () => ref.read(userManagementProvider.notifier).getUsers(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: Center(
-                child: Text('Error: ${ErrorHandler.formatError(error ?? '')}'),
-              ),
-            ),
-          ),
+        error: (error, _) => SupabaseErrorWidget(
+          error: error,
+          title: 'Failed to load users',
+          onRetry: () => ref.read(userManagementProvider.notifier).getUsers(),
         ),
       ),
       floatingActionButton: canManage
