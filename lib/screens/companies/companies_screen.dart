@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/company_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/company_provider.dart';
+import '../../providers/supabase_health_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import 'widgets/company_card.dart';
 import 'add_edit_company_screen.dart';
 import '../../core/services/permission_service.dart';
@@ -423,8 +425,8 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
           itemBuilder: (context, index) => SkeletonCard(height: 100),
         ),
         error: (error, stack) {
-          final isPaused = error.toString().toLowerCase().contains('paused') ||
-              error.toString().toLowerCase().contains('unavailable');
+          final isPaused = ref.read(isSupabasePausedProvider) ||
+              SupabaseHealthService.isProjectPaused(error);
           return RefreshIndicator(
             onRefresh: () => ref.read(companiesProvider.notifier).loadInitial(),
             child: SingleChildScrollView(

@@ -21,6 +21,8 @@ import '../activities/all_activities_screen.dart';
 import '../../widgets/org_switcher.dart';
 import '../../providers/organization_provider.dart';
 import '../../widgets/database_paused_banner.dart';
+import '../../providers/supabase_health_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 
 import '../../core/services/permission_service.dart';
 
@@ -388,13 +390,16 @@ class HomeScreen extends ConsumerWidget {
         color: color,
         onTap: onTap,
       ),
-      error: (error, __) => DashboardCard(
-        title: title,
-        value: error.toString().contains('paused') ? '⏸' : '-',
-        icon: icon,
-        color: color.withOpacity(0.5),
-        onTap: onTap,
-      ),
+      error: (error, __) {
+        final isPaused = SupabaseHealthService.isProjectPaused(error);
+        return DashboardCard(
+          title: title,
+          value: isPaused ? '⏸' : '-',
+          icon: icon,
+          color: color.withOpacity(0.5),
+          onTap: onTap,
+        );
+      },
     );
   }
 

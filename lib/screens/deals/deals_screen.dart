@@ -4,12 +4,13 @@ import '../../models/permission_model.dart';
 import '../../models/deal_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/deal_provider.dart';
+import '../../providers/supabase_health_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import 'widgets/deal_card.dart';
 import 'add_edit_deal_screen.dart';
 import 'deal_detail_screen.dart';
 
 import '../../core/services/permission_service.dart';
-import '../../utils/error_handler.dart';
 import '../../widgets/skeleton_loading.dart';
 import '../../widgets/org_switcher.dart';
 
@@ -408,8 +409,8 @@ class _DealsScreenState extends ConsumerState<DealsScreen> {
           itemBuilder: (context, index) => SkeletonCard(height: 140),
         ),
         error: (error, stack) {
-          final isPaused = error.toString().toLowerCase().contains('paused') ||
-              error.toString().toLowerCase().contains('unavailable');
+          final isPaused = ref.read(isSupabasePausedProvider) ||
+              SupabaseHealthService.isProjectPaused(error);
           return RefreshIndicator(
             onRefresh: () => ref.read(dealsProvider.notifier).loadInitial(),
             child: SingleChildScrollView(

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/lead_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/lead_provider.dart';
+import '../../providers/supabase_health_provider.dart';
+import '../../core/services/supabase_health_service.dart';
 import 'widgets/lead_card.dart';
 import 'add_edit_lead_screen.dart';
 import 'lead_detail_screen.dart';
@@ -466,8 +468,8 @@ class _LeadsScreenState extends ConsumerState<LeadsScreen> {
           itemBuilder: (context, index) => SkeletonCard(height: 140),
         ),
         error: (error, stack) {
-          final isPaused = error.toString().toLowerCase().contains('paused') ||
-              error.toString().toLowerCase().contains('unavailable');
+          final isPaused = ref.read(isSupabasePausedProvider) ||
+              SupabaseHealthService.isProjectPaused(error);
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
