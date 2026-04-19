@@ -11,9 +11,9 @@ import 'tasks/tasks_screen.dart';
 
 import '../services/push_notification_service.dart';
 import '../widgets/animations/animated_indexed_stack.dart';
-import '../widgets/org_switcher.dart';
-import '../providers/auth_provider.dart';
 import '../core/constants/navigation_items.dart';
+import '../widgets/database_paused_banner.dart';
+import '../providers/supabase_health_provider.dart';
 
 // State provider for the current bottom nav index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
@@ -75,16 +75,30 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
                 Expanded(
-                  child: AnimatedIndexedStack(
-                    index: safeIndex,
-                    children: screens,
+                  child: Column(
+                    children: [
+                      const DatabasePausedBanner(),
+                      Expanded(
+                        child: AnimatedIndexedStack(
+                          index: safeIndex,
+                          children: screens,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             );
           } else {
             // Mobile/Tablet Portrait: Show BottomNavigationBar
-            return AnimatedIndexedStack(index: safeIndex, children: screens);
+            return Column(
+              children: [
+                const DatabasePausedBanner(),
+                Expanded(
+                  child: AnimatedIndexedStack(index: safeIndex, children: screens),
+                ),
+              ],
+            );
           }
         },
       ),
