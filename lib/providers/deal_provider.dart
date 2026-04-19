@@ -4,8 +4,10 @@ import '../models/deal_model.dart';
 import '../repositories/deal_repository.dart';
 import '../services/deal_service.dart';
 import '../services/activity_service.dart';
+import '../core/services/supabase_health_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'supabase_health_provider.dart';
 
 // Service Provider
 final dealServiceProvider = Provider<DealService>((ref) => DealService());
@@ -70,8 +72,12 @@ class DealNotifier extends StateNotifier<AsyncValue<List<DealModel>>> {
         pageSize: _pageSize,
       );
       if (deals.length < _pageSize) _hasMore = false;
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(deals);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }

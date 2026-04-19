@@ -20,6 +20,7 @@ import '../../providers/notification_provider.dart';
 import '../activities/all_activities_screen.dart';
 import '../../widgets/org_switcher.dart';
 import '../../providers/organization_provider.dart';
+import '../../widgets/database_paused_banner.dart';
 
 import '../../core/services/permission_service.dart';
 
@@ -149,6 +150,7 @@ class HomeScreen extends ConsumerWidget {
               final mainContent = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const DatabasePausedBanner(),
                   _buildInvitationBanner(context, ref),
                   FadeInSlide(
                     child: Row(
@@ -386,9 +388,9 @@ class HomeScreen extends ConsumerWidget {
         color: color,
         onTap: onTap,
       ),
-      error: (_, __) => DashboardCard(
+      error: (error, __) => DashboardCard(
         title: title,
-        value: '-',
+        value: error.toString().contains('paused') ? '⏸' : '-',
         icon: icon,
         color: color.withOpacity(0.5),
         onTap: onTap,

@@ -5,8 +5,10 @@ import '../models/user_model.dart';
 import '../repositories/task_repository.dart';
 import '../services/task_service.dart';
 import '../services/activity_service.dart';
+import '../core/services/supabase_health_service.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'supabase_health_provider.dart';
 
 // Service Provider
 final taskServiceProvider = Provider<TaskService>((ref) => TaskService());
@@ -75,6 +77,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         pageSize: _pageSize,
       );
       if (tasks.length < _pageSize) _hasMore = false;
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(tasks);
 
       // Check for Task Due Reminders
@@ -96,6 +99,9 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskModel>>> {
         }
       }
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }

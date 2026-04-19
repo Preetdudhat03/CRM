@@ -4,9 +4,11 @@ import '../models/contact_model.dart';
 import '../repositories/contact_repository.dart';
 import '../services/contact_service.dart';
 import '../services/activity_service.dart';
+import '../core/services/supabase_health_service.dart';
 import 'dashboard_provider.dart';
 import 'auth_provider.dart';
 import 'notification_provider.dart';
+import 'supabase_health_provider.dart';
 
 // Service Provider
 final contactServiceProvider = Provider<ContactService>(
@@ -74,8 +76,12 @@ class ContactNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
       if (contacts.length < _pageSize) {
         _hasMore = false;
       }
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(contacts);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }
