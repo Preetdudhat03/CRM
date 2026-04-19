@@ -3,6 +3,8 @@ import '../models/user_model.dart';
 import '../models/role_model.dart';
 import '../repositories/user_repository.dart';
 import '../services/user_service.dart';
+import '../core/services/supabase_health_service.dart';
+import 'supabase_health_provider.dart';
 
 final userServiceProvider = Provider<UserService>((ref) => UserService());
 
@@ -22,8 +24,12 @@ class UserManagementNotifier
     try {
       state = const AsyncValue.loading();
       final users = await _repository.getUsers();
+      _repository.ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(users);
     } catch (e, stack) {
+      if (SupabaseHealthService.isProjectPaused(e)) {
+        _repository.ref.read(supabaseHealthProvider.notifier).reportPaused();
+      }
       state = AsyncValue.error(e, stack);
     }
   }
