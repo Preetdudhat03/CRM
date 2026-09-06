@@ -58,8 +58,7 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              // Refresh is just clearing filters and reloading or just reloading
-              ref.read(paginatedAuditLogsProvider.notifier).loadMore();
+              await ref.read(paginatedAuditLogsProvider.notifier).loadInitial();
             },
             child: ListView.builder(
               controller: _scrollController,
@@ -105,7 +104,7 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
         error: (error, __) => SupabaseErrorWidget(
           error: error,
           title: 'Failed to load audit logs',
-          onRetry: () => ref.read(auditLogsProvider.notifier).loadInitial(),
+          onRetry: () => ref.read(paginatedAuditLogsProvider.notifier).loadInitial(),
         ),
       ),
     );

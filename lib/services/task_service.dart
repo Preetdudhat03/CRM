@@ -1,7 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/task_model.dart';
 import 'activity_service.dart';
-import 'activity_service.dart';
 
 class TaskService {
   final SupabaseClient _supabase = Supabase.instance.client;

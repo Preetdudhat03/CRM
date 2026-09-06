@@ -47,9 +47,10 @@ class NotificationNotifier
     extends StateNotifier<AsyncValue<List<NotificationModel>>> {
   final NotificationRepository _repository;
   final UserModel? _currentUser;
+  final Ref _ref;
   RealtimeChannel? _realtimeChannel;
 
-  NotificationNotifier(this._repository, this._currentUser)
+  NotificationNotifier(this._repository, this._currentUser, this._ref)
     : super(const AsyncValue.loading()) {
     getNotifications();
     _subscribeToRealtime();
@@ -109,11 +110,11 @@ class NotificationNotifier
     try {
       state = const AsyncValue.loading();
       final notifications = await _repository.getNotifications();
-      ref.read(supabaseHealthProvider.notifier).reportHealthy();
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(notifications);
     } catch (e, stack) {
       if (SupabaseHealthService.isProjectPaused(e)) {
-        ref.read(supabaseHealthProvider.notifier).reportPaused();
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
       }
       state = AsyncValue.error(e, stack);
     }
@@ -225,6 +226,7 @@ final notificationsProvider =
       return NotificationNotifier(
         ref.watch(notificationRepositoryProvider),
         user,
+        ref,
       );
     });
 

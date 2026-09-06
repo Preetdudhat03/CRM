@@ -54,6 +54,9 @@ class SupabaseHealthNotifier extends StateNotifier<SupabaseConnectionState> {
     }
   }
 
+  /// Alias to check health
+  Future<void> refresh() => checkHealth();
+
   void _startRetryTimer() {
     _retryTimer?.cancel();
     _retryTimer = Timer.periodic(const Duration(seconds: 30), (_) {

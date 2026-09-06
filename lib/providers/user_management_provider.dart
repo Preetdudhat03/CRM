@@ -15,8 +15,9 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 class UserManagementNotifier
     extends StateNotifier<AsyncValue<List<UserModel>>> {
   final UserRepository _repository;
+  final Ref _ref;
 
-  UserManagementNotifier(this._repository) : super(const AsyncValue.loading()) {
+  UserManagementNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     getUsers();
   }
 
@@ -24,11 +25,11 @@ class UserManagementNotifier
     try {
       state = const AsyncValue.loading();
       final users = await _repository.getUsers();
-      _repository.ref.read(supabaseHealthProvider.notifier).reportHealthy();
+      _ref.read(supabaseHealthProvider.notifier).reportHealthy();
       state = AsyncValue.data(users);
     } catch (e, stack) {
       if (SupabaseHealthService.isProjectPaused(e)) {
-        _repository.ref.read(supabaseHealthProvider.notifier).reportPaused();
+        _ref.read(supabaseHealthProvider.notifier).reportPaused();
       }
       state = AsyncValue.error(e, stack);
     }
@@ -87,7 +88,7 @@ final userManagementProvider =
     StateNotifierProvider<UserManagementNotifier, AsyncValue<List<UserModel>>>((
       ref,
     ) {
-      return UserManagementNotifier(ref.watch(userRepositoryProvider));
+      return UserManagementNotifier(ref.watch(userRepositoryProvider), ref);
     });
 
 

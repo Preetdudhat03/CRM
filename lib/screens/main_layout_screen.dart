@@ -14,6 +14,8 @@ import '../widgets/animations/animated_indexed_stack.dart';
 import '../core/constants/navigation_items.dart';
 import '../widgets/database_paused_banner.dart';
 import '../providers/supabase_health_provider.dart';
+import '../providers/auth_provider.dart';
+import '../widgets/org_switcher.dart';
 
 // State provider for the current bottom nav index
 final bottomNavIndexProvider = StateProvider<int>((ref) => 0);

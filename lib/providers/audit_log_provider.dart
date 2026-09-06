@@ -66,12 +66,12 @@ class PaginatedAuditLogsNotifier extends StateNotifier<AsyncValue<List<AuditLogM
   bool _hasMore = true;
 
   PaginatedAuditLogsNotifier(this._service, this._filter) : super(const AsyncValue.loading()) {
-    _loadInitial();
+    loadInitial();
   }
 
   bool get hasMore => _hasMore;
 
-  Future<void> _loadInitial() async {
+  Future<void> loadInitial() async {
     try {
       _currentPage = 0;
       final results = await _service.getAuditLogs(
@@ -89,6 +89,8 @@ class PaginatedAuditLogsNotifier extends StateNotifier<AsyncValue<List<AuditLogM
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> refresh() => loadInitial();
 
   Future<void> loadMore() async {
     if (!_hasMore || state.isLoading || state.hasError) return;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/task_model.dart';
+import '../../providers/task_provider.dart';
 import '../../providers/contact_provider.dart';
 import '../../providers/deal_provider.dart';
 import '../../utils/error_handler.dart';

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../providers/deal_provider.dart';
 import '../../../../models/deal_model.dart';
+import '../../../../core/services/supabase_health_service.dart';
 
 class RevenueTrendChart extends ConsumerWidget {
   const RevenueTrendChart({super.key});

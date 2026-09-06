@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/deal_model.dart';
 import '../../providers/deal_provider.dart';
+import '../../providers/contact_provider.dart';
 import '../../utils/error_handler.dart';
 import '../../providers/user_management_provider.dart';
 import '../../core/services/supabase_health_service.dart';

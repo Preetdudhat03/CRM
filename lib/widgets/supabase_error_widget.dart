@@ -68,26 +68,28 @@ class SupabaseErrorWidget extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              maxWidth: 200,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // If it was paused, we should first trigger a health check
-                  if (isPaused) {
-                    ref.read(supabaseHealthProvider.notifier).refresh();
-                  }
-                  onRetry();
-                },
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text(
-                  'Retry',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // If it was paused, we should first trigger a health check
+                    if (isPaused) {
+                      ref.read(supabaseHealthProvider.notifier).refresh();
+                    }
+                    onRetry();
+                  },
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text(
+                    'Retry',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
